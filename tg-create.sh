@@ -114,5 +114,5 @@ git add "$root_dir/.topmsg"
 
 
 
-info "Topic branch $name successfully set up. Please fill .topmsg now."
-info "You MUST do an initial commit. To abort: git rm -f .top* && git checkout ${deps%% *} && tg delete $name"
+info "Topic branch $name set up. Please fill .topmsg now and make initial commit."
+info "To abort: git rm -f .top* && git checkout ${deps%% *} && tg delete $name"
