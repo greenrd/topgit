@@ -14,11 +14,9 @@ fi
 
 ## List branches
 
-git for-each-ref | cut -f 2 |
+git for-each-ref refs/heads | cut -f 2 |
 	while read ref; do
 		name="${ref#refs/heads/}"
-		[ "$name" != "$ref" ] ||
-			continue # eew, not a branch
 		git rev-parse --verify "refs/top-bases/$name" >/dev/null 2>&1 ||
 			continue # not a TopGit branch
 
