@@ -1,0 +1,8 @@
+hooks/pre-commit
+tg-create
+tg-delete
+tg-info
+tg-patch
+tg-summary
+tg-update
+tg

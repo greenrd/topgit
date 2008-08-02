@@ -1,0 +1,321 @@
+TopGit - A different patch queue manager
+
+
+DESCRIPTION
+-----------
+
+TopGit aims to make handling of large amount of interdependent topic
+branches easier. In fact, it is designed especially for the case
+when you maintain a queue of third-party patches on top of another
+(perhaps Git-controlled) project and want to easily organize, maintain
+and submit them - TopGit achieves that by keeping a separate topic
+branch for each patch and providing few tools to maintain the branches.
+
+
+RATIONALE
+---------
+
+Why not use something like StGIT or Guilt or rebase -i for that?
+The advantage of these tools is their simplicity; they work with patch
+_series_ and defer to the reflog facility for version control of patches
+(reordering of patches is not version-controlled at all). But there are
+several disadvantages - for one, these tools (especially StGIT) do not
+actually fit well with plain Git at all - it is basically impossible
+to take advantage of index efectively when using StGIT. But more
+importantly, these tools horribly fail in the face of distributed
+environment.
+
+TopGit has been designed around three main tenents:
+
+	(i) TopGit is as thin layer on top of Git as possible.
+You still maintain your index and commit using Git, TopGit will
+only automate few indispensable tasks.
+
+	(ii) TopGit is anxious about _keeping_ your history. It will
+never rewrite your history and all metadata are also tracked by Git,
+smoothly and non-obnoxiously. It is useful if there is a _single_
+point when the history is cleaned up, and that is at the point of
+inclusion in the upstream project; locally, you can see how your
+patch has evolved and easily return to older versions.
+
+	(iii) TopGit is specifically designed to work in distributed
+environment. You can have several instances of TopGit-aware repositories
+and smoothly keep them all up-to-date and transfer your changes between
+them.
+
+As mentioned above, the main intended use-case for TopGit is tracking
+third-party patches, where each patch is effectively a single topic
+branch.  In order to flexibly accomodate even complex scenarios when
+you track many patches where many are independent but some depend
+on others, TopGit ignores the ancient Quilt heritage of patch series
+and instead allows the patches to freely form graphs (DAGs just like
+Git history itself, only "one lever higher"). For now, you have
+to manually specify which patches does the current one depend
+on, but TopGit might help you with that in the future in a darcs-like
+fashion.
+
+A glossary plug: The union (i.e. merge) of patch dependencies is
+called a _base_ of the patch (topic branch).
+
+Of course, TopGit is perhaps not the right tool for you:
+
+	(i) TopGit is not complicated, but StGIT et al. are somewhat
+simpler, conceptually.  If you just want to make a linear purely-local
+patch queue, deferring to StGIT instead might make more sense.
+
+	(ii) While keeping your history anxiously, in some extreme
+cases the TopGit-generated history graph will perhaps be a little
+too complex. ;-)
+
+
+SYNOPSIS
+--------
+
+	## Create and evolve a topic branch
+	$ tg create t/gitweb/pathinfo-action
+	tg: Automatically marking dependency on master
+	tg: Creating t/gitweb/pathinfo-action base from master...
+	$ ..hack..
+	$ git commit
+	$ ..fix a mistake..
+	$ git commit
+
+	## Create another topic branch on top of the former one
+	$ tg create t/gitweb/nifty-links
+	tg: Automatically marking dependency on t/gitweb/pathinfo-action
+	tg: Creating t/gitweb/nifty-links base from t/gitweb/pathinfo-action...
+	$ ..hack..
+	$ git commit
+
+	## Create another topic branch on top of specified one and submit
+	## the resulting patch upstream
+	$ tg create -d master t/revlist/author-fixed
+	tg: Creating t/revlist/author-fixed base from master...
+	$ ..hack..
+	$ git commit
+	$ tg patch -m
+	tg: Sent t/revlist/author-fixed
+	From: pasky@suse.cz
+	To: git@vger.kernel.org
+	Cc: gitster@pobox.com
+	Subject: [PATCH] Fix broken revlist --author when --fixed-string
+
+	## Create another topic branch depending on two others non-trivially
+	$ tg create -d t/revlist/author-fixed,t/gitweb/nifty-links t/whatever
+	tg: Creating t/whatever base from t/revlist/author-fixed...
+	tg: Merging t/whatever base with t/gitweb/nifty-links...
+	Merge failed!
+	tg: Please commit merge resolution and call: tg create
+	tg: It is also safe to abort this operation using `git reset --hard`
+	tg: but please remember you are on the base branch now;
+	tg: you will want to switch to a different branch.
+	$ ..resolve..
+	$ git commit
+	tg: Resuming t/whatever setup...
+	$ tg create t/whatever
+	$ ..hack..
+	$ git commit
+
+	## Update a single topic branch and propagate the changes to
+	## a different one
+	$ git checkout t/gitweb/nifty-links
+	$ ..hack..
+	$ git commit
+	$ git checkout t/whatever
+	$ tg info
+	Topic Branch: t/whatever (1 commit)
+	Subject: [PATCH] Whatever patch
+	Base: 3f47ebc1
+	Depends: t/revlist/author-fixed t/gitweb/nifty-links
+	Needs update from:
+		t/gitweb/nifty-links (1 commit)
+	$ tg update
+	tg: Updating base with t/gitweb/nifty-links changes...
+	Merge failed!
+	tg: Please commit merge resolution and call `tg update` again.
+	tg: It is also safe to abort this operation using `git reset --hard`,
+	tg: but please remember you are on the base branch now;
+	tg: you will want to switch to a different branch.
+	$ ..resolve..
+	$ git commit
+	$ tg update
+	tg: Updating t/whatever against new base...
+	Merge failed!
+	tg: Please resolve the merge and commit. No need to do anything else.
+	tg: You can abort this operation using `git reset --hard` now
+	tg: and retry this merge later using `tg update`.
+	$ ..resolve..
+	$ git commit
+
+	## Update a single topic branch and propagate the changes
+	## further through the dependency chain
+	$ git checkout t/gitweb/pathinfo-action
+	$ ..hack..
+	$ git commit
+	$ git checkout t/whatever
+	$ tg info
+	Topic Branch: t/whatever (1/2 commits)
+	Subject: [PATCH] Whatever patch
+	Base: 0ab2c9b3
+	Depends: t/revlist/author-fixed t/gitweb/nifty-links
+	Needs update from:
+		t/gitweb/pathinfo-action (<= t/gitweb/nifty-links) (1 commit)
+	$ tg update
+	tg: Recursing to t/gitweb/nifty-links...
+	[t/gitweb/nifty-links] tg: Updating base with t/gitweb/pathinfo-action changes...
+	Merge failed!
+	[t/gitweb/nifty-links] tg: Please commit merge resolution and call `tg update` again.
+	[t/gitweb/nifty-links] tg: It is also safe to abort this operation using `git reset --hard`,
+	[t/gitweb/nifty-links] tg: but please remember you are on the base branch now;
+	[t/gitweb/nifty-links] tg: you will want to switch to a different branch.
+	[t/gitweb/nifty-links] tg: You are in a subshell. If you abort the merge,
+	[t/gitweb/nifty-links] tg: use `exit` to abort the recursive update altogether.
+	[t/gitweb/nifty-links] $ ..resolve..
+	[t/gitweb/nifty-links] $ git commit
+	[t/gitweb/nifty-links] $ tg update
+	[t/gitweb/nifty-links] tg: Updating t/gitweb/nifty-links against new base...
+	Merge failed!
+	[t/gitweb/nifty-links] tg: Please resolve the merge and commit.
+	[t/gitweb/nifty-links] tg: You can abort this operation using `git reset --hard`.
+	[t/gitweb/nifty-links] tg: You are in a subshell. After you either commit or abort
+	[t/gitweb/nifty-links] tg: your merge, use `exit` to proceed with the recursive update.
+	[t/gitweb/nifty-links] $ ..resolve..
+	[t/gitweb/nifty-links] $ git commit
+	[t/gitweb/nifty-links] $ exit
+	tg: Updating base with t/gitweb/nifty-links changes...
+	tg: Updating t/whatever against new base...
+
+
+USAGE
+-----
+
+The 'tg' tool of TopGit has several subcommands:
+
+tg help
+~~~~~~~
+	Our sophisticated integrated help facility. Doesn't do
+	a whole lot for now.
+
+tg create
+~~~~~~~~~
+	Create a new TopGit-controlled topic branch of a given name
+	(required argument) and switch to it. If no dependencies
+	are specified using the '-d' paremeter, the current branch
+	is assumed to be the only dependency.
+
+	After `tg create`, you should insert the patch description
+	to the '.topmsg' file.
+
+	The main task of `tg create` is to set up the topic branch
+	base from the dependencies. This may fail due to merge conflicts.
+	In that case, after you commit the conflicts resolution,
+	you should call `tg create` again (without any arguments);
+	it will detect that you are on a topic branch base ref and
+	resume the topic branch creation operation.
+
+	'-d':
+		Manually specified dependencies. A comma- or
+		space-separated list of branch names.
+
+tg delete
+~~~~~~~~~
+	Remove a TopGit-controlled topic branch of given name
+	(required argument). Normally, this command will remove
+	only empty branch (base == head); use '-f' to remove
+	non-empty branch.
+
+	Currently, this command will _NOT_ remove the branch from
+	the dependency list in other branches. You need to take
+	care of this _manually_. This is even more complicated
+	in combination with '-f', in that case you need to manually
+	unmerge the removed branch's changes from the branches
+	depending on it.
+
+	TODO: '-a' to delete all empty branches, depfix, revert
+
+tg info
+~~~~~~~
+	Show a summary information about the current or specified
+	topic branch.
+
+tg patch
+~~~~~~~~
+	Generate a patch from the current or specified topic branch.
+	This means that the diff between the topic branch base and
+	head (latest commit) is shown, appended to the description
+	found in the .topmsg file.
+
+	The patch is by default simply dumped to stdout. In the future,
+	tg patch will be able to automatically send the patches by mail
+	or save them to files.
+
+	TODO: tg patch -i to base at index instead of branch,
+		-w for working tree
+
+tg summary
+~~~~~~~~~~
+	Show overview of all TopGit-tracked topic branches and their
+	up-to-date status ('D' marks that it is out-of-date wrt. its
+	dependencies, 'B' marks that it is out-of-date wrt. its base).
+
+tg update
+~~~~~~~~~
+	Update the current topic branch wrt. changes in the branches
+	it depends on. This is made in two phases - first,
+	changes within the dependencies are merged to the base,
+	then the base is merged into the topic branch. The output
+	will guide you in case of conflicts.
+
+	In case your dependencies are not up-to-date, tg update
+	will first recurse into them and update these.
+
+	TODO: tg update -a for updating all topic branches
+
+TODO: Some infrastructure for sharing topic branches between
+	repositories easily
+
+
+IMPLEMENTATION
+--------------
+
+TopGit stores all the topic branches in the regular refs/heads/
+namespace, (we recommend to mark them with the 't/' prefix).
+Except that, TopGit also maintains a set of auxiliary refs in
+refs/top-*. Currently, only refs/top-bases/ is used, containing
+the current _base_ of the given topic branch - this is basically
+a merge of all the branches the topic branch depends on; it is
+updated during `tg update` and then merged to the topic branch,
+and it is the base of a patch generated from the topic branch by
+`tg patch`.
+
+All the metadata is tracked within the source tree and history
+of the topic branch itself, in .top* files; these files are kept
+isolated within the topic branches during TopGit-controlled merges
+and are of course omitted during `tg patch`. The state of these
+files in base commits is undefined; look at them only in the topic
+branches themselves.  Currently, two files are defined:
+
+	.topmsg: Contains the description of the topic branch
+in a mail-like format, plus the author information,
+whatever Cc headers you choose or the post-three-dashes message.
+When mailing out your patch, basically only few extra headers
+mail headers are inserted and the patch itself is appended.
+Thus, as your patches evolve, you can record nuances like whether
+the paricular patch should have To-list/Cc-maintainer or vice
+versa and similar nuances, if your project is into that.
+
+	.topdeps: Contains the one-per-line list of branches
+your patch depends on, pre-seeded with `tg create`. (Continuously
+updated) merge of these branches will be the "base" of your topic
+branch.
+
+TopGit also automagically installs a bunch of custom commit-related
+hooks that will verify if you are committing the .top* files in sane
+state. It will add the hooks to separate files within the hooks/
+subdirectory and merely insert calls of them to the appropriate hooks
+and make them executable (but make sure the original hooks code
+is not called if the hook was not executable beforehand).
+
+Another automagically installed piece is .git/info/attributes specifier
+for an 'ours' merge strategy for the files .topmsg and .topdeps, and
+the (intuitive) 'ours' merge strategy definition in .git/config.
