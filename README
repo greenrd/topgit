@@ -255,8 +255,9 @@ tg patch
 tg summary
 ~~~~~~~~~~
 	Show overview of all TopGit-tracked topic branches and their
-	up-to-date status ('D' marks that it is out-of-date wrt. its
-	dependencies, 'B' marks that it is out-of-date wrt. its base).
+	up-to-date status ('0' marks that it introduces no own changes,
+	'D' marks that it is out-of-date wrt. its dependencies,
+	'B' marks that it is out-of-date wrt. its base).
 
 tg update
 ~~~~~~~~~

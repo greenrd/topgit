@@ -18,6 +18,8 @@ git for-each-ref refs/top-bases |
 	while read rev name ref; do
 		name="${ref#refs/top-bases/}"
 
+		nonempty=
+		! branch_empty "$name" || nonempty='0'
 		deps_update=' '
 		[ -z "$(needs_update "$name")" ] || deps_update='D'
 		base_update=' '
@@ -30,5 +32,6 @@ git for-each-ref refs/top-bases |
 			subject="(No commits)"
 		fi
 
-		printf '%s%s\t%-31s\t%s\n' "$deps_update" "$base_update" "$name" "$subject"
+		printf '%s%s%s\t%-31s\t%s\n' "$nonempty" "$deps_update" "$base_update" \
+			"$name" "$subject"
 	done
