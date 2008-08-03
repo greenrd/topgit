@@ -85,11 +85,19 @@ branch_contains()
 # to the branch (e.g. B_DIRTY B1 B2 NAME), one path per line,
 # inner paths first. Innermost name can be ':' if the head is
 # not in sync with the base.
+# If needs_update() hits missing dependencies, it will append
+# them to space-separated $missing_deps list and skip them.
 needs_update()
 {
 	{
 	git cat-file blob "$1:.topdeps" 2>/dev/null |
 		while read _dep; do
+			if !git rev-parse --verify "$_dep" >/dev/null 2>&1; then
+				# All hope is lost
+				missing_deps="$missing_deps $_dep"
+				continue
+			fi
+
 			_dep_is_tgish=1
 			git rev-parse --verify "refs/top-bases/$_dep" >/dev/null 2>&1 ||
 				_dep_is_tgish=

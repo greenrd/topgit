@@ -42,7 +42,11 @@ deps="$(git cat-file blob "$name:.topdeps" | paste -s -d' ')"
 echo "Depends: $deps"
 
 depcheck="$(mktemp)"
+missing_deps=
 needs_update "$name" >"$depcheck"
+if [ -n "$missing_deps" ]; then
+	echo "MISSING: $missing_deps"
+fi
 if [ -s "$depcheck" ]; then
 	echo "Needs update from:"
 	cat "$depcheck" |
