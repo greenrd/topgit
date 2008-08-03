@@ -242,7 +242,7 @@ tg patch
 
 	The patch is by default simply dumped to stdout. In the future,
 	tg patch will be able to automatically send the patches by mail
-	or save them to files.
+	or save them to files. (TODO)
 
 	TODO: tg patch -i to base at index instead of branch,
 		-w for working tree
