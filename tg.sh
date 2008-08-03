@@ -21,11 +21,10 @@ die()
 setup_hook()
 {
 	hook_call="\"\$(tg --hooks-path)\"/$1 \"\$@\""
-	if [ -x "$git_dir/hooks/$1" ]; then
-		if fgrep -q "$hook_call" "$git_dir/hooks/$1"; then
-			# Another job well done!
-			return
-		fi
+	if [ -f "$git_dir/hooks/$1" ] &&
+	   fgrep -q "$hook_call" "$git_dir/hooks/$1"; then
+		# Another job well done!
+		return
 	fi
 	# Prepare incanation
 	if [ -x "$git_dir/hooks/$1" ]; then
@@ -37,7 +36,7 @@ setup_hook()
 	{
 		echo "#!/bin/sh"
 		echo "$hook_call"
-		[ -x "$git_dir/hooks/$1" ] && cat "$git_dir/hooks/$1"
+		[ ! -s "$git_dir/hooks/$1" ] || cat "$git_dir/hooks/$1"
 	} >"$git_dir/hooks/$1+"
 	chmod a+x "$git_dir/hooks/$1+"
 	mv "$git_dir/hooks/$1+" "$git_dir/hooks/$1"
