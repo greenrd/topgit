@@ -256,6 +256,7 @@ tg summary
 	Show overview of all TopGit-tracked topic branches and their
 	up-to-date status ('0' marks that it introduces no own changes,
 	'D' marks that it is out-of-date wrt. its dependencies,
+	'!' marks that it has missing dependencies (even recursively),
 	'B' marks that it is out-of-date wrt. its base).
 
 	TODO: Speed up by an order of magnitude
