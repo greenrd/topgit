@@ -30,12 +30,12 @@ done
 
 if [ -z "$deps" ]; then
 	head="$(git symbolic-ref HEAD)"
-	bname="${heads#refs/top-bases/}"
+	bname="${head#refs/top-bases/}"
 	if [ "$bname" != "$head" -a -s "$git_dir/top-deps" -a -s "$git_dir/top-merge" ]; then
 		# We are on a base branch now; resume merge!
 		deps="$(cat "$git_dir/top-deps")"
-		merge="$(cat "$git_dir/top-merge") "
-		name="$base"
+		merge="$(cat "$git_dir/top-merge")"
+		name="$bname"
 		restarted=1
 		info "Resuming $name setup..."
 	else
