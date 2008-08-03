@@ -35,7 +35,7 @@ baserev="$(git rev-parse --verify "refs/top-bases/$name" 2>/dev/null)" ||
 	die "cannot delete your current branch"
 
 nonempty=
-[ -z "$(git diff-tree "refs/top-bases/$name" "$name" | fgrep -v "	.top")" ] || nonempty=1
+branch_empty "$name" || nonempty=1
 
 [ -z "$nonempty" ] || [ -n "$force" ] || die "branch is non-empty: $name"
 

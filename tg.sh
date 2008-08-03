@@ -112,6 +112,12 @@ needs_update()
 	} || : # $1 is not tracked by TopGit anymore
 }
 
+# branch_empty NAME
+branch_empty()
+{
+	[ -z "$(git diff-tree "refs/top-bases/$1" "$1" | fgrep -v "	.top")" ]
+}
+
 # switch_to_base NAME [SEED]
 switch_to_base()
 {
