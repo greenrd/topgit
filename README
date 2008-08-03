@@ -110,8 +110,8 @@ SYNOPSIS
 	tg: you will want to switch to a different branch.
 	$ ..resolve..
 	$ git commit
+	$ tg create
 	tg: Resuming t/whatever setup...
-	$ tg create t/whatever
 	$ ..hack..
 	$ git commit
 
