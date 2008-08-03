@@ -17,7 +17,7 @@ fi
 git for-each-ref refs/heads | cut -f 2 |
 	while read ref; do
 		name="${ref#refs/heads/}"
-		git rev-parse --verify "refs/top-bases/$name" >/dev/null 2>&1 ||
+		base_rev="$(git rev-parse --verify "refs/top-bases/$name" 2>/dev/null)" ||
 			continue # not a TopGit branch
 
 		deps_update=' '
@@ -25,7 +25,7 @@ git for-each-ref refs/heads | cut -f 2 |
 		base_update=' '
 		branch_contains "$name" "refs/top-bases/$name" || base_update='B'
 
-		if [ "$(git rev-parse "$name")" != "$(git rev-parse "refs/top-bases/$name")" ]; then
+		if [ "$(git rev-parse "$name")" != "$base_rev" ]; then
 			subject="$(git cat-file blob "$name:.topmsg" | sed -n 's/^Subject: //p')"
 		else
 			# No commits yet
