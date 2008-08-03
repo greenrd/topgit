@@ -14,20 +14,22 @@ name=
 while [ -n "$1" ]; do
 	arg="$1"; shift
 	case "$arg" in
-	-d)
-		deps="$(echo "$1" | sed 's/,/ /g')"; shift;;
 	-*)
 		echo "Usage: tg create [-d DEPS...] NAME" >&2
 		exit 1;;
 	*)
-		[ -z "$name" ] || die "name already specified ($name)"
-		name="$arg";;
+		if [ -z "$name" ]; then
+			name="$arg"
+		else
+			deps="$deps $arg"
+		fi;;
 	esac
 done
 
 
 ## Auto-guess dependencies
 
+deps="${deps# }"
 if [ -z "$deps" ]; then
 	head="$(git symbolic-ref HEAD)"
 	bname="${head#refs/top-bases/}"

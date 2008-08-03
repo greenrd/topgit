@@ -86,9 +86,9 @@ SYNOPSIS
 	$ ..hack..
 	$ git commit
 
-	## Create another topic branch on top of specified one and submit
+	## Create another topic branch on top of master and submit
 	## the resulting patch upstream
-	$ tg create -d master t/revlist/author-fixed
+	$ tg create t/revlist/author-fixed master
 	tg: Creating t/revlist/author-fixed base from master...
 	$ ..hack..
 	$ git commit
@@ -100,7 +100,7 @@ SYNOPSIS
 	Subject: [PATCH] Fix broken revlist --author when --fixed-string
 
 	## Create another topic branch depending on two others non-trivially
-	$ tg create -d t/revlist/author-fixed,t/gitweb/nifty-links t/whatever
+	$ tg create t/whatever t/revlist/author-fixed t/gitweb/nifty-links
 	tg: Creating t/whatever base from t/revlist/author-fixed...
 	tg: Merging t/whatever base with t/gitweb/nifty-links...
 	Merge failed!
@@ -199,8 +199,8 @@ tg create
 ~~~~~~~~~
 	Create a new TopGit-controlled topic branch of a given name
 	(required argument) and switch to it. If no dependencies
-	are specified using the '-d' paremeter, the current branch
-	is assumed to be the only dependency.
+	are specified (by extra arguments passed after the first one),
+	the current branch is assumed to be the only dependency.
 
 	After `tg create`, you should insert the patch description
 	to the '.topmsg' file.
@@ -211,10 +211,6 @@ tg create
 	you should call `tg create` again (without any arguments);
 	it will detect that you are on a topic branch base ref and
 	resume the topic branch creation operation.
-
-	'-d':
-		Manually specified dependencies. A comma- or
-		space-separated list of branch names.
 
 tg delete
 ~~~~~~~~~
