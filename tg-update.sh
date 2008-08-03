@@ -22,7 +22,9 @@ base_rev="$(git rev-parse --short --verify "refs/top-bases/$name" 2>/dev/null)" 
 ## First, take care of our base
 
 depcheck="$(mktemp)"
+missing_deps=
 needs_update "$name" >"$depcheck"
+[ -z "$missing_deps" ] || die "some dependencies are missing: $missing_deps"
 if [ -s "$depcheck" ]; then
 	# We need to switch to the base branch
 	# ...but only if we aren't there yet (from failed previous merge)
