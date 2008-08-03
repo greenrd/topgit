@@ -14,18 +14,16 @@ fi
 
 ## List branches
 
-git for-each-ref refs/heads | cut -f 2 |
-	while read ref; do
-		name="${ref#refs/heads/}"
-		base_rev="$(git rev-parse --verify "refs/top-bases/$name" 2>/dev/null)" ||
-			continue # not a TopGit branch
+git for-each-ref refs/top-bases |
+	while read rev name ref; do
+		name="${ref#refs/top-bases/}"
 
 		deps_update=' '
 		[ -z "$(needs_update "$name")" ] || deps_update='D'
 		base_update=' '
 		branch_contains "$name" "refs/top-bases/$name" || base_update='B'
 
-		if [ "$(git rev-parse "$name")" != "$base_rev" ]; then
+		if [ "$(git rev-parse "$name")" != "$rev" ]; then
 			subject="$(git cat-file blob "$name:.topmsg" | sed -n 's/^Subject: //p')"
 		else
 			# No commits yet
