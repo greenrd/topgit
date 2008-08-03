@@ -38,7 +38,7 @@ echo "Base: $base_rev"
 branch_contains "$name" "$base_rev" ||
 	echo "Base is newer than head! Please run \`tg update\`."
 
-deps="$(git cat-file blob "$name:.topdeps")"
+deps="$(git cat-file blob "$name:.topdeps" | paste -s -d' ')"
 echo "Depends: $deps"
 
 depcheck="$(mktemp)"
