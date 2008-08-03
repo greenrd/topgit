@@ -154,7 +154,7 @@ shift
 
 case "$cmd" in
 help)
-	echo "TopGit - A different patch queue manager"
+	echo "TopGit v0.1 - A different patch queue manager"
 	echo "Usage: tg (create|delete|info|patch|summary|update|help) ..."
 	exit 1;;
 create|delete|info|patch|summary|update)
