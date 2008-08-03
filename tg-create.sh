@@ -104,6 +104,9 @@ author="$(git var GIT_AUTHOR_IDENT)"
 author_addr="${author%> *}>"
 {
 	echo "From: $author_addr"
+	! header="$(git config topgit.to)" || echo "To: $header"
+	! header="$(git config topgit.cc)" || echo "Cc: $header"
+	! header="$(git config topgit.bcc)" || echo "Bcc: $header"
 	echo "Subject: [PATCH] $1"
 	echo
 	cat <<EOT

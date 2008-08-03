@@ -203,7 +203,10 @@ tg create
 	the current branch is assumed to be the only dependency.
 
 	After `tg create`, you should insert the patch description
-	to the '.topmsg' file.
+	to the '.topmsg' file, which will already contain some
+	pre-filled bits. You can set topgit.to, topgit.cc and topgit.bcc
+	configuration variables in order to have `tg create`
+	add these headers with given default values to '.topmsg'.
 
 	The main task of `tg create` is to set up the topic branch
 	base from the dependencies. This may fail due to merge conflicts.
@@ -306,6 +309,8 @@ mail headers are inserted and the patch itself is appended.
 Thus, as your patches evolve, you can record nuances like whether
 the paricular patch should have To-list/Cc-maintainer or vice
 versa and similar nuances, if your project is into that.
+From is prefilled from your current GIT_AUTHOR_IDENT, the To,
+Cc and Bcc can be prefilled from optional topgit.{to,cc,bcc}.
 
 	.topdeps: Contains the one-per-line list of branches
 your patch depends on, pre-seeded with `tg create`. (Continuously
