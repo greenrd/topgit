@@ -55,7 +55,7 @@ if [ -s "$depcheck" ]; then
 					# The merge got stuck! Let the user fix it up.
 					info "You are in a subshell. If you abort the merge,"
 					info "use \`exit 1\` to abort the recursive update altogether."
-					if ! sh -i; then
+					if ! sh -i </dev/tty; then
 						info "Ok, you aborated the merge. Now, you just need to"
 						info "switch back to some sane branch using \`git checkout\`."
 						exit 3
@@ -105,4 +105,5 @@ if ! git merge "refs/top-bases/$name"; then
 		info "Please commit merge resolution and call exit."
 		info "You can abort this operation using \`git reset --hard\`."
 	fi
+	exit 3
 fi
