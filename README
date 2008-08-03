@@ -276,6 +276,7 @@ tg update
 
 TODO: Some infrastructure for sharing topic branches between
 	repositories easily
+TODO: tg depend for adding/removing dependencies smoothly
 
 
 IMPLEMENTATION
