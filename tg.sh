@@ -85,12 +85,13 @@ branch_contains()
 # to the branch (e.g. B_DIRTY B1 B2 NAME), one path per line,
 # inner paths first. Innermost name can be ':' if the head is
 # not in sync with the base.
+# It will also return non-zero status if NAME needs update.
 # If needs_update() hits missing dependencies, it will append
 # them to space-separated $missing_deps list and skip them.
 needs_update()
 {
-	{
-	git cat-file blob "$1:.topdeps" 2>/dev/null |
+	git cat-file blob "$1:.topdeps" 2>/dev/null | {
+		_ret=0
 		while read _dep; do
 			if !git rev-parse --verify "$_dep" >/dev/null 2>&1; then
 				# All hope is lost
@@ -103,7 +104,9 @@ needs_update()
 				_dep_is_tgish=
 
 			# Shoo shoo, keep our environment alone!
-			[ -z "$_dep_is_tgish" ] || (needs_update "$_dep" "$@")
+			[ -z "$_dep_is_tgish" ] ||
+				(needs_update "$_dep" "$@") ||
+				_ret=$?
 
 			_dep_base_uptodate=1
 			if [ -n "$_dep_is_tgish" ]; then
@@ -113,12 +116,15 @@ needs_update()
 			if [ -z "$_dep_base_uptodate" ]; then
 				# _dep needs to be synced with its base
 				echo ": $_dep $*"
+				_ret=1
 			elif ! branch_contains "refs/top-bases/$1" "$_dep"; then
 				# Some new commits in _dep
 				echo "$_dep $*"
+				_ret=1
 			fi
 		done
-	} || : # $1 is not tracked by TopGit anymore
+		exit $_ret
+	}
 }
 
 # branch_empty NAME

@@ -21,7 +21,7 @@ git for-each-ref refs/top-bases |
 		nonempty=
 		! branch_empty "$name" || nonempty='0'
 		deps_update=' '
-		[ -z "$(needs_update "$name")" ] || deps_update='D'
+		needs_update "$name" >/dev/null || deps_update='D'
 		base_update=' '
 		branch_contains "$name" "refs/top-bases/$name" || base_update='B'
 

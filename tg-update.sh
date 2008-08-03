@@ -23,7 +23,7 @@ base_rev="$(git rev-parse --short --verify "refs/top-bases/$name" 2>/dev/null)" 
 
 depcheck="$(mktemp)"
 missing_deps=
-needs_update "$name" >"$depcheck"
+needs_update "$name" >"$depcheck" || :
 [ -z "$missing_deps" ] || die "some dependencies are missing: $missing_deps"
 if [ -s "$depcheck" ]; then
 	# We need to switch to the base branch

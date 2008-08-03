@@ -43,7 +43,7 @@ echo "Depends: $deps"
 
 depcheck="$(mktemp)"
 missing_deps=
-needs_update "$name" >"$depcheck"
+needs_update "$name" >"$depcheck" || :
 if [ -n "$missing_deps" ]; then
 	echo "MISSING: $missing_deps"
 fi
