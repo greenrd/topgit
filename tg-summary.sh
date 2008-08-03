@@ -19,7 +19,7 @@ git for-each-ref refs/top-bases |
 		name="${ref#refs/top-bases/}"
 		missing_deps=
 
-		nonempty=
+		nonempty=' '
 		! branch_empty "$name" || nonempty='0'
 		deps_update=' '
 		needs_update "$name" >/dev/null || deps_update='D'
