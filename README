@@ -15,28 +15,28 @@ branch for each patch and providing few tools to maintain the branches.
 RATIONALE
 ---------
 
-Why not use something like StGIT or Guilt or rebase -i for that?
-The advantage of these tools is their simplicity; they work with patch
-_series_ and defer to the reflog facility for version control of patches
-(reordering of patches is not version-controlled at all). But there are
-several disadvantages - for one, these tools (especially StGIT) do not
-actually fit well with plain Git at all - it is basically impossible
-to take advantage of index efectively when using StGIT. But more
-importantly, these tools horribly fail in the face of distributed
-environment.
+Why not use something like StGIT or Guilt or rebase -i for maintaining
+your patch queue?  The advantage of these tools is their simplicity;
+they work with patch _series_ and defer to the reflog facility for
+version control of patches (reordering of patches is not
+version-controlled at all). But there are several disadvantages -
+for one, these tools (especially StGIT) do not actually fit well
+with plain Git at all: it is basically impossible to take advantage
+of the index efectively when using StGIT. But more importantly,
+these tools horribly fail in the face of distributed environment.
 
-TopGit has been designed around three main tenents:
+TopGit has been designed around three main tenets:
 
 	(i) TopGit is as thin layer on top of Git as possible.
 You still maintain your index and commit using Git, TopGit will
 only automate few indispensable tasks.
 
 	(ii) TopGit is anxious about _keeping_ your history. It will
-never rewrite your history and all metadata are also tracked by Git,
-smoothly and non-obnoxiously. It is useful if there is a _single_
-point when the history is cleaned up, and that is at the point of
-inclusion in the upstream project; locally, you can see how your
-patch has evolved and easily return to older versions.
+never rewrite your history and all metadata is also tracked by Git,
+smoothly and non-obnoxiously. It is good to have a _single_ point
+when the history is cleaned up, and that is at the point of inclusion
+in the upstream project; locally, you can see how your patch has evolved
+and easily return to older versions.
 
 	(iii) TopGit is specifically designed to work in distributed
 environment. You can have several instances of TopGit-aware repositories
@@ -63,9 +63,8 @@ Of course, TopGit is perhaps not the right tool for you:
 simpler, conceptually.  If you just want to make a linear purely-local
 patch queue, deferring to StGIT instead might make more sense.
 
-	(ii) While keeping your history anxiously, in some extreme
-cases the TopGit-generated history graph will perhaps be a little
-too complex. ;-)
+	(ii) When using TopGit, your history can get a little hairy
+over time, especially with all the merges rippling through. ;-)
 
 
 SYNOPSIS
