@@ -258,6 +258,9 @@ tg summary
 	'D' marks that it is out-of-date wrt. its dependencies,
 	'B' marks that it is out-of-date wrt. its base).
 
+	TODO: Speed up by an order of magnitude
+	TODO: Graph view
+
 tg update
 ~~~~~~~~~
 	Update the current topic branch wrt. changes in the branches
