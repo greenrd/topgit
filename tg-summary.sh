@@ -35,6 +35,6 @@ git for-each-ref refs/top-bases |
 			subject="(No commits)"
 		fi
 
-		printf '%s%s%s%s\t%-31s\t%s\n' "$nonempty" "$deps_update" "$deps_missing" "$base_update" \
+		printf '%s\t%-31s\t%s\n' "$nonempty$deps_update$deps_missing$base_update" \
 			"$name" "$subject"
 	done
