@@ -1,8 +1,14 @@
 hooks/pre-commit
 tg-create
+tg-create.txt
 tg-delete
+tg-delete.txt
 tg-info
+tg-info.txt
 tg-patch
+tg-patch.txt
 tg-summary
+tg-summary.txt
 tg-update
+tg-update.txt
 tg

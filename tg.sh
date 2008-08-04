@@ -148,6 +148,19 @@ switch_to_base()
 	git symbolic-ref HEAD "$_base"
 }
 
+# Show the help messages.
+do_help()
+{
+	if [ -z "$1" ] ; then
+		echo "TopGit v0.1 - A different patch queue manager"
+		echo "Usage: tg (create|delete|info|patch|summary|update|help) ..."
+	elif [ -f "@sharedir@/tg-$1.txt" ] ; then
+		cat "@sharedir@/tg-$1.txt"
+	else
+		echo "`basename $0`: no help for $1" 1>&2
+	fi
+}
+
 
 ## Initial setup
 
@@ -171,8 +184,7 @@ shift
 
 case "$cmd" in
 help)
-	echo "TopGit v0.1 - A different patch queue manager"
-	echo "Usage: tg (create|delete|info|patch|summary|update|help) ..."
+	do_help "$1"
 	exit 1;;
 create|delete|info|patch|summary|update)
 	. "@cmddir@"/tg-$cmd;;
