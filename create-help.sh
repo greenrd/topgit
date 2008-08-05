@@ -10,8 +10,8 @@ fi
 < README awk '
 	BEGIN { incommand = 0; }
 	/^tg '"$1"'$/ { incommand = 1; next; }
-	/^tg/ { incommand = 0; next; }
 	/^~/ { next; } # Ignore the title underlines.
+	/^[^\t]/ { incommand = 0; next; }
 	{ if (incommand) { print $0; } }
 '  > tg-"$1".txt
 
