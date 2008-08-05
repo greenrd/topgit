@@ -15,7 +15,7 @@ while [ -n "$1" ]; do
 	arg="$1"; shift
 	case "$arg" in
 	-*)
-		echo "Usage: tg create [-d DEPS...] NAME" >&2
+		echo "Usage: tg create NAME [DEPS...]" >&2
 		exit 1;;
 	*)
 		if [ -z "$name" ]; then
