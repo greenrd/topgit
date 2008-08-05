@@ -107,7 +107,8 @@ author_addr="${author%> *}>"
 	! header="$(git config topgit.to)" || echo "To: $header"
 	! header="$(git config topgit.cc)" || echo "Cc: $header"
 	! header="$(git config topgit.bcc)" || echo "Bcc: $header"
-	echo "Subject: [PATCH] $1"
+	! subject_prefix="$(git config topgit.subjectprefix)" || subject_prefix="$subject_prefix "
+	echo "Subject: [${subject_prefix}PATCH] $1"
 	echo
 	cat <<EOT
 <patch description>
