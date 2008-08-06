@@ -152,8 +152,21 @@ switch_to_base()
 do_help()
 {
 	if [ -z "$1" ] ; then
+		## Build available commands list for help output
+
+		cmds=
+		sep=
+		for cmd in "@cmddir@"/tg-*; do
+			! [ -r "$cmd" ] && continue
+			# strip directory part and "tg-" prefix
+			cmd="$(basename "$cmd")"
+			cmd="${cmd#tg-}"
+			cmds="$cmds$sep$cmd"
+			sep="|"
+		done
+
 		echo "TopGit v0.1 - A different patch queue manager"
-		echo "Usage: tg (create|delete|info|patch|summary|update|help) ..."
+		echo "Usage: tg ($cmds|help) ..."
 	elif [ -f "@sharedir@/tg-$1.txt" ] ; then
 		cat "@sharedir@/tg-$1.txt"
 	else
@@ -171,6 +184,8 @@ root_dir="$(git rev-parse --show-cdup)"; root_dir="${root_dir:-.}"
 setup_ours
 setup_hook "pre-commit"
 
+[ -d "@cmddir@" ] ||
+	die "No command directory: '@cmddir@'"
 
 ## Dispatch
 
@@ -186,12 +201,13 @@ case "$cmd" in
 help)
 	do_help "$1"
 	exit 1;;
-create|delete|info|patch|summary|update)
-	. "@cmddir@"/tg-$cmd;;
 --hooks-path)
 	# Internal command
 	echo "@hooksdir@";;
 *)
-	echo "Unknown subcommand: $cmd" >&2
-	exit 1;;
+	[ -r "@cmddir@"/tg-$cmd ] || {
+		echo "Unknown subcommand: $cmd" >&2
+		exit 1
+	}
+	. "@cmddir@"/tg-$cmd;;
 esac
