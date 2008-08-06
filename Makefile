@@ -37,7 +37,7 @@ install:: all
 	install -d -m 755 "$(hooksdir)"
 	install $(hooks_out) "$(hooksdir)"
 	install -d -m 755 "$(sharedir)"
-	install $(help_out) "$(sharedir)"
+	install -m 644 $(help_out) "$(sharedir)"
 
 clean::
 	rm -f tg $(commands_out) $(hooks_out) $(help_out)

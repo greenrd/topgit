@@ -167,7 +167,7 @@ do_help()
 
 		echo "TopGit v0.1 - A different patch queue manager"
 		echo "Usage: tg ($cmds|help) ..."
-	elif [ -f "@sharedir@/tg-$1.txt" ] ; then
+	elif [ -r "@sharedir@/tg-$1.txt" ] ; then
 		cat "@sharedir@/tg-$1.txt"
 	else
 		echo "`basename $0`: no help for $1" 1>&2
