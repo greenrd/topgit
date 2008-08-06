@@ -26,7 +26,9 @@ tg $(commands_out) $(hooks_out): % : %.sh
 	mv $@+ $@
 
 $(help_out): README
-	./create-help.sh `echo $@ | sed -e 's/tg-//' -e 's/\.txt//'`
+	@CMD=`echo $@ | sed -e 's/tg-//' -e 's/\.txt//'` && \
+	echo '[HELP]' $$CMD && \
+	./create-help.sh $$CMD
 
 install:: all
 	install tg "$(bindir)"
