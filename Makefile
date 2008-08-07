@@ -31,6 +31,7 @@ $(help_out): README
 	./create-help.sh $$CMD
 
 install:: all
+	install -d -m 755 "$(bindir)"
 	install tg "$(bindir)"
 	install -d -m 755 "$(cmddir)"
 	install $(commands_out) "$(cmddir)"
