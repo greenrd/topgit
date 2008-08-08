@@ -45,11 +45,11 @@ setup_hook()
 # setup_ours (no arguments)
 setup_ours()
 {
-	if [ ! -s "$git_dir/info/gitattributes" ] || ! grep -q topmsg "$git_dir/info/gitattributes"; then
+	if [ ! -s "$git_dir/info/attributes" ] || ! grep -q topmsg "$git_dir/info/attributes"; then
 		{
 			echo -e ".topmsg\tmerge=ours"
 			echo -e ".topdeps\tmerge=ours"
-		} >>"$git_dir/info/gitattributes"
+		} >>"$git_dir/info/attributes"
 	fi
 	if ! git config merge.ours.driver >/dev/null; then
 		git config merge.ours.name '"always keep ours" merge driver'
