@@ -198,7 +198,7 @@ cmd="$1"
 shift
 
 case "$cmd" in
-help)
+help|--help|-h)
 	do_help "$1"
 	exit 1;;
 --hooks-path)
