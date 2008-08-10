@@ -111,7 +111,7 @@ recurse_deps()
 
 		# Shoo shoo, keep our environment alone!
 		[ -z "$_dep_is_tgish" ] ||
-			(needs_update "$_cmd" "$_dep" "$@") ||
+			(recurse_deps "$_cmd" "$_dep" "$@") ||
 			_ret=$?
 
 		eval "$_cmd"
