@@ -80,18 +80,23 @@ branch_contains()
 	[ -z "$(git rev-list ^"$1" "$2")" ]
 }
 
-# needs_update NAME [BRANCHPATH...]
-# This function is recursive; it outputs reverse path from NAME
-# to the branch (e.g. B_DIRTY B1 B2 NAME), one path per line,
-# inner paths first. Innermost name can be ':' if the head is
-# not in sync with the base.
-# It will also return non-zero status if NAME needs update.
-# If needs_update() hits missing dependencies, it will append
+# recurse_deps CMD NAME [BRANCHPATH...]
+# Recursively eval CMD on all dependencies of NAME.
+# CMD can refer to $_name for queried branch name,
+# $_dep for dependency name,
+# $_depchain for space-seperated branch backtrace,
+# and the $_dep_is_tgish boolean.
+# It can modify $_ret to affect the return value
+# of the whole function.
+# If recurse_deps() hits missing dependencies, it will append
 # them to space-separated $missing_deps list and skip them.
-needs_update()
+recurse_deps()
 {
+	_cmd="$1"; shift
+	_name="$1"; # no shift
+	_depchain="$*"
 	depsfile="$(mktemp)"
-	git cat-file blob "$1:.topdeps" >"$depsfile"
+	git cat-file blob "$_name:.topdeps" >"$depsfile"
 	_ret=0
 	while read _dep; do
 		if ! git rev-parse --verify "$_dep" >/dev/null 2>&1; then
@@ -106,27 +111,52 @@ needs_update()
 
 		# Shoo shoo, keep our environment alone!
 		[ -z "$_dep_is_tgish" ] ||
-			(needs_update "$_dep" "$@") ||
+			(needs_update "$_cmd" "$_dep" "$@") ||
 			_ret=$?
 
-		_dep_base_uptodate=1
-		if [ -n "$_dep_is_tgish" ]; then
-			branch_contains "$_dep" "refs/top-bases/$_dep" || _dep_base_uptodate=
-		fi
-
-		if [ -z "$_dep_base_uptodate" ]; then
-			# _dep needs to be synced with its base
-			echo ": $_dep $*"
-			_ret=1
-		elif ! branch_contains "refs/top-bases/$1" "$_dep"; then
-			# Some new commits in _dep
-			echo "$_dep $*"
-			_ret=1
-		fi
+		eval "$_cmd"
 	done <"$depsfile"
 	missing_deps="${missing_deps# }"
 	rm "$depsfile"
 	return $_ret
+}
+
+# branch_needs_update
+# This is a helper function for determining whether given branch
+# is up-to-date wrt. its dependencies. It expects input as if it
+# is called as a recurse_deps() helper.
+# In case the branch does need update, it will echo it together
+# with the branch backtrace on the output (see needs_update()
+# description for details) and set $_ret to non-zero.
+branch_needs_update()
+{
+	_dep_base_uptodate=1
+	if [ -n "$_dep_is_tgish" ]; then
+		branch_contains "$_dep" "refs/top-bases/$_dep" || _dep_base_uptodate=
+	fi
+
+	if [ -z "$_dep_base_uptodate" ]; then
+		# _dep needs to be synced with its base
+		echo ": $_dep $_depchain"
+		_ret=1
+	elif ! branch_contains "refs/top-bases/$1" "$_dep"; then
+		# Some new commits in _dep
+		echo "$_dep $_depchain"
+		_ret=1
+	fi
+}
+
+# needs_update NAME
+# This function is recursive; it outputs reverse path from NAME
+# to the branch (e.g. B_DIRTY B1 B2 NAME), one path per line,
+# inner paths first. Innermost name can be ':' if the head is
+# not in sync with the base.
+# It will also return non-zero status if NAME needs update.
+# If needs_update() hits missing dependencies, it will append
+# them to space-separated $missing_deps list and skip them.
+needs_update()
+{
+	recurse_deps branch_needs_update "$@"
 }
 
 # branch_empty NAME
