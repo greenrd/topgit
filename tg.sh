@@ -95,8 +95,8 @@ recurse_deps()
 	_cmd="$1"; shift
 	_name="$1"; # no shift
 	_depchain="$*"
-	depsfile="$(mktemp)"
-	git cat-file blob "$_name:.topdeps" >"$depsfile"
+	_depsfile="$(mktemp)"
+	git cat-file blob "$_name:.topdeps" >"$_depsfile"
 	_ret=0
 	while read _dep; do
 		if ! git rev-parse --verify "$_dep" >/dev/null 2>&1; then
@@ -115,9 +115,9 @@ recurse_deps()
 			_ret=$?
 
 		eval "$_cmd"
-	done <"$depsfile"
+	done <"$_depsfile"
 	missing_deps="${missing_deps# }"
-	rm "$depsfile"
+	rm "$_depsfile"
 	return $_ret
 }
 
