@@ -261,6 +261,50 @@ tg summary
 	TODO: Speed up by an order of magnitude
 	TODO: Graph view
 
+tg export
+~~~~~~~~~
+	Create a new branch containing tidied-up history
+	of the current topic branch and its dependencies,
+	suitable for pull by upstream - each topic branch
+	corresponds to a single commit in the cleaned up history
+	(corresponding basically exactly to `tg patch` output
+	for the topic branch).
+
+	You can use this collapsed structure either for providing
+	a pull source for upstream, or further linearization e.g.
+	for creation of a quilt series using git log:
+
+		git log --pretty=email -p --topo-order origin..exported
+
+	To better understand the function of `tg export`,
+	consider this dependency structure of topic branches:
+
+	origin/master - t/foo/blue - t/foo/red - master
+	             `- t/bar/good <,----------'
+	             `- t/baz      ------------'
+
+	(Where each of the branches may have hefty history.) Then
+
+	master$ tg export for-linus
+
+	will create this commit structure on branch for-linus:
+
+	origin/master - t/foo/blue -. merge - t/foo/red -.. merge - master
+	             `- t/bar/good <,-------------------'/
+	             `- t/baz      ---------------------'
+
+	The command works on the current topic branch
+	and requires one mandatory argument: the name of the branch
+	where the exported result shall be stored.
+	The branch will be silently overwritten if it exists already!
+	Use git reflog to recover in case of mistake.
+
+	Usage: tg export BRANCH
+
+	TODO: Make stripping of non-essential headers configurable
+	TODO: Make stripping of [PATCH] and other prefixes configurable
+	TODO: --quilt and --mbox options for other modes of operation
+
 tg update
 ~~~~~~~~~
 	Update the current topic branch wrt. changes in the branches

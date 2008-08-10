@@ -139,7 +139,7 @@ branch_needs_update()
 		# _dep needs to be synced with its base
 		echo ": $_dep $_depchain"
 		_ret=1
-	elif ! branch_contains "refs/top-bases/$_name" "$_dep"; then
+	elif [ -n "$_name" ] && ! branch_contains "refs/top-bases/$_name" "$_dep"; then
 		# Some new commits in _dep
 		echo "$_dep $_depchain"
 		_ret=1
