@@ -39,8 +39,8 @@ if [ -s "$depcheck" ]; then
 		sed 's/^\([^+]\)/-\1/' | # now each line is +branch or -branch (+ == recurse)
 		uniq -s 1 | # fold branch lines; + always comes before - and thus wins within uniq
 		while read depline; do
-			action="${depline:0:1}"
-			dep="${depline:1}"
+			action="$(echo "$depline" | cut -c 1)"
+			dep="$(echo "$depline" | cut -c 2-)"
 
 			# We do not distinguish between dependencies out-of-date
 			# and base out-of-date cases for $dep here, but thanks
