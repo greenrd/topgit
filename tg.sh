@@ -47,8 +47,8 @@ setup_ours()
 {
 	if [ ! -s "$git_dir/info/attributes" ] || ! grep -q topmsg "$git_dir/info/attributes"; then
 		{
-			echo -e ".topmsg\tmerge=ours"
-			echo -e ".topdeps\tmerge=ours"
+			echo ".topmsg	merge=ours"
+			echo ".topdeps	merge=ours"
 		} >>"$git_dir/info/attributes"
 	fi
 	if ! git config merge.ours.driver >/dev/null; then
