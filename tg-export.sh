@@ -122,11 +122,10 @@ collapse()
 
 	else
 		# First time hitting this dep; the common case
+		echo "Collapsing $_dep"
 		commit="$(collapsed_commit "$_dep")"
-
 		mkdir -p "$playground/$(dirname "$_dep")"
 		echo "$commit" >"$playground/$_dep"
-		echo "Collapsed $_dep"
 	fi
 
 	# Propagate our work through the dependency chain
@@ -150,10 +149,10 @@ quilt()
 		return
 	fi
 
+	echo "Exporting $_dep"
 	mkdir -p "$(dirname "$filename")"
 	tg patch "$_dep" >"$filename"
 	echo "$_dep.diff -p1" >>"$output/series"
-	echo "Exported $_dep"
 }
 
 
