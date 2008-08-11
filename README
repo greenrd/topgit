@@ -321,8 +321,6 @@ tg update
 TODO: Some infrastructure for sharing topic branches between
 	repositories easily
 TODO: tg depend for adding/removing dependencies smoothly
-TODO: tg collapse for creating a one-commit-per-patch tidied up
-	history (for pulling by upstream)
 
 
 IMPLEMENTATION
