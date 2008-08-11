@@ -263,13 +263,16 @@ tg summary
 
 tg export
 ~~~~~~~~~
-	Create a new branch containing tidied-up history
-	of the current topic branch and its dependencies,
-	suitable for pull by upstream - each topic branch
-	corresponds to a single commit in the cleaned up history
-	(corresponding basically exactly to `tg patch` output
-	for the topic branch).
+	Export a tidied-up history of the current topic branch
+	and its dependencies, suitable for feeding upstream.
+	Each topic branch corresponds to a single commit or patch
+	in the cleaned up history (corresponding basically exactly
+	to `tg patch` output for the topic branch).
 
+	The command has two posible outputs now - either a Git branch
+	with the collapsed history, or a quilt series in new directory.
+
+	In case of producing collapsed history in new branch,
 	You can use this collapsed structure either for providing
 	a pull source for upstream, or further linearization e.g.
 	for creation of a quilt series using git log:
@@ -293,17 +296,39 @@ tg export
 	             `- t/bar/good <,-------------------'/
 	             `- t/baz      ---------------------'
 
+	In case of the quilt mode,
+
+	master$ tg export --quilt for-linus
+
+	would create this directory for-linus:
+
+	for-linus/t/foo/blue.diff
+	for-linus/t/foo/red.diff
+	for-linus/t/bar/good.diff
+	for-linus/t/baz.diff
+	for-linus/series:
+		t/foo/blue.diff -p1
+		t/bar/good.diff -p1
+		t/foo/red.diff -p1
+		t/baz.diff -p1
+
 	The command works on the current topic branch
-	and requires one mandatory argument: the name of the branch
+	and can be called either without a parameter
+	(in that case, '--collapse' is assumed)
+	and with one mandatory argument: the name of the branch
 	where the exported result shall be stored.
 	The branch will be silently overwritten if it exists already!
 	Use git reflog to recover in case of mistake.
 
-	Usage: tg export BRANCH
+	Alternatively, call it with the '--quilt' parameter
+	and an argument specifying the directory
+	where the quilt series should be saved.
+
+	Usage: tg export ([--collapse] BRANCH | --quilt DIR)
 
 	TODO: Make stripping of non-essential headers configurable
 	TODO: Make stripping of [PATCH] and other prefixes configurable
-	TODO: --quilt and --mbox options for other modes of operation
+	TODO: --mbox option for other mode of operation
 
 tg update
 ~~~~~~~~~

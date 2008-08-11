@@ -5,6 +5,7 @@
 
 name=
 output=
+driver=collapse
 
 
 ## Parse options
@@ -12,11 +13,15 @@ output=
 while [ -n "$1" ]; do
 	arg="$1"; shift
 	case "$arg" in
+	--quilt)
+		driver=quilt;;
+	--collapse)
+		driver=collapse;;
 	-*)
-		echo "Usage: tg export NEWBRANCH" >&2
+		echo "Usage: tg export ([--collapse] NEWBRANCH | --quilt DIRECTORY)" >&2
 		exit 1;;
 	*)
-		[ -z "$output" ] || die "new branch already specified ($output)"
+		[ -z "$output" ] || die "output already specified ($output)"
 		output="$arg";;
 	esac
 done
@@ -26,15 +31,12 @@ name="$(git symbolic-ref HEAD | sed 's#^refs/heads/##')"
 base_rev="$(git rev-parse --short --verify "refs/top-bases/$name" 2>/dev/null)" ||
 	die "not on a TopGit-controlled branch"
 
-[ -n "$output" ] ||
-	die "no target branch specified"
-
-! git rev-parse --verify "$output" >/dev/null 2>&1 ||
-	die "target branch '$output' already exists; first run: git branch -D $output"
-
 
 playground="$(mktemp -d)"
 trap 'rm -rf "$playground"' EXIT
+
+
+## Collapse driver
 
 # Trusty Cogito code:
 load_author()
@@ -105,15 +107,11 @@ collapsed_commit()
 	echo "$name" >>"$playground/^ticker"
 }
 
-# collapse_one
+# collapse
 # This will collapse a single branch, using information about
 # previously collapsed branches stored in $playground.
-collapse_one()
+collapse()
 {
-	branch_needs_update >/dev/null
-	[ "$_ret" -eq 0 ] ||
-		die "cancelling $_ret export of $_dep (-> $_name): branch not up-to-date"
-
 	if [ -s "$playground/$_dep" ]; then
 		# We've already seen this dep
 		commit="$(cat "$playground/$_dep")"
@@ -136,12 +134,69 @@ collapse_one()
 	echo "$commit	$_dep" >>"$playground/$_name^parents"
 }
 
-# Collapse all the branches - this way, collapse_one will be
-# called in topological order.
-recurse_deps collapse_one "$name"
-(_ret=0; _dep="$name"; _name=""; _dep_is_tgish=1; collapse_one)
 
-git update-ref "refs/heads/$output" "$(cat "$playground/$name")"
+## Quilt driver
 
-depcount="$(cat "$playground/^ticker" | wc -l)"
-echo "Exported topic branch $name (total $depcount topics) to branch $output"
+quilt()
+{
+	if [ -z "$_dep_is_tgish" ]; then
+		# This dep is not for rewrite
+		return
+	fi
+
+	filename="$output/$_dep.diff"
+	if [ -e "$filename" ]; then
+		# We've already seen this dep
+		return
+	fi
+
+	mkdir -p "$(dirname "$filename")"
+	tg patch "$_dep" >"$filename"
+	echo "$_dep.diff -p1" >>"$output/series"
+	echo "Exported $_dep"
+}
+
+
+## Machinery
+
+if [ "$driver" = "collapse" ]; then
+	[ -n "$output" ] ||
+		die "no target branch specified"
+	! git rev-parse --verify "$output" >/dev/null 2>&1 ||
+		die "target branch '$output' already exists; first run: git branch -D $output"
+
+elif [ "$driver" = "quilt" ]; then
+	[ -n "$output" ] ||
+		die "no target directory specified"
+	[ ! -e "$output" ] ||
+		die "target directory already exists: $output"
+
+	mkdir -p "$output"
+fi
+
+
+driver()
+{
+	branch_needs_update >/dev/null
+	[ "$_ret" -eq 0 ] ||
+		die "cancelling export of $_dep (-> $_name): branch not up-to-date"
+
+	$driver
+}
+
+# Call driver on all the branches - this will happen
+# in topological order.
+recurse_deps driver "$name"
+(_ret=0; _dep="$name"; _name=""; _dep_is_tgish=1; driver)
+
+
+if [ "$driver" = "collapse" ]; then
+	git update-ref "refs/heads/$output" "$(cat "$playground/$name")"
+
+	depcount="$(cat "$playground/^ticker" | wc -l)"
+	echo "Exported topic branch $name (total $depcount topics) to branch $output"
+
+elif [ "$driver" = "quilt" ]; then
+	depcount="$(cat "$output/series" | wc -l)"
+	echo "Exported topic branch $name (total $depcount topics) to directory $output"
+fi
