@@ -53,7 +53,7 @@ pretty_tree()
 {
 	(export GIT_INDEX_FILE="$playground/^index"
 	 git read-tree "$1"
-	 git update-index --force-remove ".top*"
+	 git update-index --force-remove ".topmsg" ".topdeps"
 	 git write-tree)
 }
 
