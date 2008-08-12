@@ -190,7 +190,7 @@ recurse_deps driver "$name"
 
 
 if [ "$driver" = "collapse" ]; then
-	git update-ref "refs/heads/$output" "$(cat "$playground/$name")"
+	git update-ref "refs/heads/$output" "$(cat "$playground/$name")" ""
 
 	depcount="$(cat "$playground/^ticker" | wc -l)"
 	echo "Exported topic branch $name (total $depcount topics) to branch $output"
