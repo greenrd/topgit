@@ -31,18 +31,17 @@ done
 
 deps="${deps# }"
 if [ -z "$deps" ]; then
-	head="$(git symbolic-ref HEAD)"
-	bname="${head#refs/top-bases/}"
-	if [ "$bname" != "$head" -a -s "$git_dir/top-deps" -a -s "$git_dir/top-merge" ]; then
-		# We are on a base branch now; resume merge!
+	if [ -z "$name" -a -s "$git_dir/top-name" -a -s "$git_dir/top-deps" -a -s "$git_dir/top-merge" ]; then
+		# We are setting up the base branch now; resume merge!
+		name="$(cat "$git_dir/top-name")"
 		deps="$(cat "$git_dir/top-deps")"
 		merge="$(cat "$git_dir/top-merge")"
-		name="$bname"
 		restarted=1
 		info "Resuming $name setup..."
 	else
 		# The common case
 		[ -z "$name" ] && die "no branch name given"
+		head="$(git symbolic-ref HEAD)"
 		deps="${head#refs/heads/}"
 		[ "$deps" != "$head" ] || die "refusing to auto-depend on non-head ref ($head)"
 		info "Automatically marking dependency on $deps"
@@ -59,7 +58,7 @@ done
 	die "branch '$name' already exists"
 
 # Clean up any stale stuff
-rm -f "$git_dir/top-deps" "$git_dir/top-merge"
+rm -f "$git_dir/top-name" "$git_dir/top-deps" "$git_dir/top-merge"
 
 
 ## Create base
@@ -69,7 +68,8 @@ if [ -n "$merge" ]; then
 	branch="${merge%% *}"
 	merge="${merge#* }"
 	info "Creating $name base from $branch..."
-	switch_to_base "$name" "$branch"
+	# We create a detached head so that we can abort this operation
+	git checkout -q "$(git rev-parse "$branch")"
 fi
 
 
@@ -83,9 +83,10 @@ while [ -n "$merge" ]; do
 
 	if ! git merge "$branch"; then
 		info "Please commit merge resolution and call: tg create"
-		info "It is also safe to abort this operation using \`git reset --hard\`"
-		info "but please remember you are on the base branch now;"
-		info "you will want to switch to a different branch."
+		info "It is also safe to abort this operation using:"
+		info "git reset --hard some_branch"
+		info "(You are on a detached HEAD now.)"
+		echo "$name" >"$git_dir/top-name"
 		echo "$deps" >"$git_dir/top-deps"
 		echo "$merge" >"$git_dir/top-merge"
 		exit 2
@@ -95,6 +96,7 @@ done
 
 ## Set up the topic branch
 
+git update-ref "refs/top-bases/$name" "HEAD" ""
 git checkout -b "$name"
 
 echo "$deps" | sed 's/ /\n/g' >"$root_dir/.topdeps"
