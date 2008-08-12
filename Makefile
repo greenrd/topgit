@@ -1,8 +1,7 @@
-# Set PREFIX to wherever you want to install TopGit
-PREFIX = $(HOME)
-bindir = $(PREFIX)/bin
-cmddir = $(PREFIX)/libexec/topgit
-sharedir = $(PREFIX)/share/topgit
+prefix = $(HOME)
+bindir = $(prefix)/bin
+cmddir = $(prefix)/libexec/topgit
+sharedir = $(prefix)/share/topgit
 hooksdir = $(cmddir)/hooks
 
 
@@ -31,14 +30,14 @@ $(help_out): README
 	./create-help.sh $$CMD
 
 install:: all
-	install -d -m 755 "$(bindir)"
-	install tg "$(bindir)"
-	install -d -m 755 "$(cmddir)"
-	install $(commands_out) "$(cmddir)"
-	install -d -m 755 "$(hooksdir)"
-	install $(hooks_out) "$(hooksdir)"
-	install -d -m 755 "$(sharedir)"
-	install -m 644 $(help_out) "$(sharedir)"
+	install -d -m 755 "$(DESTDIR)$(bindir)"
+	install tg "$(DESTDIR)$(bindir)"
+	install -d -m 755 "$(DESTDIR)$(cmddir)"
+	install $(commands_out) "$(DESTDIR)$(cmddir)"
+	install -d -m 755 "$(DESTDIR)$(hooksdir)"
+	install $(hooks_out) "$(DESTDIR)$(hooksdir)"
+	install -d -m 755 "$(DESTDIR)$(sharedir)"
+	install -m 644 $(help_out) "$(DESTDIR)$(sharedir)"
 
 clean::
 	rm -f tg $(commands_out) $(hooks_out) $(help_out)
