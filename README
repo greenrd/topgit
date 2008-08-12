@@ -329,6 +329,12 @@ tg export
 	TODO: Make stripping of non-essential headers configurable
 	TODO: Make stripping of [PATCH] and other prefixes configurable
 	TODO: --mbox option for other mode of operation
+	TODO: -n option to prevent exporting of empty patches
+	TODO: -a option to export all branches
+	TODO: Allow branches to be exported to be passed as arguments, default
+	      to the current branch if none are specified
+	TODO: For quilt exporting, use a temporary branch and remove it when
+	      done - this would allow producing conflict-less series
 
 tg update
 ~~~~~~~~~
@@ -346,6 +352,7 @@ tg update
 TODO: Some infrastructure for sharing topic branches between
 	repositories easily
 TODO: tg depend for adding/removing dependencies smoothly
+TODO: tg rename
 
 
 IMPLEMENTATION
