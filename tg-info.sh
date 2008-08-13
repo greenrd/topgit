@@ -39,7 +39,7 @@ branch_contains "$name" "$base_rev" ||
 	echo "Base is newer than head! Please run \`tg update\`."
 
 git cat-file blob "$name:.topdeps" |
-	sed '1{s/^/Depends: /;n}; s/^/         /;'
+	sed '1{ s/^/Depends: /; n; }; s/^/         /;'
 
 depcheck="$(mktemp -t tg-depcheck.XXXXXX)"
 missing_deps=
