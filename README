@@ -352,6 +352,13 @@ tg export
 	TODO: For quilt exporting, use a temporary branch and remove it when
 	      done - this would allow producing conflict-less series
 
+tg import
+~~~~~~~~
+	Import the commits between the given revision range into
+	a topgit managed branch
+
+	Usage: tg import rev1..rev2
+
 tg update
 ~~~~~~~~~
 	Update the current topic branch wrt. changes in the branches
