@@ -41,7 +41,7 @@ branch_contains "$name" "$base_rev" ||
 git cat-file blob "$name:.topdeps" |
 	sed '1{s/^/Depends: /;n}; s/^/         /;'
 
-depcheck="$(mktemp)"
+depcheck="$(mktemp -t tg-depcheck.XXXXXX)"
 missing_deps=
 needs_update "$name" >"$depcheck" || :
 if [ -n "$missing_deps" ]; then

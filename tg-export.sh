@@ -32,7 +32,7 @@ base_rev="$(git rev-parse --short --verify "refs/top-bases/$name" 2>/dev/null)" 
 	die "not on a TopGit-controlled branch"
 
 
-playground="$(mktemp -d)"
+playground="$(mktemp -d -t tg-export.XXXXXX)"
 trap 'rm -rf "$playground"' EXIT
 
 

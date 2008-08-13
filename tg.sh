@@ -95,7 +95,7 @@ recurse_deps()
 	_cmd="$1"; shift
 	_name="$1"; # no shift
 	_depchain="$*"
-	_depsfile="$(mktemp)"
+	_depsfile="$(mktemp -t tg-depsfile.XXXXXX)"
 	git cat-file blob "$_name:.topdeps" >"$_depsfile"
 	_ret=0
 	while read _dep; do

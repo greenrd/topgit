@@ -29,7 +29,7 @@ echo
 [ -n "$(git grep '^[-]--' "$name" -- ".topmsg")" ] || echo '---'
 
 # Evil obnoxious hack to work around the lack of git diff --exclude
-git_is_stupid="$(mktemp)"
+git_is_stupid="$(mktemp -t tg-patch-changes.XXXXXX)"
 git diff-tree --name-only "$base_rev" "$name" |
 	fgrep -vx ".topdeps" |
 	fgrep -vx ".topmsg" >"$git_is_stupid" || : # fgrep likes to fail randomly?
