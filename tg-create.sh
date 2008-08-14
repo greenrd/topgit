@@ -100,7 +100,7 @@ git update-ref "refs/top-bases/$name" "HEAD" ""
 git checkout -b "$name"
 
 echo "$deps" | sed 's/ /\n/g' >"$root_dir/.topdeps"
-git add "$root_dir/.topdeps"
+git add -f "$root_dir/.topdeps"
 
 author="$(git var GIT_AUTHOR_IDENT)"
 author_addr="${author%> *}>"
@@ -118,7 +118,7 @@ author_addr="${author%> *}>"
 Signed-off-by: $author_addr
 EOT
 } >"$root_dir/.topmsg"
-git add "$root_dir/.topmsg"
+git add -f "$root_dir/.topmsg"
 
 
 
