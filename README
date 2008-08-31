@@ -401,3 +401,44 @@ is not called if the hook was not executable beforehand).
 Another automagically installed piece is .git/info/attributes specifier
 for an 'ours' merge strategy for the files .topmsg and .topdeps, and
 the (intuitive) 'ours' merge strategy definition in .git/config.
+
+
+REMOTE HANDLING
+---------------
+
+There are three issues with accessing topic branches in remote repositories:
+
+	(i) Fetching/pushing accurate picture of the remote topic branch setup
+	(ii) Referring to remote topic branches from your local repository
+	(iii) Developing some of the remote topic branches locally
+
+(ii) and (iii) are fairly interconnected problems, while (i) is largely
+independent. The issue is to accurately reflect the current state of the
+quickly changing topic branches set - this can be easily done
+with the current facilities like 'git remote prune' and 'git push --mirror' -
+and to properly upload also the bases of the topic branches.
+For this, we need to modify the fetch/push refspecs to also include
+the refs/top-bases/ ref namespace; we shall provide a special 'tg remote'
+command to set up an existing remote for TopGit usage.
+
+About (ii) and (iii), there are two somewhat contradicting design
+considerations:
+
+	(a) Hacking on multiple independent TopGit remotes in a single
+	repository
+	(b) Having a self-contained topic system in local refs space
+
+To us, (a) does not appear to be very convincing, while (b) is quite desirable
+for 'git-log topic' etc. working, 'git push' automatically creating
+self-contained topic system in the remote repository, and increased conceptual
+simplicity.
+
+Thus, we choose to instantiate all the topic branches of given remote locally;
+tg update will also check if a branch can be updated from its corresponding
+remote branch. The logic is somewhat involved if we should DTRT.
+First, we update the base, handling the remote branch as if it was the first
+dependency; thus, conflict resolutions made in the remote branch will be
+carried over to our local base automagically. Then, the base is merged into
+remote branch and the result is merged to local branch - again, to carry over
+remote conflict resolutions. In the future, this order might be adjustable
+per-update in case local changes are diverging more than the remote ones.
