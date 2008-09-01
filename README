@@ -250,6 +250,19 @@ tg patch
 	TODO: tg patch -i to base at index instead of branch,
 		-w for working tree
 
+tg remote
+~~~~~~~~~
+	Register given remote as TopGit-controlled. This will create
+	the namespace for the remote branch bases and teach 'git fetch'
+	and 'git push' to operate on them.
+
+	It takes a mandatory remote name argument, and optional
+	'--populate' switch - use that for your origin-style remote,
+	it will seed the local topic branch system based on the
+	remote topic branches. '--populate' will also make 'tg remote'
+	automatically fetch the remote and 'tg update' to look at
+	branches of this remote for updates by default.
+
 tg summary
 ~~~~~~~~~~
 	Show overview of all TopGit-tracked topic branches and their
@@ -434,7 +447,8 @@ self-contained topic system in the remote repository, and increased conceptual
 simplicity.
 
 Thus, we choose to instantiate all the topic branches of given remote locally;
-tg update will also check if a branch can be updated from its corresponding
+this is performed by 'tg remote --populate'.
+'tg update' will also check if a branch can be updated from its corresponding
 remote branch. The logic is somewhat involved if we should DTRT.
 First, we update the base, handling the remote branch as if it was the first
 dependency; thus, conflict resolutions made in the remote branch will be
