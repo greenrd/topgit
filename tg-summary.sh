@@ -15,7 +15,7 @@ fi
 ## List branches
 
 git for-each-ref refs/top-bases |
-	while read rev name ref; do
+	while read rev type ref; do
 		name="${ref#refs/top-bases/}"
 		missing_deps=
 
