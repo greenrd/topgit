@@ -223,7 +223,7 @@ do_help()
 		done
 
 		echo "TopGit v0.2 - A different patch queue manager"
-		echo "Usage: tg ($cmds|help) ..."
+		echo "Usage: tg [-r REMOTE] ($cmds|help) ..."
 	elif [ -r "@sharedir@/tg-$1.txt" ] ; then
 		cat "@sharedir@/tg-$1.txt"
 	else
@@ -250,6 +250,10 @@ setup_hook "pre-commit"
 # We were sourced from another script for our utility functions;
 # this is set by hooks.
 [ -z "$tg__include" ] || return 0
+
+if [ "$1" = "-r" ]; then
+	shift; base_remote="$1"; shift
+fi
 
 cmd="$1"
 [ -n "$cmd" ] || die "He took a duck in the face at two hundred and fifty knots"

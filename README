@@ -460,3 +460,8 @@ carried over to our local base automagically. Then, the base is merged into
 remote branch and the result is merged to local branch - again, to carry over
 remote conflict resolutions. In the future, this order might be adjustable
 per-update in case local changes are diverging more than the remote ones.
+
+All commands by default refer to the remote that 'tg remote --populate'
+was called on the last time ('topgit.remote' configuration variable). You can
+manually run any command with a different base remote by passing '-r REMOTE'
+_before_ the subcommand name.
