@@ -1,5 +1,7 @@
 #!/bin/sh
 # TopGit - A different patch queue manager
+# (c) Petr Baudis <pasky@suse.cz>  2008
+# (c) Aneesh Kumar K.V <aneesh.kumar@linux.vnet.ibm.com>  2008
 # GPLv2
 
 
