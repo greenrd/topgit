@@ -44,6 +44,8 @@ if has_remote "$name"; then
 		echo "* Local base is out of date wrt. the remote base."
 	branch_contains "$name" "refs/remotes/$base_remote/$name" ||
 		echo "* Local head is out of date wrt. the remote head."
+	branch_contains "refs/remotes/$base_remote/$name" "$name" ||
+		echo "* Local head is ahead of the remote head."
 fi
 
 git cat-file blob "$name:.topdeps" |
