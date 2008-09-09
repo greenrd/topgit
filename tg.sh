@@ -217,6 +217,7 @@ do_help()
 set -e
 git_dir="$(git rev-parse --git-dir)"
 root_dir="$(git rev-parse --show-cdup)"; root_dir="${root_dir:-.}"
+base_remote="$(git config topgit.remote 2>/dev/null)" || :
 # make sure merging the .top* files will always behave sanely
 setup_ours
 setup_hook "pre-commit"
