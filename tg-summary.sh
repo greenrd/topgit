@@ -11,6 +11,8 @@ if [ -n "$1" ]; then
 	exit 1
 fi
 
+curname="$(git symbolic-ref HEAD | sed 's#^refs/\(heads\|top-bases\)/##')"
+
 
 ## List branches
 
@@ -19,6 +21,8 @@ git for-each-ref refs/top-bases |
 		name="${ref#refs/top-bases/}"
 		missing_deps=
 
+		current=' '
+		[ "$name" != "$curname" ] || current='>'
 		nonempty=' '
 		! branch_empty "$name" || nonempty='0'
 		remote=' '
@@ -45,6 +49,6 @@ git for-each-ref refs/top-bases |
 			subject="(No commits)"
 		fi
 
-		printf '%s\t%-31s\t%s\n' "$nonempty$remote$rem_update$deps_update$deps_missing$base_update" \
+		printf '%s\t%-31s\t%s\n' "$current$nonempty$remote$rem_update$deps_update$deps_missing$base_update" \
 			"$name" "$subject"
 	done

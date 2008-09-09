@@ -266,7 +266,8 @@ tg remote
 tg summary
 ~~~~~~~~~~
 	Show overview of all TopGit-tracked topic branches and their
-	up-to-date status ('0' marks that it introduces no own changes,
+	up-to-date status ('>' marks the current topic branch,
+	'0' marks that it introduces no own changes,
 	'l'/'r' marks that it is local-only or has remote mate,
 	'L'/'R' marks that it is ahead/out-of-date wrt. its remote mate,
 	'D' marks that it is out-of-date wrt. its dependencies,
