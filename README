@@ -184,6 +184,24 @@ SYNOPSIS
 	tg: Updating base with t/gitweb/nifty-links changes...
 	tg: Updating t/whatever against new base...
 
+	## Clone a TopGit-controlled repository
+	$ git clone URL repo
+	$ cd repo
+	$ tg remote --populate origin
+	...
+	$ git fetch
+	$ tg update
+
+	## Add a TopGit remote to a repository and push to it
+	$ git remote add foo URL
+	$ tg remote foo
+	$ git push foo
+
+	## Update from a non-default TopGit remote
+	$ git fetch foo
+	$ tg -r foo summary
+	$ tg -r foo update
+
 
 USAGE
 -----
