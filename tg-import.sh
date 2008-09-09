@@ -50,7 +50,7 @@ process_commit()
 {
 	commit="$1"
 	branch_name=$(get_branch_name "$commit")
-	echo "Importing $commit to $branch_name"
+	info "Importing $commit to $branch_prefix$branch_name"
 	tg create "$branch_prefix""$branch_name"
 	git read-tree "$commit"
 	get_commit_msg "$commit" > .topmsg
