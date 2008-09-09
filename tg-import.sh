@@ -50,12 +50,13 @@ process_commit()
 {
 	commit="$1"
 	branch_name=$(get_branch_name "$commit")
-	info "Importing $commit to $branch_prefix$branch_name"
+	info "---- Importing $commit to $branch_prefix$branch_name"
 	tg create "$branch_prefix""$branch_name"
 	git read-tree "$commit"
 	get_commit_msg "$commit" > .topmsg
 	git add -f .topmsg .topdeps
 	git commit -C "$commit"
+	info "++++ Importing $commit finished"
 }
 
 # nice arg verification stolen from git-format-patch.sh
