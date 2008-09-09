@@ -374,6 +374,16 @@ tg export
 	TODO: For quilt exporting, use a temporary branch and remove it when
 	      done - this would allow producing conflict-less series
 
+tg import
+~~~~~~~~~
+	Import commits within the given revision range into TopGit,
+	creating one topic branch per commit, the dependencies forming
+	a linear sequence starting on your current branch.
+
+	The branch names are auto-guessed from the commit messages
+	and prefixed by t/ by default; use '-p PREFIX' to specify
+	an alternative prefix (even an empty one).
+
 tg update
 ~~~~~~~~~
 	Update the current topic branch wrt. changes in the branches
