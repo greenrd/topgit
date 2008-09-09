@@ -7,6 +7,7 @@ deps= # List of dependent branches
 restarted= # Set to 1 if we are picking up in the middle of base setup
 merge= # List of branches to be merged; subset of $deps
 name=
+rname= # Remote branch to base this one on
 
 
 ## Parse options
@@ -14,8 +15,10 @@ name=
 while [ -n "$1" ]; do
 	arg="$1"; shift
 	case "$arg" in
+	-r)
+		rname="$1"; shift;;
 	-*)
-		echo "Usage: tg [...] create NAME [DEPS...]" >&2
+		echo "Usage: tg [...] create NAME [DEPS...|-r RNAME]" >&2
 		exit 1;;
 	*)
 		if [ -z "$name" ]; then
@@ -25,6 +28,20 @@ while [ -n "$1" ]; do
 		fi;;
 	esac
 done
+
+
+## Fast-track creating branches based on remote ones
+
+if [ -n "$rname" ]; then
+	[ -n "$name" ] || die "no branch name given"
+	! ref_exists "$name" || die "branch '$name' already exists"
+	has_remote "$rname" || die "no branch $rname in remote $base_remote"
+
+	git update-ref "refs/top-bases/$name" "refs/remotes/$base_remote/top-bases/$rname"
+	git update-ref "refs/heads/$name" "refs/remotes/$base_remote/$rname"
+	info "Topic branch $name based on $base_remote : $rname set up."
+	exit 0
+fi
 
 
 ## Auto-guess dependencies

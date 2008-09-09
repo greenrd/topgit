@@ -233,6 +233,10 @@ tg create
 	it will detect that you are on a topic branch base ref and
 	resume the topic branch creation operation.
 
+	In an alternative use case, if '-r BRANCH' is given instead
+	of dependency list, the topic branch is created based on
+	the given remote branch.
+
 tg delete
 ~~~~~~~~~
 	Remove a TopGit-controlled topic branch of given name
@@ -381,6 +385,13 @@ tg update
 
 	In case your dependencies are not up-to-date, tg update
 	will first recurse into them and update these.
+
+	If a remote branch update brings dependencies on branches
+	not yet instantiated locally, you can either bring in all
+	the new branches from the remote using 'tg remote --populate'
+	or only pick out the missing ones using 'tg create -r'
+	('tg summary' will point out branches with incomplete
+	dependencies by showing an '!' near to them).
 
 	TODO: tg update -a for updating all topic branches
 
