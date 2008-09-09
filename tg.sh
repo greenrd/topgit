@@ -87,6 +87,13 @@ ref_exists()
 	git rev-parse --verify "$@" >/dev/null 2>&1
 }
 
+# has_remote BRANCH
+# Whether BRANCH has a remote equivalent (accepts top-bases/ too)
+has_remote()
+{
+	[ -n "$base_remote" ] && ref_exists "remotes/$base_remote/$1"
+}
+
 # recurse_deps CMD NAME [BRANCHPATH...]
 # Recursively eval CMD on all dependencies of NAME.
 # CMD can refer to $_name for queried branch name,
@@ -106,9 +113,8 @@ recurse_deps()
 	_depsfile="$(mktemp -t tg-depsfile.XXXXXX)"
 	# Check also our base against remote base. Checking our head
 	# against remote head has to be done in the helper.
-	_remotebase="refs/remotes/$base_remote/top-bases/$_name"
-	if [ -n "$base_remote" ] && ref_exists "$_remotebase"; then
-		echo "$_remotebase" >>"$_depsfile"
+	if has_remote "top-bases/$_name"; then
+		echo "refs/remotes/$base_remote/top-bases/$_name" >>"$_depsfile"
 	fi
 	git cat-file blob "$_name:.topdeps" >>"$_depsfile"
 
@@ -147,7 +153,7 @@ branch_needs_update()
 {
 	_dep_base_update=
 	if [ -n "$_dep_is_tgish" ]; then
-		if [ -n "$base_remote" ] && ref_exists "refs/remotes/$base_remote/$_dep"; then
+		if has_remote "$_dep"; then
 			branch_contains "$_dep" "refs/remotes/$base_remote/$_dep" || _dep_base_update=%
 		fi
 		# This can possibly override the remote check result;

@@ -100,8 +100,8 @@ merge_with="refs/top-bases/$name"
 
 ## Second, update our head with the remote branch
 
-rname="refs/remotes/$base_remote/$name"
-if [ -n "$base_remote" ] && ref_exists "$rname"; then
+if has_remote "$name"; then
+	rname="refs/remotes/$base_remote/$name"
 	if branch_contains "$name" "$rname"; then
 		info "The $name head is up-to-date wrt. its remote branch."
 	else
