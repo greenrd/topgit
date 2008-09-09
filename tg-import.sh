@@ -21,13 +21,13 @@ while [ -n "$1" ]; do
 done
 
 
-tg_get_commit_msg()
+get_commit_msg()
 {
 	commit="$1"
 	git log -1 --pretty=format:"From: %an <%ae>%n%n%s%n%n%b" "$commit"
 }
 
-tg_get_branch_name()
+get_branch_name()
 {
 	# nice sed script from git-format-patch.sh
 	commit="$1"
@@ -43,14 +43,14 @@ tg_get_branch_name()
 	git log -1 --pretty=format:"%s" "$commit" | sed -e "$titleScript"
 }
 
-tg_process_commit()
+process_commit()
 {
 	commit="$1"
-	branch_name=$(tg_get_branch_name "$commit")
+	branch_name=$(get_branch_name "$commit")
 	echo "Importing $commit to $branch_name"
 	tg create tp/"$branch_name"
 	git read-tree "$commit"
-	tg_get_commit_msg "$commit" > .topmsg
+	get_commit_msg "$commit" > .topmsg
 	git add -f .topmsg .topdeps
 	git commit -C "$commit"
 }
@@ -79,7 +79,7 @@ do
 			info "Merged already: $comment"
 			;;
 		*)
-			tg_process_commit "$rev"
+			process_commit "$rev"
 			;;
 		esac
 	done
