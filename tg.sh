@@ -77,7 +77,7 @@ measure_branch()
 # Whether B1 is a superset of B2.
 branch_contains()
 {
-	[ -z "$(git rev-list ^"$1" "$2")" ]
+	[ -z "$(git rev-list ^"$1" "$2" --)" ]
 }
 
 # ref_exists REF
