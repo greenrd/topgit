@@ -82,7 +82,7 @@ while [ -n "$merge" ]; do
 	info "Merging $name base with $branch..."
 
 	if ! git merge "$branch"; then
-		info "Please commit merge resolution and call: tg create"
+		info "Please commit merge resolution and call: $tg create"
 		info "It is also safe to abort this operation using:"
 		info "git reset --hard some_branch"
 		info "(You are on a detached HEAD now.)"
@@ -123,4 +123,4 @@ git add -f "$root_dir/.topmsg"
 
 
 info "Topic branch $name set up. Please fill .topmsg now and make initial commit."
-info "To abort: git rm -f .top* && git checkout ${deps%% *} && tg delete $name"
+info "To abort: git rm -f .top* && git checkout ${deps%% *} && $tg delete $name"

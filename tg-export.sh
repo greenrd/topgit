@@ -151,7 +151,7 @@ quilt()
 
 	echo "Exporting $_dep"
 	mkdir -p "$(dirname "$filename")"
-	tg patch "$_dep" >"$filename"
+	$tg patch "$_dep" >"$filename"
 	echo "$_dep.diff -p1" >>"$output/series"
 }
 

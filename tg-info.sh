@@ -36,7 +36,7 @@ git cat-file blob "$name:.topmsg" | grep ^Subject:
 
 echo "Base: $base_rev"
 branch_contains "$name" "$base_rev" ||
-	echo "* Base is newer than head! Please run \`tg update\`."
+	echo "* Base is newer than head! Please run \`$tg update\`."
 
 if has_remote "$name"; then
 	echo "Remote Mate: $base_remote/$name"

@@ -54,7 +54,7 @@ if [ -s "$depcheck" ]; then
 				(
 				export TG_RECURSIVE="[$dep] $TG_RECURSIVE"
 				export PS1="[$dep] $PS1"
-				while ! tg update; do
+				while ! $tg update; do
 					# The merge got stuck! Let the user fix it up.
 					info "You are in a subshell. If you abort the merge,"
 					info "use \`exit 1\` to abort the recursive update altogether."
@@ -75,7 +75,7 @@ if [ -s "$depcheck" ]; then
 			info "Updating base with $dep changes..."
 			if ! git merge "$dep"; then
 				if [ -z "$TG_RECURSIVE" ]; then
-					resume='`tg update` again'
+					resume='`$tg update` again'
 				else # subshell
 					resume='exit'
 				fi
@@ -133,7 +133,7 @@ if ! git merge "$merge_with"; then
 	if [ -z "$TG_RECURSIVE" ]; then
 		info "Please commit merge resolution. No need to do anything else"
 		info "You can abort this operation using \`git reset --hard\` now"
-		info "and retry this merge later using \`tg update\`."
+		info "and retry this merge later using \`$tg update\`."
 	else # subshell
 		info "Please commit merge resolution and call exit."
 		info "You can abort this operation using \`git reset --hard\`."
