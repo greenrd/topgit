@@ -21,6 +21,14 @@ git for-each-ref refs/top-bases |
 
 		nonempty=' '
 		! branch_empty "$name" || nonempty='0'
+		remote=' '
+		[ -z "$base_remote" ] || remote='l'
+		! has_remote "$name" || remote='r'
+		rem_update=' '
+		[ "$remote" != 'r' ] || {
+			branch_contains "refs/top-bases/$name" "refs/remotes/$base_remote/top-bases/$name" &&
+			branch_contains "$name" "refs/remotes/$base_remote/$name"
+		} || rem_update='R'
 		deps_update=' '
 		needs_update "$name" >/dev/null || deps_update='D'
 		deps_missing=' '
@@ -35,6 +43,6 @@ git for-each-ref refs/top-bases |
 			subject="(No commits)"
 		fi
 
-		printf '%s\t%-31s\t%s\n' "$nonempty$deps_update$deps_missing$base_update" \
+		printf '%s\t%-31s\t%s\n' "$nonempty$remote$rem_update$deps_update$deps_missing$base_update" \
 			"$name" "$subject"
 	done
