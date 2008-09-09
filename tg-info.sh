@@ -28,7 +28,7 @@ measure="$(measure_branch "$name" "$base_rev")"
 
 echo "Topic Branch: $name ($measure)"
 if [ "$(git rev-parse --short "$name")" = "$base_rev" ]; then
-	echo "No commits."
+	echo "* No commits."
 	exit 0
 fi
 
@@ -36,14 +36,14 @@ git cat-file blob "$name:.topmsg" | grep ^Subject:
 
 echo "Base: $base_rev"
 branch_contains "$name" "$base_rev" ||
-	echo "Base is newer than head! Please run \`tg update\`."
+	echo "* Base is newer than head! Please run \`tg update\`."
 
 if has_remote "$name"; then
 	echo "Remote Mate: $base_remote/$name"
 	branch_contains "$base_rev" "refs/remotes/$base_remote/top-bases/$name" ||
-		echo "Local base is out of date wrt. the remote base."
+		echo "* Local base is out of date wrt. the remote base."
 	branch_contains "$name" "refs/remotes/$base_remote/$name" ||
-		echo "Local head is out of date wrt. the remote head."
+		echo "* Local head is out of date wrt. the remote head."
 fi
 
 git cat-file blob "$name:.topdeps" |
