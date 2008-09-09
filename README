@@ -405,8 +405,6 @@ tg update
 
 	TODO: tg update -a for updating all topic branches
 
-TODO: Some infrastructure for sharing topic branches between
-	repositories easily
 TODO: tg depend for adding/removing dependencies smoothly
 TODO: tg rename
 
