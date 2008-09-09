@@ -4,6 +4,7 @@
 # (c) Aneesh Kumar K.V <aneesh.kumar@linux.vnet.ibm.com>  2008
 # GPLv2
 
+branch_prefix=t/
 ranges=
 
 
@@ -12,8 +13,10 @@ ranges=
 while [ -n "$1" ]; do
 	arg="$1"; shift
 	case "$arg" in
+	-p)
+		branch_prefix="$1"; shift;;
 	-*)
-		echo "Usage: tg [...] import RANGE..." >&2
+		echo "Usage: tg [...] import [-p PREFIX] RANGE..." >&2
 		exit 1;;
 	*)
 		ranges="$ranges $arg";;
@@ -48,7 +51,7 @@ process_commit()
 	commit="$1"
 	branch_name=$(get_branch_name "$commit")
 	echo "Importing $commit to $branch_name"
-	tg create t/"$branch_name"
+	tg create "$branch_prefix""$branch_name"
 	git read-tree "$commit"
 	get_commit_msg "$commit" > .topmsg
 	git add -f .topmsg .topdeps
