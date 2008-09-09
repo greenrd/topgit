@@ -29,6 +29,8 @@ git for-each-ref refs/top-bases |
 			branch_contains "refs/top-bases/$name" "refs/remotes/$base_remote/top-bases/$name" &&
 			branch_contains "$name" "refs/remotes/$base_remote/$name"
 		} || rem_update='R'
+		[ "$rem_update" = 'R' ] || branch_contains "refs/remotes/$base_remote/$name" "$name" ||
+			rem_update='L'
 		deps_update=' '
 		needs_update "$name" >/dev/null || deps_update='D'
 		deps_missing=' '
