@@ -80,6 +80,13 @@ branch_contains()
 	[ -z "$(git rev-list ^"$1" "$2")" ]
 }
 
+# ref_exists REF
+# Whether REF is a valid ref name
+ref_exists()
+{
+	git rev-parse --verify "$@" >/dev/null 2>&1
+}
+
 # recurse_deps CMD NAME [BRANCHPATH...]
 # Recursively eval CMD on all dependencies of NAME.
 # CMD can refer to $_name for queried branch name,
@@ -99,14 +106,14 @@ recurse_deps()
 	git cat-file blob "$_name:.topdeps" >"$_depsfile"
 	_ret=0
 	while read _dep; do
-		if ! git rev-parse --verify "$_dep" >/dev/null 2>&1; then
+		if ! ref_exists "$_dep" ; then
 			# All hope is lost
 			missing_deps="$missing_deps $_dep"
 			continue
 		fi
 
 		_dep_is_tgish=1
-		git rev-parse --verify "refs/top-bases/$_dep" >/dev/null 2>&1 ||
+		ref_exists "refs/top-bases/$_dep"  ||
 			_dep_is_tgish=
 
 		# Shoo shoo, keep our environment alone!

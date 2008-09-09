@@ -161,7 +161,7 @@ quilt()
 if [ "$driver" = "collapse" ]; then
 	[ -n "$output" ] ||
 		die "no target branch specified"
-	! git rev-parse --verify "$output" >/dev/null 2>&1 ||
+	! ref_exists "$output"  ||
 		die "target branch '$output' already exists; first run: git branch -D $output"
 
 elif [ "$driver" = "quilt" ]; then

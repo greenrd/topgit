@@ -51,10 +51,10 @@ fi
 [ -n "$merge" -o -n "$restarted" ] || merge="$deps "
 
 for d in $deps; do
-	git rev-parse --verify "$d" >/dev/null 2>&1 ||
+	ref_exists "$d"  ||
 		die "unknown branch dependency '$d'"
 done
-! git rev-parse --verify "$name" >/dev/null 2>&1 ||
+! ref_exists "$name"  ||
 	die "branch '$name' already exists"
 
 # Clean up any stale stuff
