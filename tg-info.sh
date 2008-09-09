@@ -38,6 +38,14 @@ echo "Base: $base_rev"
 branch_contains "$name" "$base_rev" ||
 	echo "Base is newer than head! Please run \`tg update\`."
 
+if has_remote "$name"; then
+	echo "Remote Mate: $base_remote/$name"
+	branch_contains "$base_rev" "refs/remotes/$base_remote/top-bases/$name" ||
+		echo "Local base is out of date wrt. the remote base."
+	branch_contains "$name" "refs/remotes/$base_remote/$name" ||
+		echo "Local head is out of date wrt. the remote head."
+fi
+
 git cat-file blob "$name:.topdeps" |
 	sed '1{ s/^/Depends: /; n; }; s/^/         /;'
 
