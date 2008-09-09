@@ -9,7 +9,7 @@ name=
 ## Parse options
 
 if [ -n "$1" ]; then
-	echo "Usage: tg update" >&2
+	echo "Usage: tg [...] update" >&2
 	exit 1
 fi
 

@@ -18,7 +18,7 @@ while [ -n "$1" ]; do
 	--collapse)
 		driver=collapse;;
 	-*)
-		echo "Usage: tg export ([--collapse] NEWBRANCH | --quilt DIRECTORY)" >&2
+		echo "Usage: tg [...] export ([--collapse] NEWBRANCH | --quilt DIRECTORY)" >&2
 		exit 1;;
 	*)
 		[ -z "$output" ] || die "output already specified ($output)"

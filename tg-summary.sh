@@ -7,7 +7,7 @@
 ## Parse options
 
 if [ -n "$1" ]; then
-	echo "Usage: tg summary" >&2
+	echo "Usage: tg [...] summary" >&2
 	exit 1
 fi
 
