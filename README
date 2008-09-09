@@ -361,8 +361,6 @@ tg import
 	The branch names are auto-guessed from the commit messages
 	and prefixed by tp/.
 
-	Usage: tg import rev1..rev2
-
 tg update
 ~~~~~~~~~
 	Update the current topic branch wrt. changes in the branches

@@ -4,6 +4,22 @@
 # (c) Aneesh Kumar K.V <aneesh.kumar@linux.vnet.ibm.com>  2008
 # GPLv2
 
+ranges=
+
+
+## Parse options
+
+while [ -n "$1" ]; do
+	arg="$1"; shift
+	case "$arg" in
+	-*)
+		echo "Usage: tg [...] import RANGE..." >&2
+		exit 1;;
+	*)
+		ranges="$ranges $arg";;
+	esac
+done
+
 
 tg_get_commit_msg()
 {
@@ -40,7 +56,7 @@ tg_process_commit()
 }
 
 # nice arg verification stolen from git-format-patch.sh
-for revpair
+for revpair in $ranges
 do
 	case "$revpair" in
 	?*..?*)
