@@ -354,8 +354,12 @@ tg export
 
 tg import
 ~~~~~~~~
-	Import the commits between the given revision range into
-	a topgit managed branch
+	Import commits within the given revision range into TopGit,
+	creating one topic branch per commit, the dependencies forming
+	a linear sequence starting on your current branch.
+
+	The branch names are auto-guessed from the commit messages
+	and prefixed by tp/.
 
 	Usage: tg import rev1..rev2
 
