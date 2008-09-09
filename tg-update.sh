@@ -43,9 +43,9 @@ if [ -s "$depcheck" ]; then
 			dep="$(echo "$depline" | cut -c 2-)"
 
 			# We do not distinguish between dependencies out-of-date
-			# and base out-of-date cases for $dep here, but thanks
-			# to needs_update returning : for the latter, we do
-			# correctly recurse here in both cases.
+			# and base out-of-date cases for $dep here,
+			# but thanks to needs_update returning : for the latter,
+			# we do correctly recurse here in both cases.
 
 			if [ x"$action" = x+ ]; then
 				info "Recursing to $dep..."
@@ -66,6 +66,12 @@ if [ -s "$depcheck" ]; then
 				)
 				switch_to_base "$name"
 			fi
+
+			# This will always be a proper topic branch
+			# (not a base or remote), since for deep updates
+			# we recurse and immediate dependencies
+			# are always proper. (branch_needs_update() is called
+			# only on the _dependencies_, not our branch itself!)
 
 			info "Updating base with $dep changes..."
 			if ! git merge "$dep"; then
