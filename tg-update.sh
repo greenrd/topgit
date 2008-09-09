@@ -43,9 +43,10 @@ if [ -s "$depcheck" ]; then
 			dep="$(echo "$depline" | cut -c 2-)"
 
 			# We do not distinguish between dependencies out-of-date
-			# and base out-of-date cases for $dep here,
-			# but thanks to needs_update returning : for the latter,
-			# we do correctly recurse here in both cases.
+			# and base/remote out-of-date cases for $dep here,
+			# but thanks to needs_update returning : or %
+			# for the latter, we do correctly recurse here
+			# in both cases.
 
 			if [ x"$action" = x+ ]; then
 				info "Recursing to $dep..."
@@ -67,10 +68,8 @@ if [ -s "$depcheck" ]; then
 				switch_to_base "$name"
 			fi
 
-			# This will always be a proper topic branch
-			# (not a base or remote), since for deep updates
-			# we recurse and immediate dependencies
-			# are always proper. (branch_needs_update() is called
+			# This will be either a proper topic branch
+			# or a remote base.  (branch_needs_update() is called
 			# only on the _dependencies_, not our branch itself!)
 
 			info "Updating base with $dep changes..."
@@ -96,15 +95,41 @@ else
 fi
 rm "$depcheck"
 
+merge_with="refs/top-bases/$name"
 
-## Second, update our head with the base
 
-if branch_contains "$name" "refs/top-bases/$name"; then
+## Second, update our head with the remote branch
+
+rname="refs/remotes/$base_remote/$name"
+if [ -n "$base_remote" ] && ref_exists "$rname"; then
+	if branch_contains "$name" "$rname"; then
+		info "The $name head is up-to-date wrt. its remote branch."
+	else
+		info "Reconciling remote branch updates with $name base..."
+		# *DETACH* our HEAD now!
+		git checkout -q "refs/top-bases/$name"
+		if ! git merge "$rname"; then
+			info "Oops, you will need to help me out here a bit."
+			info "Please commit merge resolution and call:"
+			info "git checkout $name && git merge <commitid>"
+			info "It is also safe to abort this operation using: git reset --hard $name"
+			exit 3
+		fi
+		# Go back but remember we want to merge with this, not base
+		merge_with="$(git rev-parse HEAD)"
+		git checkout -q "$name"
+	fi
+fi
+
+
+## Third, update our head with the base
+
+if branch_contains "$name" "$merge_with"; then
 	info "The $name head is up-to-date wrt. the base."
 	exit 0
 fi
 info "Updating $name against new base..."
-if ! git merge "refs/top-bases/$name"; then
+if ! git merge "$merge_with"; then
 	if [ -z "$TG_RECURSIVE" ]; then
 		info "Please commit merge resolution. No need to do anything else"
 		info "You can abort this operation using \`git reset --hard\` now"

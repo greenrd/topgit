@@ -352,10 +352,11 @@ tg export
 tg update
 ~~~~~~~~~
 	Update the current topic branch wrt. changes in the branches
-	it depends on. This is made in two phases - first,
+	it depends on and remote branches.
+	This is performed in two phases - first,
 	changes within the dependencies are merged to the base,
-	then the base is merged into the topic branch. The output
-	will guide you in case of conflicts.
+	then the base is merged into the topic branch.
+	The output will guide you in case of conflicts.
 
 	In case your dependencies are not up-to-date, tg update
 	will first recurse into them and update these.
