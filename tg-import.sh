@@ -48,7 +48,7 @@ process_commit()
 	commit="$1"
 	branch_name=$(get_branch_name "$commit")
 	echo "Importing $commit to $branch_name"
-	tg create tp/"$branch_name"
+	tg create t/"$branch_name"
 	git read-tree "$commit"
 	get_commit_msg "$commit" > .topmsg
 	git add -f .topmsg .topdeps

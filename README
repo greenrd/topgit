@@ -359,7 +359,7 @@ tg import
 	a linear sequence starting on your current branch.
 
 	The branch names are auto-guessed from the commit messages
-	and prefixed by tp/.
+	and prefixed by t/.
 
 tg update
 ~~~~~~~~~
