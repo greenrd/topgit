@@ -102,8 +102,16 @@ recurse_deps()
 	_cmd="$1"; shift
 	_name="$1"; # no shift
 	_depchain="$*"
+
 	_depsfile="$(mktemp -t tg-depsfile.XXXXXX)"
-	git cat-file blob "$_name:.topdeps" >"$_depsfile"
+	# Check also our base against remote base. Checking our head
+	# against remote head has to be done in the helper.
+	_remotebase="refs/remotes/$base_remote/top-bases/$_name"
+	if [ -n "$base_remote" ] && ref_exists "$_remotebase"; then
+		echo "$_remotebase" >>"$_depsfile"
+	fi
+	git cat-file blob "$_name:.topdeps" >>"$_depsfile"
+
 	_ret=0
 	while read _dep; do
 		if ! ref_exists "$_dep" ; then
@@ -137,14 +145,19 @@ recurse_deps()
 # description for details) and set $_ret to non-zero.
 branch_needs_update()
 {
-	_dep_base_uptodate=1
+	_dep_base_update=
 	if [ -n "$_dep_is_tgish" ]; then
-		branch_contains "$_dep" "refs/top-bases/$_dep" || _dep_base_uptodate=
+		if [ -n "$base_remote" ] && ref_exists "refs/remotes/$base_remote/$_dep"; then
+			branch_contains "$_dep" "refs/remotes/$base_remote/$_dep" || _dep_base_update=%
+		fi
+		# This can possibly override the remote check result;
+		# we want to sync with our base first
+		branch_contains "$_dep" "refs/top-bases/$_dep" || _dep_base_update=:
 	fi
 
-	if [ -z "$_dep_base_uptodate" ]; then
-		# _dep needs to be synced with its base
-		echo ": $_dep $_depchain"
+	if [ -n "$_dep_base_update" ]; then
+		# _dep needs to be synced with its base/remote
+		echo "$_dep_base_update $_dep $_depchain"
 		_ret=1
 	elif [ -n "$_name" ] && ! branch_contains "refs/top-bases/$_name" "$_dep"; then
 		# Some new commits in _dep
@@ -157,7 +170,8 @@ branch_needs_update()
 # This function is recursive; it outputs reverse path from NAME
 # to the branch (e.g. B_DIRTY B1 B2 NAME), one path per line,
 # inner paths first. Innermost name can be ':' if the head is
-# not in sync with the base.
+# not in sync with the base or '%' if the head is not in sync
+# with the remote (in this order of priority).
 # It will also return non-zero status if NAME needs update.
 # If needs_update() hits missing dependencies, it will append
 # them to space-separated $missing_deps list and skip them.
