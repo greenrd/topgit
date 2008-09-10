@@ -26,7 +26,7 @@ setup_hook()
 		# Another job well done!
 		return
 	fi
-	# Prepare incanation
+	# Prepare incantation
 	if [ -x "$git_dir/hooks/$1" ]; then
 		hook_call="$hook_call"' || exit $?'
 	else
