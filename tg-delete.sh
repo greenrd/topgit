@@ -31,7 +31,7 @@ branchrev="$(git rev-parse --verify "$name" 2>/dev/null)" ||
 	die "invalid branch name: $name"
 baserev="$(git rev-parse --verify "refs/top-bases/$name" 2>/dev/null)" ||
 	die "not a TopGit topic branch: $name"
-[ "$(git symbolic-ref HEAD)" != "refs/heads/$name" ] ||
+! git symbolic-ref HEAD || [ "$(git symbolic-ref HEAD)" != "refs/heads/$name" ] ||
 	die "cannot delete your current branch"
 
 nonempty=
