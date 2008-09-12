@@ -14,7 +14,7 @@ help_out = $(patsubst %.sh,%.txt,$(commands_in))
 
 all::	tg $(commands_out) $(hooks_out) $(help_out)
 
-tg $(commands_out) $(hooks_out): % : %.sh
+tg $(commands_out) $(hooks_out): % : %.sh Makefile
 	@echo "[SED] $@"
 	@sed -e 's#@cmddir@#$(cmddir)#g;' \
 		-e 's#@hooksdir@#$(hooksdir)#g' \
