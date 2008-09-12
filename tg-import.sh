@@ -24,6 +24,15 @@ while [ -n "$1" ]; do
 done
 
 
+## Make sure our tree is clean
+
+git update-index --ignore-submodules --refresh || exit
+[ -z "$(git diff-index --cached --name-status -r --ignore-submodules HEAD --)" ] ||
+	die "the index is not clean"
+
+
+## Perform import
+
 get_commit_msg()
 {
 	commit="$1"
