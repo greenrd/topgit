@@ -276,7 +276,8 @@ tg remote
 ~~~~~~~~~
 	Register given remote as TopGit-controlled. This will create
 	the namespace for the remote branch bases and teach 'git fetch'
-	and 'git push' to operate on them.
+	and 'git push' to operate on them. (Do NOT use 'git push --all'
+	for your pushes - plain 'git push' will do the right thing.)
 
 	It takes a mandatory remote name argument, and optional
 	'--populate' switch - use that for your origin-style remote,
