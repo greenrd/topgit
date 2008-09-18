@@ -61,7 +61,7 @@ process_commit()
 	branch_name=$(get_branch_name "$commit")
 	info "---- Importing $commit to $branch_prefix$branch_name"
 	tg create "$branch_prefix""$branch_name"
-	git read-tree -u -m "$commit"
+	git cherry-pick --no-commit "$commit"
 	get_commit_msg "$commit" > .topmsg
 	git add -f .topmsg .topdeps
 	git commit -C "$commit"
