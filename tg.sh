@@ -224,8 +224,12 @@ do_help()
 
 		echo "TopGit v0.3 - A different patch queue manager"
 		echo "Usage: tg [-r REMOTE] ($cmds|help) ..."
-	elif [ -r "@sharedir@/tg-$1.txt" ] ; then
-		cat "@sharedir@/tg-$1.txt"
+	elif [ -r "@cmddir@"/tg-$1 ] ; then
+		@cmddir@/tg-$1 -h || :
+		echo
+		if [ -r "@sharedir@/tg-$1.txt" ] ; then
+			cat "@sharedir@/tg-$1.txt"
+		fi
 	else
 		echo "`basename $0`: no help for $1" 1>&2
 	fi
