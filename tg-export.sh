@@ -38,17 +38,6 @@ trap 'rm -rf "$playground"' EXIT
 
 ## Collapse driver
 
-# Trusty Cogito code:
-load_author()
-{
-	if [ -z "$GIT_AUTHOR_NAME" ] && echo "$1" | grep -q '^[^< ]'; then
-		export GIT_AUTHOR_NAME="$(echo "$1" | sed 's/ *<.*//')"
-	fi
-	if [ -z "$GIT_AUTHOR_EMAIL" ] && echo "$1" | grep -q '<.*>'; then
-		export GIT_AUTHOR_EMAIL="$(echo "$1" | sed 's/.*<\(.*\)>.*/\1/')"
-	fi
-}
-
 # pretty_tree NAME
 # Output tree ID of a cleaned-up tree without tg's artifacts.
 pretty_tree()
@@ -69,19 +58,16 @@ collapsed_commit()
 	>"$playground/^body"
 
 	# Get commit message and authorship information
-	git cat-file blob "$name:.topmsg" >"$playground/^msg"
-	while read line; do
-		if [ -z "$line" ]; then
-			# end of header
-			cat >"$playground/^body"
-			break
-		fi
-		case "$line" in
-		From:*) load_author "${line#From: }";;
-		Subject:*) echo "${line#Subject: }" >>"$playground/^pre";;
-		*) echo "$line" >>"$playground/^post";;
-		esac
-	done <"$playground/^msg"
+	git cat-file blob "$name:.topmsg" | git mailinfo "$playground/^msg" /dev/null > "$playground/^info"
+
+	GIT_AUTHOR_NAME="$(sed -n '/^Author/ s/Author: //p' "$playground/^info")"
+	GIT_AUTHOR_EMAIL="$(sed -n '/^Email/ s/Email: //p' "$playground/^info")"
+	GIT_AUTHOR_DATE="$(sed -n '/^Date/ s/Date: //p' "$playground/^info")"
+	SUBJECT="$(sed -n '/^Subject/ s/Subject: //p' "$playground/^info")"
+
+	test -n "$GIT_AUTHOR_NAME" && export GIT_AUTHOR_NAME
+	test -n "$GIT_AUTHOR_EMAIL" && export GIT_AUTHOR_EMAIL
+	test -n "$GIT_AUTHOR_DATE" && export GIT_AUTHOR_DATE
 
 	# Determine parent
 	parent="$(cut -f 1 "$playground/$name^parents")"
@@ -95,14 +81,9 @@ collapsed_commit()
 			$(for p in $parent; do echo -p $p; done))"
 	fi
 
-	{
-		if [ -s "$playground/^pre" ]; then
-			cat "$playground/^pre"
-			echo
-		fi
-		cat "$playground/^body"
-		[ ! -s "$playground/^post" ] || cat "$playground/^post"
-	} | git commit-tree "$(pretty_tree "$name")" -p "$parent"
+	(printf '%s\n\n' "$SUBJECT"; cat "$playground/^msg") |
+	git stripspace |
+	git commit-tree "$(pretty_tree "$name")" -p "$parent"
 
 	echo "$name" >>"$playground/^ticker"
 }
