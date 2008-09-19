@@ -272,6 +272,24 @@ tg patch
 	TODO: tg patch -i to base at index instead of branch,
 		-w for working tree
 
+tg mail
+~~~~~~~
+	Send a patch from the current or specified topic branch as
+	email.
+
+	Takes the patch given on the command line and emails it out.
+	Destination addresses such as To, Cc and Bcc are taken from the
+	patch header.
+
+	Since it actually boils down to `git send-email` please refer to
+	it's documentation for details on how to setup email for git.
+
+
+	TODO: tg mail patchfile  to mail an already exported patch
+	TODO: mailing patch series
+	TODO: specifying additional options and addresses on command
+	      line
+
 tg remote
 ~~~~~~~~~
 	Register given remote as TopGit-controlled. This will create
