@@ -32,7 +32,7 @@ if [ "$(git rev-parse --short "$name")" = "$base_rev" ]; then
 	exit 0
 fi
 
-git cat-file blob "$name:.topmsg" | grep ^Subject:
+git cat-file blob "$name:.topmsg" | grep ^Subject: || :
 
 echo "Base: $base_rev"
 branch_contains "$name" "$base_rev" ||
