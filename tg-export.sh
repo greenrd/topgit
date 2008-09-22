@@ -157,6 +157,7 @@ fi
 
 driver()
 {
+	case $_dep in refs/remotes/*) return;; esac
 	branch_needs_update >/dev/null
 	[ "$_ret" -eq 0 ] ||
 		die "cancelling export of $_dep (-> $_name): branch not up-to-date"
