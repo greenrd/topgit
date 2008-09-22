@@ -282,10 +282,9 @@ tg mail
 	patch header.
 
 	Since it actually boils down to `git send-email` please refer to
-	it's documentation for details on how to setup email for git.
+	its documentation for details on how to setup email for git.
 
-
-	TODO: tg mail patchfile  to mail an already exported patch
+	TODO: 'tg mail patchfile' to mail an already exported patch
 	TODO: mailing patch series
 	TODO: specifying additional options and addresses on command
 	      line

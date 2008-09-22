@@ -19,7 +19,6 @@ while [ -n "$1" ]; do
 	esac
 done
 
-# TODO refactor me into something common?
 [ -n "$name" ] || name="$(git symbolic-ref HEAD | sed 's#^refs/heads/##')"
 base_rev="$(git rev-parse --short --verify "refs/top-bases/$name" 2>/dev/null)" ||
 	die "not a TopGit-controlled branch"
@@ -30,7 +29,7 @@ patchfile="$(mktemp -t tg-mail.XXXXXX)"
 $tg patch $name >"$patchfile"
 
 hlines=$(grep -n -m 1 '^---' "$patchfile" | sed 's/:---//')
-header=$(head -$(($hlines - 1)) "$patchfile")
+header=$(head -n $(($hlines - 1)) "$patchfile")
 
 
 
