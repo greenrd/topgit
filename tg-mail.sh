@@ -37,16 +37,14 @@ from="$(echo "$header" | grep '^From:' | sed 's/From:\s*//')"
 to="$(echo "$header" | grep '^To:' | sed 's/To:\s*//')"
 
 
-# XXX I can't get quoting right without arrays
-[ -n "$from" ] && from=(--from "$from")
-[ -n "$to"   ] && to=(--to "$to") # FIXME there could be multimple To
-
+# XXX: I can't get quoting right without arrays
 people=()
-[ -n "$from" ] && people=("${people[@]}" "${from[@]}")
-[ -n "$to" ]   && people=("${people[@]}" "${to[@]}")
+[ -n "$from" ] && people=("${people[@]}" --from "$from")
+# FIXME: there could be multimple To
+[ -n "$to" ]   && people=("${people[@]}" --to "$to")
 
 
-# NOTE git-send-email handles cc itself
+# NOTE: git-send-email handles cc itself
 git send-email "${people[@]}" "$patchfile"
 
 rm "$patchfile"
