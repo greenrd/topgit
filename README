@@ -253,6 +253,19 @@ tg delete
 
 	TODO: '-a' to delete all empty branches, depfix, revert
 
+tg depend
+~~~~~~~~~
+	Change dependencies of a TopGit-controlled topic branch.
+	This should have several subcommands, but only 'add' is
+	supported right now.
+
+	The 'add' subcommand takes an argument of a topic branch
+	to be added, adds it to '.topdeps', performs a commit and
+	then updates your topic branch accordingly. If you want to
+	do other things related to the dependency addition, like
+	adjusting '.topmsg', prepare them in the index before
+	calling 'tg depend add'.
+
 tg info
 ~~~~~~~
 	Show a summary information about the current or specified
