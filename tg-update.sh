@@ -75,7 +75,7 @@ if [ -s "$depcheck" ]; then
 			info "Updating base with $dep changes..."
 			if ! git merge "$dep"; then
 				if [ -z "$TG_RECURSIVE" ]; then
-					resume='`$tg update` again'
+					resume="\`$tg update\` again"
 				else # subshell
 					resume='exit'
 				fi
