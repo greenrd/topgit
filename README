@@ -296,6 +296,8 @@ tg mail
 
 	Since it actually boils down to `git send-email` please refer to
 	its documentation for details on how to setup email for git.
+	You can pass arbitrary options to this command through the
+	'-s' parameter, but you must double-quote everything.
 
 	TODO: 'tg mail patchfile' to mail an already exported patch
 	TODO: mailing patch series

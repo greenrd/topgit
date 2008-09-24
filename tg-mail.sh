@@ -3,6 +3,7 @@
 # GPLv2
 
 name=
+send_email_args=
 
 
 ## Parse options
@@ -10,8 +11,10 @@ name=
 while [ -n "$1" ]; do
 	arg="$1"; shift
 	case "$arg" in
+	-s)
+		send_email_args="$1"; shift;;
 	-*)
-		echo "Usage: tg [...] mail [NAME]" >&2
+		echo "Usage: tg [...] mail [-s SEND_EMAIL_ARGS] [NAME]" >&2
 		exit 1;;
 	*)
 		[ -z "$name" ] || die "name already specified ($name)"
@@ -45,6 +48,6 @@ people=()
 
 
 # NOTE: git-send-email handles cc itself
-git send-email "${people[@]}" "$patchfile"
+git send-email $send_email_args "${people[@]}" "$patchfile"
 
 rm "$patchfile"
