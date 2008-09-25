@@ -395,6 +395,10 @@ tg export
 	and an argument specifying the directory
 	where the quilt series should be saved.
 
+	With '--quilt', you can also pass '-b' parameter followed by
+	a comma-separated explicit list of branches to export. This
+	mode of operation is currently not supported with collapse.
+
 	Usage: tg export ([--collapse] BRANCH | --quilt DIR)
 
 	TODO: Make stripping of non-essential headers configurable
@@ -402,8 +406,6 @@ tg export
 	TODO: --mbox option for other mode of operation
 	TODO: -n option to prevent exporting of empty patches
 	TODO: -a option to export all branches
-	TODO: Allow branches to be exported to be passed as arguments, default
-	      to the current branch if none are specified
 	TODO: For quilt exporting, use a temporary branch and remove it when
 	      done - this would allow producing conflict-less series
 

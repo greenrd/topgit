@@ -4,6 +4,7 @@
 # GPLv2
 
 name=
+branches=
 output=
 driver=collapse
 
@@ -13,12 +14,14 @@ driver=collapse
 while [ -n "$1" ]; do
 	arg="$1"; shift
 	case "$arg" in
+	-b)
+		branches="$1"; shift;;
 	--quilt)
 		driver=quilt;;
 	--collapse)
 		driver=collapse;;
 	-*)
-		echo "Usage: tg [...] export ([--collapse] NEWBRANCH | --quilt DIRECTORY)" >&2
+		echo "Usage: tg [...] export [-b BRANCH1,BRANCH2...] ([--collapse] NEWBRANCH | --quilt DIRECTORY)" >&2
 		exit 1;;
 	*)
 		[ -z "$output" ] || die "output already specified ($output)"
@@ -30,6 +33,9 @@ done
 name="$(git symbolic-ref HEAD | sed 's#^refs/heads/##')"
 base_rev="$(git rev-parse --short --verify "refs/top-bases/$name" 2>/dev/null)" ||
 	die "not on a TopGit-controlled branch"
+
+[ -z "$branches" -o "$driver" = "quilt" ] ||
+	die "-b works only with the quilt driver"
 
 
 playground="$(mktemp -d -t tg-export.XXXXXX)"
@@ -167,8 +173,16 @@ driver()
 
 # Call driver on all the branches - this will happen
 # in topological order.
-recurse_deps driver "$name"
-(_ret=0; _dep="$name"; _name=""; _dep_is_tgish=1; driver)
+if [ -z "$branches" ]; then
+	recurse_deps driver "$name"
+	(_ret=0; _dep="$name"; _name=""; _dep_is_tgish=1; driver)
+else
+	echo "$branches" | tr ',' '\n' | while read _dep; do
+		_dep_is_tgish=1
+		$driver
+	done
+	name="$(echo "$branches" | sed 's/.*,//')"
+fi
 
 
 if [ "$driver" = "collapse" ]; then
