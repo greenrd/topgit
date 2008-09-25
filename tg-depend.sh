@@ -9,6 +9,10 @@ name=
 ## Parse options
 
 subcmd="$1"; shift
+[ "$subcmd" = "-h" ] && {
+	echo "Usage: tg [...] depend add NAME" >&2
+	exit 1
+}
 [ "$subcmd" = "add" ] || die "unknown subcommand ($subcmd)"
 
 while [ -n "$1" ]; do
