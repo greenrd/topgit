@@ -329,6 +329,10 @@ tg summary
 	'!' marks that it has missing dependencies (even recursively),
 	'B' marks that it is out-of-date wrt. its base).
 
+	This can take long time to accurately determine all the relevant
+	information about each branch; you can pass '-t' to get just
+	terse list of topic branch names quickly.
+
 	TODO: Speed up by an order of magnitude
 	TODO: Graph view
 

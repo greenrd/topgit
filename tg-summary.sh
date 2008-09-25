@@ -3,13 +3,21 @@
 # (c) Petr Baudis <pasky@suse.cz>  2008
 # GPLv2
 
+terse=
+
 
 ## Parse options
 
-if [ -n "$1" ]; then
-	echo "Usage: tg [...] summary" >&2
-	exit 1
-fi
+while [ -n "$1" ]; do
+	arg="$1"; shift
+	case "$arg" in
+	-t)
+		terse=1;;
+	*)
+		echo "Usage: tg [...] summary [-t]" >&2
+		exit 1;;
+	esac
+done
 
 curname="$(git symbolic-ref HEAD | sed 's#^refs/\(heads\|top-bases\)/##')"
 
@@ -19,6 +27,11 @@ curname="$(git symbolic-ref HEAD | sed 's#^refs/\(heads\|top-bases\)/##')"
 git for-each-ref refs/top-bases |
 	while read rev type ref; do
 		name="${ref#refs/top-bases/}"
+		if [ -n "$terse" ]; then
+			echo "$name"
+			continue
+		fi
+
 		missing_deps=
 
 		current=' '
