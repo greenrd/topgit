@@ -7,6 +7,7 @@
 branch_prefix=t/
 single=
 ranges=
+basedep=
 
 
 ## Parse options
@@ -14,12 +15,14 @@ ranges=
 while [ -n "$1" ]; do
 	arg="$1"; shift
 	case "$arg" in
+	-d)
+		basedep="$1"; shift;;
 	-p)
 		branch_prefix="$1"; shift;;
 	-s)
 		single="$1"; shift;;
 	-*)
-		echo "Usage: tg [...] import {[-p PREFIX] RANGE...|-s NAME COMMIT}" >&2
+		echo "Usage: tg [...] import [-d BASE_BRANCH] {[-p PREFIX] RANGE...|-s NAME COMMIT}" >&2
 		exit 1;;
 	*)
 		ranges="$ranges $arg";;
@@ -63,7 +66,8 @@ process_commit()
 	commit="$1"
 	branch_name="$2"
 	info "---- Importing $commit to $branch_name"
-	tg create "$branch_name"
+	tg create "$branch_name" $basedep
+	basedep=
 	git cherry-pick --no-commit "$commit"
 	get_commit_msg "$commit" > .topmsg
 	git add -f .topmsg .topdeps
