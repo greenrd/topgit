@@ -76,7 +76,7 @@ process_commit()
 }
 
 if [ -n "$single" ]; then
-	process_commit "$ranges" "$single"
+	process_commit $ranges "$single"
 	exit
 fi
 
