@@ -42,7 +42,11 @@ git update-index --ignore-submodules --refresh || exit
 get_commit_msg()
 {
 	commit="$1"
-	git log -1 --pretty=format:"From: %an <%ae>%n%n%s%n%n%b" "$commit"
+	headers=""
+	! header="$(git config topgit.to)" || headers="$headers%nTo: $header"
+	! header="$(git config topgit.cc)" || headers="$headers%nCc: $header"
+	! header="$(git config topgit.bcc)" || headers="$headers%nBcc: $header"
+	git log -1 --pretty=format:"From: %an <%ae>$headers%nSubject: %s%n%n%b" "$commit"
 }
 
 get_branch_name()
