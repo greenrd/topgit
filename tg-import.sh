@@ -5,6 +5,7 @@
 # GPLv2
 
 branch_prefix=t/
+single=
 ranges=
 
 
@@ -15,8 +16,10 @@ while [ -n "$1" ]; do
 	case "$arg" in
 	-p)
 		branch_prefix="$1"; shift;;
+	-s)
+		single="$1"; shift;;
 	-*)
-		echo "Usage: tg [...] import [-p PREFIX] RANGE..." >&2
+		echo "Usage: tg [...] import {[-p PREFIX] RANGE...|-s NAME COMMIT}" >&2
 		exit 1;;
 	*)
 		ranges="$ranges $arg";;
@@ -58,15 +61,20 @@ get_branch_name()
 process_commit()
 {
 	commit="$1"
-	branch_name=$(get_branch_name "$commit")
-	info "---- Importing $commit to $branch_prefix$branch_name"
-	tg create "$branch_prefix""$branch_name"
+	branch_name="$2"
+	info "---- Importing $commit to $branch_name"
+	tg create "$branch_name"
 	git cherry-pick --no-commit "$commit"
 	get_commit_msg "$commit" > .topmsg
 	git add -f .topmsg .topdeps
 	git commit -C "$commit"
 	info "++++ Importing $commit finished"
 }
+
+if [ -n "$single" ]; then
+	process_commit "$ranges" "$single"
+	exit
+fi
 
 # nice arg verification stolen from git-format-patch.sh
 for revpair in $ranges
@@ -92,7 +100,7 @@ do
 			info "Merged already: $comment"
 			;;
 		*)
-			process_commit "$rev"
+			process_commit "$rev" "$branch_prefix$(get_branch_name "$rev")"
 			;;
 		esac
 	done

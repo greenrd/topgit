@@ -423,6 +423,10 @@ tg import
 	and prefixed by t/ by default; use '-p PREFIX' to specify
 	an alternative prefix (even an empty one).
 
+	Alternatively, you can use the '-s NAME' parameter to specify
+	the name of target branch; the command will then take one more
+	argument describing a single commit to import.
+
 tg update
 ~~~~~~~~~
 	Update the current topic branch wrt. changes in the branches
