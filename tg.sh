@@ -222,7 +222,7 @@ do_help()
 			sep="|"
 		done
 
-		echo "TopGit v0.3 - A different patch queue manager"
+		echo "TopGit v0.4 - A different patch queue manager"
 		echo "Usage: tg [-r REMOTE] ($cmds|help) ..."
 	elif [ -r "@cmddir@"/tg-$1 ] ; then
 		@cmddir@/tg-$1 -h || :
