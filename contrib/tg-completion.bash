@@ -191,7 +191,7 @@ __tg_complete_revlist ()
 
 __tg_topics ()
 {
-	tg summary | cut -f 2
+	tg summary -t
 }
 
 __tg_commands ()
