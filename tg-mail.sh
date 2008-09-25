@@ -29,10 +29,9 @@ base_rev="$(git rev-parse --short --verify "refs/top-bases/$name" 2>/dev/null)" 
 
 patchfile="$(mktemp -t tg-mail.XXXXXX)"
 
-$tg patch $name >"$patchfile"
+$tg patch "$name" >"$patchfile"
 
-hlines=$(grep -n -m 1 '^---' "$patchfile" | sed 's/:---//')
-header=$(head -n $(($hlines - 1)) "$patchfile")
+header="$(sed -e '/^$/,$d' "$patchfile")"
 
 
 
