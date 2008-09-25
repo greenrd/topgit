@@ -8,12 +8,16 @@ name=
 
 ## Parse options
 
-subcmd="$1"; shift
-[ "$subcmd" = "-h" ] && {
-	echo "Usage: tg [...] depend add NAME" >&2
-	exit 1
-}
-[ "$subcmd" = "add" ] || die "unknown subcommand ($subcmd)"
+subcmd="$1"; shift || :
+case "$subcmd" in
+	-h|"")
+		echo "Usage: tg [...] depend add NAME" >&2
+		exit 1;;
+	add)
+		;;
+	*)
+		die "unknown subcommand ($subcmd)";;
+esac
 
 while [ -n "$1" ]; do
 	arg="$1"; shift
