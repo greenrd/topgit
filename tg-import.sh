@@ -72,9 +72,12 @@ process_commit()
 	info "---- Importing $commit to $branch_name"
 	tg create "$branch_name" $basedep
 	basedep=
-	git cherry-pick --no-commit "$commit"
 	get_commit_msg "$commit" > .topmsg
 	git add -f .topmsg .topdeps
+	if ! git cherry-pick --no-commit "$commit"; then
+		info "The commit will also finish the import of this patch."
+		exit 2
+	fi
 	git commit -C "$commit"
 	info "++++ Importing $commit finished"
 }
