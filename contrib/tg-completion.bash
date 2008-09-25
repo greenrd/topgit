@@ -7,32 +7,13 @@
 # Conceptually based on gitcompletion (http://gitweb.hawaga.org.uk/).
 # Distributed under the GNU General Public License, version 2.0.
 #
-# The contained completion routines provide support for completing:
-#
-#    *) local and remote branch names
-#    *) local and remote tag names
-#    *) .git/remotes file names
-#    *) git 'subcommands'
-#    *) tree paths within 'ref:path/to/file' expressions
-#    *) common --long-options
-#
 # To use these routines:
 #
-#    1) Copy this file to somewhere (e.g. ~/.git-completion.sh).
-#    2) Added the following line to your .bashrc:
-#        source ~/.git-completion.sh
+#    1) Copy this file to somewhere (e.g. ~/.tg-completion.sh).
+#    2) Source it from your ~/.bashrc.
 #
-#    3) You may want to make sure the git executable is available
-#       in your PATH before this script is sourced, as some caching
-#       is performed while the script loads.  If git isn't found
-#       at source time then all lookups will be done on demand,
-#       which may be slightly slower.
-#
-#    4) Consider changing your PS1 to also show the current branch:
-#        PS1='[\u@\h \W$(__tg_ps1 " (%s)")]\$ '
-#
-#       The argument to __tg_ps1 will be displayed only if you
-#       are currently in a git repository.  The %s token will be
+# Note: Make sure the tg script is in your PATH before you source this
+# script, so it can properly setup cached values.
 
 case "$COMP_WORDBREAKS" in
 *:*) : great ;;
@@ -172,6 +153,22 @@ __tg_remotes ()
 	done
 }
 
+__tg_find_subcommand ()
+{
+	local word subcommand c=1
+
+	while [ $c -lt $COMP_CWORD ]; do
+		word="${COMP_WORDS[c]}"
+		for subcommand in $1; do
+			if [ "$subcommand" = "$word" ]; then
+				echo "$subcommand"
+				return
+			fi
+		done
+		c=$((++c))
+	done
+}
+
 __tg_complete_revlist ()
 {
 	local pfx cur="${COMP_WORDS[COMP_CWORD]}"
@@ -265,6 +262,21 @@ _tg_delete ()
 		;;
 	*)
 		__tgcomp "$(__tg_topics)"
+	esac
+}
+
+_tg_depend ()
+{
+	local subcommands="add"
+	local subcommand="$(__git_find_subcommand "$subcommands")"
+	if [ -z "$subcommand" ]; then
+		__tgcomp "$subcommands"
+		return
+	fi
+
+	case "$subcommand" in
+	add)
+		__tgcomp "$(__tg_refs)"
 	esac
 }
 
@@ -411,6 +423,7 @@ _tg ()
 	case "$command" in
 	create)      _tg_create "$c" ;;
 	delete)      _tg_delete ;;
+	depend)      _tg_depend ;;
 	export)      _tg_export ;;
 	help)        _tg_help ;;
 	import)      _tg_import ;;
@@ -426,7 +439,6 @@ _tg ()
 
 ### }}}
 
-	__tgcomp "$(__tg_refs top-bases)"
 complete -o default -o nospace -F _tg tg
 
 # The following are necessary only for Cygwin, and only are needed
