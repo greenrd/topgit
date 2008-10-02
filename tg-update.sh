@@ -87,13 +87,15 @@ if [ -s "$depcheck" ]; then
 				exit 2
 			fi
 		done
-
-	# Home, sweet home...
-	git checkout -q "$name"
 else
 	info "The base is up-to-date."
 fi
 rm "$depcheck"
+
+# Home, sweet home...
+# (We want to always switch back, in case we were on the base from failed
+# previous merge.)
+git checkout -q "$name"
 
 merge_with="refs/top-bases/$name"
 
