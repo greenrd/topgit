@@ -298,6 +298,8 @@ tg mail
 	its documentation for details on how to setup email for git.
 	You can pass arbitrary options to this command through the
 	'-s' parameter, but you must double-quote everything.
+	The '-r' parameter with msgid can be used to generate in-reply-to
+	and reference headers to an earlier mail.
 
 	TODO: 'tg mail patchfile' to mail an already exported patch
 	TODO: mailing patch series

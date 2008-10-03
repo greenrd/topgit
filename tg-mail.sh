@@ -4,6 +4,7 @@
 
 name=
 send_email_args=
+in_reply_to=
 
 
 ## Parse options
@@ -13,8 +14,10 @@ while [ -n "$1" ]; do
 	case "$arg" in
 	-s)
 		send_email_args="$1"; shift;;
+	-r)
+		in_reply_to="$1"; shift;;
 	-*)
-		echo "Usage: tg [...] mail [-s SEND_EMAIL_ARGS] [NAME]" >&2
+		echo "Usage: tg [...] mail [-s SEND_EMAIL_ARGS] [-r REFERENCE_MSGID] [NAME]" >&2
 		exit 1;;
 	*)
 		[ -z "$name" ] || die "name already specified ($name)"
@@ -25,6 +28,10 @@ done
 [ -n "$name" ] || name="$(git symbolic-ref HEAD | sed 's#^refs/heads/##')"
 base_rev="$(git rev-parse --short --verify "refs/top-bases/$name" 2>/dev/null)" ||
 	die "not a TopGit-controlled branch"
+
+if [ -n "$in_reply_to" ]; then
+	send_email_args="$send_email_args --in-reply-to=$in_reply_to"
+fi
 
 
 patchfile="$(mktemp -t tg-mail.XXXXXX)"
