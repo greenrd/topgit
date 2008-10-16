@@ -333,10 +333,12 @@ tg summary
 
 	This can take long time to accurately determine all the relevant
 	information about each branch; you can pass '-t' to get just
-	terse list of topic branch names quickly.
+	terse list of topic branch names quickly. Alternately, you can
+	pass '--graphviz' to get a dot-suitable output to draw a dependency
+	graph between the topic branches.
 
 	TODO: Speed up by an order of magnitude
-	TODO: Graph view
+	TODO: Text graph view
 
 tg export
 ~~~~~~~~~
