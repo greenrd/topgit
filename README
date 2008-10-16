@@ -49,7 +49,7 @@ branch.  In order to flexibly accomodate even complex scenarios when
 you track many patches where many are independent but some depend
 on others, TopGit ignores the ancient Quilt heritage of patch series
 and instead allows the patches to freely form graphs (DAGs just like
-Git history itself, only "one lever higher"). For now, you have
+Git history itself, only "one level higher"). For now, you have
 to manually specify which patches does the current one depend
 on, but TopGit might help you with that in the future in a darcs-like
 fashion.
