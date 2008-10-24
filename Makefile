@@ -1,16 +1,16 @@
-prefix = $(HOME)
-bindir = $(prefix)/bin
-cmddir = $(prefix)/libexec/topgit
-sharedir = $(prefix)/share/topgit
-hooksdir = $(cmddir)/hooks
+prefix ?= $(HOME)
+bindir := $(prefix)/bin
+cmddir := $(prefix)/libexec/topgit
+sharedir := $(prefix)/share/topgit
+hooksdir := $(cmddir)/hooks
 
 
-commands_in = $(wildcard tg-*.sh)
+commands_in := $(wildcard tg-*.sh)
 hooks_in = hooks/pre-commit.sh
 
-commands_out = $(patsubst %.sh,%,$(commands_in))
-hooks_out = $(patsubst %.sh,%,$(hooks_in))
-help_out = $(patsubst %.sh,%.txt,$(commands_in))
+commands_out := $(patsubst %.sh,%,$(commands_in))
+hooks_out := $(patsubst %.sh,%,$(hooks_in))
+help_out := $(patsubst %.sh,%.txt,$(commands_in))
 
 all::	tg $(commands_out) $(hooks_out) $(help_out)
 
