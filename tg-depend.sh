@@ -44,6 +44,6 @@ baserev="$(git rev-parse --verify "refs/top-bases/$name" 2>/dev/null)" ||
 ## Record new dependency
 
 echo "$name" >>.topdeps
-git add .topdeps
+git add -f .topdeps
 git commit -m"New TopGit dependency: $name"
 $tg update
