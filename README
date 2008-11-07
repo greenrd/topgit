@@ -266,6 +266,8 @@ tg depend
 	adjusting '.topmsg', prepare them in the index before
 	calling 'tg depend add'.
 
+	TODO: Subcommand for removing dependencies, obviously
+
 tg info
 ~~~~~~~
 	Show a summary information about the current or specified
