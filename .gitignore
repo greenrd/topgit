@@ -23,3 +23,9 @@
 /tg-remote.txt
 /tg
 .*.swp
+
+# quilt working directory
+/.pc
+
+# .deb build stamp
+/build-stamp
