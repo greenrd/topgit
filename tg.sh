@@ -270,7 +270,7 @@ shift
 case "$cmd" in
 help|--help|-h)
 	do_help "$1"
-	exit 1;;
+	exit 0;;
 --hooks-path)
 	# Internal command
 	echo "@hooksdir@";;
