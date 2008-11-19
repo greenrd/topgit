@@ -236,6 +236,11 @@ do_help()
 }
 
 
+## Startup
+
+[ -d "@cmddir@" ] ||
+	die "No command directory: '@cmddir@'"
+
 ## Initial setup
 
 set -e
@@ -248,9 +253,6 @@ tg="tg"
 # make sure merging the .top* files will always behave sanely
 setup_ours
 setup_hook "pre-commit"
-
-[ -d "@cmddir@" ] ||
-	die "No command directory: '@cmddir@'"
 
 ## Dispatch
 
