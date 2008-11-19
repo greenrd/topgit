@@ -266,7 +266,7 @@ if [ "$1" = "-r" ]; then
 fi
 
 cmd="$1"
-[ -n "$cmd" ] || die "He took a duck in the face at two hundred and fifty knots"
+[ -n "$cmd" ] || { do_help; exit 1; }
 shift
 
 case "$cmd" in
