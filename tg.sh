@@ -209,6 +209,12 @@ switch_to_base()
 do_help()
 {
 	if [ -z "$1" ] ; then
+		# This is currently invoked in all kinds of circumstances,
+		# including when the user made a usage error. Should we end up
+		# providing more than a short help message, then we should
+		# differentiate.
+		# Petr's comment: http://marc.info/?l=git&m=122718711327376&w=2
+
 		## Build available commands list for help output
 
 		cmds=
