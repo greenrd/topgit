@@ -55,3 +55,5 @@ people=
 eval git send-email $send_email_args "$people" "$patchfile"
 
 rm "$patchfile"
+
+# vim:noet

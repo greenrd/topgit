@@ -141,3 +141,5 @@ git add -f "$root_dir/.topmsg"
 
 info "Topic branch $name set up. Please fill .topmsg now and make initial commit."
 info "To abort: git rm -f .top* && git checkout ${deps%% *} && $tg delete $name"
+
+# vim:noet

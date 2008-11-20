@@ -73,3 +73,5 @@ else
 	echo "Up-to-date."
 fi
 rm "$depcheck"
+
+# vim:noet

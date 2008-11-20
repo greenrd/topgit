@@ -142,3 +142,5 @@ if ! git merge "$merge_with"; then
 	fi
 	exit 3
 fi
+
+# vim:noet

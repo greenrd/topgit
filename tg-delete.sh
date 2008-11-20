@@ -44,3 +44,5 @@ branch_empty "$name" || nonempty=1
 
 git update-ref -d "refs/top-bases/$name" "$baserev"
 git update-ref -d "refs/heads/$name" "$branchrev"
+
+# vim:noet

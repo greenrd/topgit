@@ -298,3 +298,5 @@ help|--help|-h)
 	}
 	. "@cmddir@"/tg-$cmd;;
 esac
+
+# vim:noet

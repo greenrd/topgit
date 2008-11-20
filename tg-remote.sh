@@ -59,3 +59,5 @@ git for-each-ref "refs/remotes/$name/top-bases" |
 
 git config "topgit.remote" "$name"
 info "The remote '$name' is now the default source of topic branches."
+
+# vim:noet

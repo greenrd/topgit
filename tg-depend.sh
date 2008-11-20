@@ -47,3 +47,5 @@ echo "$name" >>"$root_dir/.topdeps"
 git add -f "$root_dir/.topdeps"
 git commit -m"New TopGit dependency: $name"
 $tg update
+
+# vim:noet

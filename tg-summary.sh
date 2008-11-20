@@ -98,3 +98,5 @@ git for-each-ref refs/top-bases |
 if [ -n "$graphviz" ]; then
 	echo '}'
 fi
+
+# vim:noet

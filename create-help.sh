@@ -15,3 +15,4 @@ fi
 	{ if (incommand) { print $0; } }
 '  > tg-"$1".txt
 
+# vim:noet

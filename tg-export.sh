@@ -199,3 +199,5 @@ elif [ "$driver" = "quilt" ]; then
 	depcount="$(cat "$output/series" | wc -l)"
 	echo "Exported topic branch $name (total $depcount topics) to directory $output"
 fi
+
+# vim:noet
