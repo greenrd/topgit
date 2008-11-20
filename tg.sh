@@ -232,6 +232,8 @@ do_help()
 		fi
 	else
 		echo "`basename $0`: no help for $1" 1>&2
+		do_help
+		exit 1
 	fi
 }
 
@@ -285,6 +287,7 @@ help|--help|-h)
 *)
 	[ -r "@cmddir@"/tg-$cmd ] || {
 		echo "Unknown subcommand: $cmd" >&2
+		do_help
 		exit 1
 	}
 	. "@cmddir@"/tg-$cmd;;
