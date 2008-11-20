@@ -261,7 +261,13 @@ setup_hook "pre-commit"
 [ -z "$tg__include" ] || return 0
 
 if [ "$1" = "-r" ]; then
-	shift; base_remote="$1"; shift
+	shift
+	if [ -z "$1" ]; then
+		echo "Option -r requires an argument." >&2
+		do_help
+		exit 1
+	fi
+	base_remote="$1"; shift
 	tg="$tg -r $base_remote"
 fi
 
