@@ -63,8 +63,8 @@ measure_branch()
 	_bname="$1"; _base="$2"
 	[ -n "$_base" ] || _base="refs/top-bases/$_bname"
 	# The caller should've verified $name is valid
-	_commits="$(git rev-list "$_bname" ^"$_base" | wc -l)"
-	_nmcommits="$(git rev-list --no-merges "$_bname" ^"$_base" | wc -l)"
+	_commits="$(git rev-list "$_bname" ^"$_base" -- | wc -l)"
+	_nmcommits="$(git rev-list --no-merges "$_bname" ^"$_base" -- | wc -l)"
 	if [ $_commits -gt 1 ]; then
 		_suffix="commits"
 	else
