@@ -140,10 +140,14 @@ quilt()
 		return
 	fi
 
-	echo "Exporting $_dep"
-	mkdir -p "$(dirname "$filename")"
-	$tg patch "$_dep" >"$filename"
-	echo "$_dep.diff -p1" >>"$output/series"
+	if branch_empty "$_dep"; then
+		echo "Skip empty patch $_dep";
+	else
+		echo "Exporting $_dep"
+		mkdir -p "$(dirname "$filename")"
+		$tg patch "$_dep" >"$filename"
+		echo "$_dep.diff -p1" >>"$output/series"
+	fi
 }
 
 

@@ -414,7 +414,7 @@ tg export
 	TODO: Make stripping of non-essential headers configurable
 	TODO: Make stripping of [PATCH] and other prefixes configurable
 	TODO: --mbox option for other mode of operation
-	TODO: -n option to prevent exporting of empty patches
+	TODO: prevent exporting of empty patches by the collapse driver
 	TODO: -a option to export all branches
 	TODO: For quilt exporting, use a temporary branch and remove it when
 	      done - this would allow producing conflict-less series
