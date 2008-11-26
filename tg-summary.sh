@@ -24,6 +24,9 @@ done
 
 curname="$(git symbolic-ref HEAD | sed 's#^refs/\(heads\|top-bases\)/##')"
 
+! [ -n "$terse" -a -n "$graphviz" ] ||
+	die "-t and --graphviz options are mutual exclusive"
+
 if [ -n "$graphviz" ]; then
 	cat <<EOT
 # GraphViz output; pipe to:
