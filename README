@@ -22,7 +22,7 @@ version control of patches (reordering of patches is not
 version-controlled at all). But there are several disadvantages -
 for one, these tools (especially StGIT) do not actually fit well
 with plain Git at all: it is basically impossible to take advantage
-of the index efectively when using StGIT. But more importantly,
+of the index effectively when using StGIT. But more importantly,
 these tools horribly fail in the face of distributed environment.
 
 TopGit has been designed around three main tenets:
@@ -45,7 +45,7 @@ them.
 
 As mentioned above, the main intended use-case for TopGit is tracking
 third-party patches, where each patch is effectively a single topic
-branch.  In order to flexibly accomodate even complex scenarios when
+branch.  In order to flexibly accommodate even complex scenarios when
 you track many patches where many are independent but some depend
 on others, TopGit ignores the ancient Quilt heritage of patch series
 and instead allows the patches to freely form graphs (DAGs just like
@@ -222,7 +222,7 @@ tg create
 
 	After `tg create`, you should insert the patch description
 	to the '.topmsg' file, which will already contain some
-	pre-filled bits. You can set topgit.to, topgit.cc and topgit.bcc
+	prefilled bits. You can set topgit.to, topgit.cc and topgit.bcc
 	configuration variables in order to have `tg create`
 	add these headers with given default values to '.topmsg'.
 
@@ -350,7 +350,7 @@ tg export
 	in the cleaned up history (corresponding basically exactly
 	to `tg patch` output for the topic branch).
 
-	The command has two posible outputs now - either a Git branch
+	The command has two possible outputs now - either a Git branch
 	with the collapsed history, or a quilt series in new directory.
 
 	In case of producing collapsed history in new branch,
@@ -455,7 +455,6 @@ tg update
 
 	TODO: tg update -a for updating all topic branches
 
-TODO: tg depend for adding/removing dependencies smoothly
 TODO: tg rename
 
 
@@ -485,7 +484,7 @@ whatever Cc headers you choose or the post-three-dashes message.
 When mailing out your patch, basically only few extra headers
 mail headers are inserted and the patch itself is appended.
 Thus, as your patches evolve, you can record nuances like whether
-the paricular patch should have To-list/Cc-maintainer or vice
+the particular patch should have To-list/Cc-maintainer or vice
 versa and similar nuances, if your project is into that.
 From is prefilled from your current GIT_AUTHOR_IDENT, other headers
 can be prefilled from various optional topgit.* config options.
