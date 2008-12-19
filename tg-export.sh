@@ -91,9 +91,13 @@ collapsed_commit()
 			$(for p in $parent; do echo -p $p; done))"
 	fi
 
-	(printf '%s\n\n' "$SUBJECT"; cat "$playground/^msg") |
-	git stripspace |
-	git commit-tree "$(pretty_tree "$name")" -p "$parent"
+	if branch_empty "$name"; then
+		echo "$parent";
+	else
+		(printf '%s\n\n' "$SUBJECT"; cat "$playground/^msg") |
+		git stripspace |
+		git commit-tree "$(pretty_tree "$name")" -p "$parent"
+	fi;
 
 	echo "$name" >>"$playground/^ticker"
 }
