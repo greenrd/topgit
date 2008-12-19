@@ -413,7 +413,9 @@ tg export
 	branch.  So usually they end up in subdirectories of the output
 	directory.  With option '--flatten' the names are mangled such that
 	they end up directly in the output dir (i.e. slashed are substituted by
-	underscores).
+	underscores).  With '--numbered' (which implies '--flatten') the patch
+	names get a number as prefix to allow getting the order without
+	consulting the series file, which eases sending out the patches.
 
 	Usage: tg export ([--collapse] BRANCH | --quilt DIR)
 

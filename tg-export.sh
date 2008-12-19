@@ -8,6 +8,7 @@ branches=
 output=
 driver=collapse
 flatten=false
+numbered=false
 
 
 ## Parse options
@@ -19,6 +20,9 @@ while [ -n "$1" ]; do
 		branches="$1"; shift;;
 	--flatten)
 		flatten=true;;
+	--numbered)
+		flatten=true;
+		numbered=true;;
 	--quilt)
 		driver=quilt;;
 	--collapse)
@@ -36,6 +40,9 @@ done
 
 [ -z "$branches" -o "$driver" = "quilt" ] ||
 	die "-b works only with the quilt driver"
+
+[ "$driver" = "quilt" ] || ! "$numbered" ||
+	die "--numbered works only with the quilt driver";
 
 [ "$driver" = "quilt" ] || ! "$flatten" ||
 	die "--flatten works only with the quilt driver"
@@ -155,18 +162,26 @@ quilt()
 		fi;
 	fi;
 
-	filename="$output/$dn$bn";
-	if [ -e "$filename" ]; then
+	if [ -e "$playground/$_dep" ]; then
 		# We've already seen this dep
 		return
 	fi
 
+	mkdir -p "$playground/$(dirname "$_dep")";
+	touch "$playground/$_dep";
+
 	if branch_empty "$_dep"; then
 		echo "Skip empty patch $_dep";
 	else
+		if "$numbered"; then
+			number="$(printf "%04u" $(($(cat "$playground/^number" 2>/dev/null) + 1)))";
+			bn="$number-$bn";
+			echo "$number" >"$playground/^number";
+		fi;
+
 		echo "Exporting $_dep"
 		mkdir -p "$output/$dn";
-		$tg patch "$_dep" >"$filename"
+		$tg patch "$_dep" >"$output/$dn$bn"
 		echo "$dn$bn -p1" >>"$output/series"
 	fi
 }
