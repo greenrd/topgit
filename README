@@ -409,6 +409,12 @@ tg export
 	a comma-separated explicit list of branches to export. This
 	mode of operation is currently not supported with collapse.
 
+	In '--quilt' mode the patches are named like the originating topgit
+	branch.  So usually they end up in subdirectories of the output
+	directory.  With option '--flatten' the names are mangled such that
+	they end up directly in the output dir (i.e. slashed are substituted by
+	underscores).
+
 	Usage: tg export ([--collapse] BRANCH | --quilt DIR)
 
 	TODO: Make stripping of non-essential headers configurable

@@ -7,6 +7,7 @@ name=
 branches=
 output=
 driver=collapse
+flatten=false
 
 
 ## Parse options
@@ -16,6 +17,8 @@ while [ -n "$1" ]; do
 	case "$arg" in
 	-b)
 		branches="$1"; shift;;
+	--flatten)
+		flatten=true;;
 	--quilt)
 		driver=quilt;;
 	--collapse)
@@ -33,6 +36,9 @@ done
 
 [ -z "$branches" -o "$driver" = "quilt" ] ||
 	die "-b works only with the quilt driver"
+
+[ "$driver" = "quilt" ] || ! "$flatten" ||
+	die "--flatten works only with the quilt driver"
 
 if [ -z "$branches" ]; then
 	# this check is only needed when no branches have been passed
@@ -138,7 +144,18 @@ quilt()
 		return
 	fi
 
-	filename="$output/$_dep.diff"
+	if "$flatten"; then
+		bn="$(echo "$_dep.diff" | sed -e 's#_#__#g' -e 's#/#_#g')";
+		dn="";
+	else
+		bn="$(basename "$_dep.diff")";
+		dn="$(dirname "$_dep.diff")/";
+		if [ "x$dn" = "x./" ]; then
+			dn="";
+		fi;
+	fi;
+
+	filename="$output/$dn$bn";
 	if [ -e "$filename" ]; then
 		# We've already seen this dep
 		return
@@ -148,9 +165,9 @@ quilt()
 		echo "Skip empty patch $_dep";
 	else
 		echo "Exporting $_dep"
-		mkdir -p "$(dirname "$filename")"
+		mkdir -p "$output/$dn";
 		$tg patch "$_dep" >"$filename"
-		echo "$_dep.diff -p1" >>"$output/series"
+		echo "$dn$bn -p1" >>"$output/series"
 	fi
 }
 
