@@ -369,6 +369,11 @@ _tg_remote ()
 	local cur="${COMP_WORDS[COMP_CWORD]}"
 
 	case "$cur" in
+	-*)
+		__tgcomp "
+			--populate
+		"
+		;;
 	*)
 		__tgcomp "$(__tg_remotes)"
 	esac
