@@ -376,7 +376,15 @@ _tg_remote ()
 
 _tg_summary ()
 {
-	COMPREPLY=()
+	local cur="${COMP_WORDS[COMP_CWORD]}"
+
+	case "$cur" in
+	*)
+		__tgcomp "
+			--graphviz
+			-t
+		"
+	esac
 }
 
 _tg_update ()
