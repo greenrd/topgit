@@ -27,9 +27,9 @@ git config "remote.$name.url" >/dev/null || die "unknown remote '$name'"
 
 ## Configure the remote
 
-git config --add "remote.$name.fetch" "+refs/top-bases/*:refs/remotes/$name/top-bases/*"
-git config --add "remote.$name.push" "+refs/top-bases/*:refs/top-bases/*"
-git config --add "remote.$name.push" "+refs/heads/*:refs/heads/*"
+git config --replace-all "remote.$name.fetch" "+refs/top-bases/*:refs/remotes/$name/top-bases/*" "\\+refs/top-bases/\\*:refs/remotes/$name/top-bases/\\*"
+git config --replace-all "remote.$name.push" "+refs/top-bases/*:refs/top-bases/*" "\\+refs/top-bases/\\*:refs/top-bases/\\*"
+git config --replace-all "remote.$name.push" "+refs/heads/*:refs/heads/*" "\\+refs/heads/\\*:refs/heads/\\*"
 
 info "Remote $name can now follow TopGit topic branches."
 if [ -z "$populate" ]; then
