@@ -71,14 +71,11 @@ pretty_tree()
 	 git write-tree)
 }
 
-# collapsed_commit NAME
-# Produce a collapsed commit of branch NAME.
-collapsed_commit()
+create_tg_commit()
 {
 	name="$1"
-
-	rm -f "$playground/^pre" "$playground/^post"
-	>"$playground/^body"
+	tree="$2"
+	parent="$3"
 
 	# Get commit message and authorship information
 	git cat-file blob "$name:.topmsg" | git mailinfo "$playground/^msg" /dev/null > "$playground/^info"
@@ -91,6 +88,20 @@ collapsed_commit()
 	test -n "$GIT_AUTHOR_NAME" && export GIT_AUTHOR_NAME
 	test -n "$GIT_AUTHOR_EMAIL" && export GIT_AUTHOR_EMAIL
 	test -n "$GIT_AUTHOR_DATE" && export GIT_AUTHOR_DATE
+
+	(printf '%s\n\n' "$SUBJECT"; cat "$playground/^msg") |
+	git stripspace |
+	git commit-tree "$tree" -p "$parent"
+}
+
+# collapsed_commit NAME
+# Produce a collapsed commit of branch NAME.
+collapsed_commit()
+{
+	name="$1"
+
+	rm -f "$playground/^pre" "$playground/^post"
+	>"$playground/^body"
 
 	# Determine parent
 	parent="$(cut -f 1 "$playground/$name^parents")"
@@ -107,9 +118,7 @@ collapsed_commit()
 	if branch_empty "$name"; then
 		echo "$parent";
 	else
-		(printf '%s\n\n' "$SUBJECT"; cat "$playground/^msg") |
-		git stripspace |
-		git commit-tree "$(pretty_tree "$name")" -p "$parent"
+		create_tg_commit "$name" "$(pretty_tree $name)" "$parent"
 	fi;
 
 	echo "$name" >>"$playground/^ticker"
