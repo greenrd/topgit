@@ -27,8 +27,10 @@ while [ -n "$1" ]; do
 		driver=quilt;;
 	--collapse)
 		driver=collapse;;
+	--linearize)
+		driver=linearize;;
 	-*)
-		echo "Usage: tg [...] export ([--collapse] NEWBRANCH | [-b BRANCH1,BRANCH2...] --quilt DIRECTORY)" >&2
+		echo "Usage: tg [...] export ([--collapse] NEWBRANCH | [-b BRANCH1,BRANCH2...] --quilt DIRECTORY | --linearize NEWBRANCH)" >&2
 		exit 1;;
 	*)
 		[ -z "$output" ] || die "output already specified ($output)"
@@ -195,10 +197,60 @@ quilt()
 	fi
 }
 
+linearize()
+{
+	if test ! -f "$playground/^BASE"; then
+		head="$(git rev-parse --verify "$_dep")"
+		echo "$head" > "$playground/^BASE"
+		git checkout -q "$head"
+		return;
+	fi;
+
+	head=$(git rev-parse --verify HEAD)
+
+	if [ -z "$_dep_is_tgish" ]; then
+		# merge in $_dep unless already included
+		rev="$(git rev-parse --verify "$_dep")";
+		common="$(git merge-base --all HEAD "$_dep")";
+		if test "$rev" = "$common"; then
+			# already included, just skip
+			:;
+		else
+			git merge -s recursive "$_dep";
+			retmerge="$?";
+			if test "x$retmerge" != "x0"; then
+				echo fix up the merge, commit and then exit;
+				#todo error handling
+				sh -i
+			fi;
+		fi;
+	else
+		git merge-recursive "$(pretty_tree "refs/top-bases/$_dep")" -- HEAD "$(pretty_tree "refs/heads/$_dep")";
+		retmerge="$?";
+
+		if test "x$retmerge" != "x0"; then
+			echo "fix up the merge and update the index.  Don't commit!"
+			#todo error handling
+			sh -i
+		fi
+
+		result_tree=$(git write-tree)
+		# testing branch_empty might not always give the right answer.
+		# It can happen that the patch is non-empty but still after
+		# linearizing there is no change.  So compare the trees.
+		if test "x$result_tree" = "x$(git rev-parse $head^{tree})"; then
+			echo "skip empty commit $_dep";
+		else
+			newcommit=$(create_tg_commit "$_dep" "$result_tree" HEAD)
+			git update-ref HEAD $newcommit $head
+			echo "exported commit $_dep";
+		fi
+	fi
+}
 
 ## Machinery
 
-if [ "$driver" = "collapse" ]; then
+if [ "$driver" = "collapse" ] || [ "$driver" = "linearize" ]; then
 	[ -n "$output" ] ||
 		die "no target branch specified"
 	! ref_exists "$output"  ||
@@ -247,6 +299,17 @@ if [ "$driver" = "collapse" ]; then
 elif [ "$driver" = "quilt" ]; then
 	depcount="$(cat "$output/series" | wc -l)"
 	echo "Exported topic branch $name (total $depcount topics) to directory $output"
+
+elif [ "$driver" = "linearize" ]; then
+	git checkout -q -b $output
+
+	echo $name
+	if test $(git rev-parse "$(pretty_tree $name)^{tree}") != $(git rev-parse "HEAD^{tree}"); then
+		echo "Warning: Exported result doesn't match";
+		echo "tg-head=$(git rev-parse "$name"), exported=$(git rev-parse "HEAD")";
+		#git diff $head HEAD;
+	fi;
+
 fi
 
 # vim:noet
