@@ -17,6 +17,27 @@ die()
 	exit 1
 }
 
+# cat_file "topic:file"
+# Like `git cat-file blob $1`, but topics '(i)' and '(w)' means index and worktree
+cat_file()
+{
+	arg="$1"
+	case "$arg" in
+	'(w):'*)
+		arg=$(echo "$arg" | tail --bytes=+5)
+		cat "$arg"
+		return
+		;;
+	'(i):'*)
+		# ':file' means cat from index
+		arg=$(echo "$arg" | tail --bytes=+5)
+		git cat-file blob ":$arg"
+		;;
+	*)
+		git cat-file blob "$arg"
+	esac
+}
+
 # setup_hook NAME
 setup_hook()
 {

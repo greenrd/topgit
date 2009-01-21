@@ -284,8 +284,9 @@ tg patch
 	tg patch will be able to automatically send the patches by mail
 	or save them to files. (TODO)
 
-	TODO: tg patch -i to base at index instead of branch,
-		-w for working tree
+	Options:
+	  -i		base patch generation on index instead of branch
+	  -w		base patch generation on working tree instead of branch
 
 tg mail
 ~~~~~~~

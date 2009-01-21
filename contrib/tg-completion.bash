@@ -359,6 +359,12 @@ _tg_patch ()
 	local cur="${COMP_WORDS[COMP_CWORD]}"
 
 	case "$cur" in
+	-*)
+		__tgcomp "
+			-i
+			-w
+		"
+		;;
 	*)
 		__tgcomp "$(__tg_topics)"
 	esac
