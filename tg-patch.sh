@@ -24,6 +24,9 @@ done
 base_rev="$(git rev-parse --short --verify "refs/top-bases/$name" 2>/dev/null)" ||
 	die "not a TopGit-controlled branch"
 
+
+setup_pager
+
 git cat-file blob "$name:.topmsg"
 echo
 [ -n "$(git grep '^[-]--' "$name" -- ".topmsg")" ] || echo '---'
