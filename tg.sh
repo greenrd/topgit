@@ -3,6 +3,7 @@
 # (c) Petr Baudis <pasky@suse.cz>  2008
 # GPLv2
 
+TG_VERSION=0.5
 
 ## Auxiliary functions
 
@@ -249,7 +250,7 @@ do_help()
 			sep="|"
 		done
 
-		echo "TopGit v0.5 - A different patch queue manager"
+		echo "TopGit v$TG_VERSION - A different patch queue manager"
 		echo "Usage: tg [-r REMOTE] ($cmds|help) ..."
 	elif [ -r "@cmddir@"/tg-$1 ] ; then
 		@cmddir@/tg-$1 -h || :
