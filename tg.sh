@@ -94,6 +94,16 @@ has_remote()
 	[ -n "$base_remote" ] && ref_exists "remotes/$base_remote/$1"
 }
 
+branch_annihilated()
+{
+	_name="$1";
+
+	# use the merge base in case the base is ahead.
+	mb="$(git merge-base "refs/top-bases/$_name" "$_name")";
+
+	test "$(git rev-parse "$mb^{tree}")" = "$(git rev-parse "$_name^{tree}")";
+}
+
 # recurse_deps CMD NAME [BRANCHPATH...]
 # Recursively eval CMD on all dependencies of NAME.
 # CMD can refer to $_name for queried branch name,
@@ -116,7 +126,12 @@ recurse_deps()
 	if has_remote "top-bases/$_name"; then
 		echo "refs/remotes/$base_remote/top-bases/$_name" >>"$_depsfile"
 	fi
-	git cat-file blob "$_name:.topdeps" >>"$_depsfile"
+
+	# if the branch was annihilated, there exists no .topdeps file
+	if ! branch_annihilated "$_name"; then
+		#TODO: handle nonexisting .topdeps?
+		git cat-file blob "$_name:.topdeps" >>"$_depsfile";
+	fi;
 
 	_ret=0
 	while read _dep; do

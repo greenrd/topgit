@@ -53,13 +53,22 @@ fi
 git for-each-ref refs/top-bases |
 	while read rev type ref; do
 		name="${ref#refs/top-bases/}"
+		if branch_annihilated "$name"; then
+			continue;
+		fi;
+
 		if [ -n "$terse" ]; then
 			echo "$name"
 			continue
 		fi
 		if [ -n "$graphviz" ]; then
 			git cat-file blob "$name:.topdeps" | while read dep; do
-				echo "\"$name\" -> \"$dep\";"
+				dep_is_tgish=true
+				ref_exists "refs/top-bases/$dep"  ||
+					dep_is_tgish=false
+				if ! "$dep_is_tgish" || ! branch_annihilated $dep; then
+					echo "\"$name\" -> \"$dep\";"
+				fi
 			done
 			continue
 		fi
