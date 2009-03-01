@@ -78,9 +78,9 @@ done
 rm -f "$git_dir/top-name" "$git_dir/top-deps" "$git_dir/top-merge"
 
 
-## Create base
+## Find starting commit to create the base
 
-if [ -n "$merge" ]; then
+if [ -n "$merge" -a -z "$restarted" ]; then
 	# Unshift the first item from the to-merge list
 	branch="${merge%% *}"
 	merge="${merge#* }"
