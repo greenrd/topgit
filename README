@@ -350,11 +350,12 @@ tg export
 	in the cleaned up history (corresponding basically exactly
 	to `tg patch` output for the topic branch).
 
-	The command has two possible outputs now - either a Git branch
-	with the collapsed history, or a quilt series in new directory.
+	The command has three possible outputs now - either a Git branch with
+	the collapsed history, a Git branch with a linearized history, or a
+	quilt series in new directory.
 
 	In case of producing collapsed history in new branch,
-	You can use this collapsed structure either for providing
+	you can use this collapsed structure either for providing
 	a pull source for upstream, or further linearization e.g.
 	for creation of a quilt series using git log:
 
@@ -376,6 +377,21 @@ tg export
 	origin/master - t/foo/blue -. merge - t/foo/red -.. merge - master
 	             `- t/bar/good <,-------------------'/
 	             `- t/baz      ---------------------'
+
+	In case of using the linearize mode:
+
+	master$ tg export --linearize for-linus
+
+	you get a linear history respecting the dependencies of your patches in
+	a new branch for-linus.  The result should be more or less the same as
+	using quilt mode and reimporting it into a Git branch.  (More or less
+	because the topologic order can usually be extended in more than one
+	way into a complete ordering and the two methods may choose different
+	one's.)  The result might be more appropriate for merging upstream as
+	it contains fewer merges.
+
+	Note that you might get conflicts during linearization because the
+	patches are reordered to get a linear history.
 
 	In case of the quilt mode,
 
@@ -417,14 +433,15 @@ tg export
 	names get a number as prefix to allow getting the order without
 	consulting the series file, which eases sending out the patches.
 
-	Usage: tg export ([--collapse] BRANCH | --quilt DIR)
+	Usage: tg export ([(--collapse | --linearize)] BRANCH | --quilt DIR)
 
 	TODO: Make stripping of non-essential headers configurable
 	TODO: Make stripping of [PATCH] and other prefixes configurable
 	TODO: --mbox option for other mode of operation
 	TODO: -a option to export all branches
-	TODO: For quilt exporting, use a temporary branch and remove it when
-	      done - this would allow producing conflict-less series
+	TODO: For quilt exporting, export the linearized history created in a
+	      temporary branch---this would allow producing conflict-less
+	      series
 
 tg import
 ~~~~~~~~~
