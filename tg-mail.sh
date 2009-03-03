@@ -29,7 +29,7 @@ done
 base_rev="$(git rev-parse --short --verify "refs/top-bases/$name" 2>/dev/null)" ||
 	die "not a TopGit-controlled branch"
 
-if ! git send-emmail --help >/dev/null 2>&1; then
+if ! git send-email --help >/dev/null 2>&1; then
 	die "git send-email command not available"
 fi
 
