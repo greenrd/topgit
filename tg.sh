@@ -3,6 +3,7 @@
 # (c) Petr Baudis <pasky@suse.cz>  2008
 # GPLv2
 
+TG_VERSION=0.6
 
 ## Auxiliary functions
 
@@ -15,6 +16,27 @@ die()
 {
 	info "fatal: $*"
 	exit 1
+}
+
+# cat_file "topic:file"
+# Like `git cat-file blob $1`, but topics '(i)' and '(w)' means index and worktree
+cat_file()
+{
+	arg="$1"
+	case "$arg" in
+	'(w):'*)
+		arg=$(echo "$arg" | tail --bytes=+5)
+		cat "$arg"
+		return
+		;;
+	'(i):'*)
+		# ':file' means cat from index
+		arg=$(echo "$arg" | tail --bytes=+5)
+		git cat-file blob ":$arg"
+		;;
+	*)
+		git cat-file blob "$arg"
+	esac
 }
 
 # setup_hook NAME
@@ -243,7 +265,7 @@ do_help()
 			sep="|"
 		done
 
-		echo "TopGit v0.5 - A different patch queue manager"
+		echo "TopGit v$TG_VERSION - A different patch queue manager"
 		echo "Usage: tg [-r REMOTE] ($cmds|help) ..."
 	elif [ -r "@cmddir@"/tg-$1 ] ; then
 		@cmddir@/tg-$1 -h || :
@@ -258,6 +280,44 @@ do_help()
 	fi
 }
 
+## Pager stuff
+
+# isatty FD
+isatty()
+{
+	test -t $1
+}
+
+# setup_pager
+# Spawn pager process and redirect the rest of our output to it
+setup_pager()
+{
+	isatty 1 || return 0
+
+	# TG_PAGER = GIT_PAGER | PAGER | less
+	# NOTE: GIT_PAGER='' is significant
+	TG_PAGER=${GIT_PAGER-${PAGER-less}}
+
+	[ -z "$TG_PAGER"  -o  "$TG_PAGER" = "cat" ]  && return 0
+
+
+	# now spawn pager
+	export LESS=${LESS:-FRSX}	# as in pager.c:pager_preexec()
+
+	_pager_fifo_dir="$(mktemp -t -d tg-pager-fifo.XXXXXX)"
+	_pager_fifo="$_pager_fifo_dir/0"
+	mkfifo -m 600 "$_pager_fifo"
+
+	"$TG_PAGER" < "$_pager_fifo" &
+	exec > "$_pager_fifo"		# dup2(pager_fifo.in, 1)
+
+	# this is needed so e.g. `git diff` will still colorize it's output if
+	# requested in ~/.gitconfig with color.diff=auto
+	export GIT_PAGER_IN_USE=1
+
+	# atexit(close(1); wait pager)
+	trap "exec >&-; rm \"$_pager_fifo\"; rmdir \"$_pager_fifo_dir\"; wait" EXIT
+}
 
 ## Startup
 
