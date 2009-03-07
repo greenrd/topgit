@@ -226,7 +226,7 @@ needs_update()
 # branch_empty NAME
 branch_empty()
 {
-	[ -z "$(git diff-tree "refs/top-bases/$1" "$1" | fgrep -v "	.top")" ]
+	[ -z "$(git diff-tree "refs/top-bases/$1" "$1" -- | fgrep -v "	.top")" ]
 }
 
 # switch_to_base NAME [SEED]
