@@ -216,22 +216,24 @@ linearize()
 			# already included, just skip
 			:;
 		else
-			git merge -s recursive "$_dep";
-			retmerge="$?";
+			retmerge=0;
+
+			git merge -s recursive "$_dep" || retmerge="$?";
 			if test "x$retmerge" != "x0"; then
 				echo fix up the merge, commit and then exit;
 				#todo error handling
-				sh -i
+				sh -i </dev/tty;
 			fi;
 		fi;
 	else
-		git merge-recursive "$(pretty_tree "refs/top-bases/$_dep")" -- HEAD "$(pretty_tree "refs/heads/$_dep")";
-		retmerge="$?";
+		retmerge=0;
+
+		git merge-recursive "$(pretty_tree "refs/top-bases/$_dep")" -- HEAD "$(pretty_tree "refs/heads/$_dep")" || retmerge="$?";
 
 		if test "x$retmerge" != "x0"; then
 			echo "fix up the merge and update the index.  Don't commit!"
 			#todo error handling
-			sh -i
+			sh -i </dev/tty;
 		fi
 
 		result_tree=$(git write-tree)
