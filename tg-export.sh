@@ -231,6 +231,7 @@ linearize()
 		git merge-recursive "$(pretty_tree "refs/top-bases/$_dep")" -- HEAD "$(pretty_tree "refs/heads/$_dep")" || retmerge="$?";
 
 		if test "x$retmerge" != "x0"; then
+			git rerere;
 			echo "fix up the merge and update the index.  Don't commit!"
 			#todo error handling
 			sh -i </dev/tty;
