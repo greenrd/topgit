@@ -17,9 +17,19 @@ tg_util
 ## Generally have fun
 
 # Don't do anything on non-topgit branch
-git rev-parse --verify "$(git symbolic-ref HEAD | sed 's/heads/top-bases/')" >/dev/null 2>&1 ||
-	exit 0
+if head_=$(git symbolic-ref -q HEAD); then
+	case "$head_" in
+		refs/heads/*)
+			git rev-parse -q --verify "${head_#refs/heads/#refs/top-bases#}" >/dev/null || exit 0;;
+		*)
+			exit 0;;
+	esac
 
+else
+	exit 0;
+fi
+
+# TODO: check the index, not the working copy
 [ -s "$root_dir/.topdeps" ] ||
 	die ".topdeps is missing"
 [ -s "$root_dir/.topmsg" ] ||
