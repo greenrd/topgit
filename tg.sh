@@ -340,8 +340,9 @@ setup_hook "pre-commit"
 ## Dispatch
 
 # We were sourced from another script for our utility functions;
-# this is set by hooks.
-[ -z "$tg__include" ] || return 0
+# this is set by hooks.  Skip the rest of the file.  A simple return doesn't
+# work as expected in every shell.  See http://bugs.debian.org/516188
+if [ -z "$tg__include" ]; then
 
 if [ "$1" = "-r" ]; then
 	shift
@@ -373,5 +374,7 @@ help|--help|-h)
 	}
 	. "@cmddir@"/tg-$cmd;;
 esac
+
+fi
 
 # vim:noet
