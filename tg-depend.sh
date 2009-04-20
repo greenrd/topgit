@@ -37,9 +37,6 @@ done
 [ -n "$name" ] || die "no branch name specified"
 branchrev="$(git rev-parse --verify "$name" 2>/dev/null)" ||
 	die "invalid branch name: $name"
-baserev="$(git rev-parse --verify "refs/top-bases/$name" 2>/dev/null)" ||
-	die "not a TopGit topic branch: $name"
-
 
 ## Record new dependency
 
