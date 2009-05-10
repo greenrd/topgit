@@ -29,10 +29,6 @@ done
 base_rev="$(git rev-parse --short --verify "refs/top-bases/$name" 2>/dev/null)" ||
 	die "not a TopGit-controlled branch"
 
-if ! git send-email --help >/dev/null 2>&1; then
-	die "git send-email command not available"
-fi
-
 if [ -n "$in_reply_to" ]; then
 	send_email_args="$send_email_args --in-reply-to=$in_reply_to"
 fi
