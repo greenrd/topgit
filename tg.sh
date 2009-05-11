@@ -136,6 +136,7 @@ branch_annihilated()
 # of the whole function.
 # If recurse_deps() hits missing dependencies, it will append
 # them to space-separated $missing_deps list and skip them.
+# remote dependencies are processed if no_remotes is unset.
 recurse_deps()
 {
 	_cmd="$1"; shift
@@ -143,9 +144,9 @@ recurse_deps()
 	_depchain="$*"
 
 	_depsfile="$(mktemp -t tg-depsfile.XXXXXX)"
-	# Check also our base against remote base. Checking our head
-	# against remote head has to be done in the helper.
-	if has_remote "top-bases/$_name"; then
+	# If no_remotes is unset check also our base against remote base.
+	# Checking our head against remote head has to be done in the helper.
+	if test -z "$no_remotes" && has_remote "top-bases/$_name"; then
 		echo "refs/remotes/$base_remote/top-bases/$_name" >>"$_depsfile"
 	fi
 
