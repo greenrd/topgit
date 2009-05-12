@@ -480,6 +480,12 @@ tg update
 
 	TODO: tg update -a for updating all topic branches
 
+tg push
+~~~~~~~
+	pushes a TopGit-controlled topic branch to a remote
+	repository.  By default the remote gets all dependencies
+	(both tgish and non-tgish) and bases pushed to.
+
 TODO: tg rename
 
 
