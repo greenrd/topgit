@@ -28,8 +28,13 @@ git config "remote.$name.url" >/dev/null || die "unknown remote '$name'"
 ## Configure the remote
 
 git config --replace-all "remote.$name.fetch" "+refs/top-bases/*:refs/remotes/$name/top-bases/*" "\\+refs/top-bases/\\*:refs/remotes/$name/top-bases/\\*"
-git config --replace-all "remote.$name.push" "+refs/top-bases/*:refs/top-bases/*" "\\+refs/top-bases/\\*:refs/top-bases/\\*"
-git config --replace-all "remote.$name.push" "+refs/heads/*:refs/heads/*" "\\+refs/heads/\\*:refs/heads/\\*"
+
+if git config --get-all "remote.$name.push" "\\+refs/top-bases/\\*:refs/top-bases/\\*" >/dev/null && test "xtrue" != "x$(git config --bool --get topgit.dontwarnonoldpushspecs)"; then
+	info "Probably you want to remove the push specs introduced by an old version of topgit:"
+	info '       git config --unset-all "remote.'$name'.push" "\\+refs/top-bases/\\*:refs/top-bases/\\*"'
+	info '       git config --unset-all "remote.'$name'.push" "\\+refs/heads/\\*:refs/heads/\\*"'
+	info '(or use git config --bool --add topgit.dontwarnonoldpushspecs true to get rid of this warning)'
+fi
 
 info "Remote $name can now follow TopGit topic branches."
 if [ -z "$populate" ]; then
