@@ -370,6 +370,29 @@ _tg_patch ()
 	esac
 }
 
+_tg_push ()
+{
+	local cur="${COMP_WORDS[COMP_CWORD]}"
+
+	__tg_complete_arg "-r" && {
+		__tgcomp "$(__tg_remotes)"
+		return
+	}
+
+	case "$cur" in
+	-*)
+		__tgcomp "
+			--no-deps
+			--dry-run
+			--tgish-only
+			-r
+		"
+		;;
+	*)
+		__tgcomp "$(__tg_topics)"
+	esac
+}
+
 _tg_remote ()
 {
 	local cur="${COMP_WORDS[COMP_CWORD]}"
@@ -449,6 +472,7 @@ _tg ()
 	info)        _tg_info ;;
 	mail)        _tg_mail ;;
 	patch)       _tg_patch ;;
+	push)        _tg_push ;;
 	remote)      _tg_remote ;;
 	summary)     _tg_summary ;;
 	update)      _tg_update ;;
