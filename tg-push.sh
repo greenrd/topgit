@@ -51,12 +51,8 @@ push_branch()
 	$tgish_deps_only && [ -z "$_dep_is_tgish" ] && return 0
 
 	echo "$_dep"
-	local base="top-bases/$_dep"
-	if ref_exists "$base"; then
+	[ -z "$_dep_is_tgish" ] ||
 		echo "top-bases/$_dep"
-	else
-		echo "warning, no base found $base" 1>&2
-	fi
 }
 
 for name in $branches; do
