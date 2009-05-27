@@ -67,8 +67,8 @@ for name in $branches; do
 		_dep_is_tgish=
 	push_branch "$name"
 
-	# deps
-	$recurse_deps &&
+	# deps but only if branch is tgish
+	$recurse_deps && [ -n "$_dep_is_tgish" ] &&
 		no_remotes=1 recurse_deps push_branch "$name"
 
 	# remove multiple occurrences of the same branch
