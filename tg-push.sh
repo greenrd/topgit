@@ -45,27 +45,32 @@ for name in $branches; do
 	ref_exists "$name" || die "detached HEAD? Can't push $name"
 done
 
+_listfile="$(mktemp -t tg-push-listfile.XXXXXX)"
+trap "rm -f \"$_listfile\"" 0
+
 push_branch()
 {
 	# if so desired omit non tgish deps
 	$tgish_deps_only && [ -z "$_dep_is_tgish" ] && return 0
 
-	echo "$_dep"
+	echo "$_dep" >> "$_listfile"
 	[ -z "$_dep_is_tgish" ] ||
-		echo "top-bases/$_dep"
+		echo "top-bases/$_dep" >> "$_listfile"
 }
 
 for name in $branches; do
-	list="$(
-		# deps
-		if $recurse_deps; then
-			no_remotes=1 recurse_deps push_branch "$name"
-		fi
-		# current branch
-		_dep="$name"
-		_dep_is_tgish=1
-		push_branch "$name"
-	)"
-	echo "pushing:"; echo $list
-	git push $dry_run "$remote" $list
+	# current branch
+	# re-use push_branch, which expects some pre-defined variables
+	_dep="$name"
+	_dep_is_tgish=1
+	ref_exists "top-bases/$_dep" ||
+		_dep_is_tgish=
+	push_branch "$name"
+
+	# deps
+	$recurse_deps &&
+		no_remotes=1 recurse_deps push_branch "$name"
+
+	# remove multiple occurrences of the same branch
+	sort -u "$_listfile" | xargs git push $dry_run "$remote"
 done
