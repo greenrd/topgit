@@ -59,7 +59,7 @@ if [ -s "$depcheck" ]; then
 					info "You are in a subshell. If you abort the merge,"
 					info "use \`exit 1\` to abort the recursive update altogether."
 					if ! sh -i </dev/tty; then
-						info "Ok, you aborated the merge. Now, you just need to"
+						info "Ok, you aborted the merge. Now, you just need to"
 						info "switch back to some sane branch using \`git checkout\`."
 						exit 3
 					fi
