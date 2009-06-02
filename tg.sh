@@ -269,7 +269,8 @@ do_help()
 		echo "TopGit v$TG_VERSION - A different patch queue manager"
 		echo "Usage: tg [-r REMOTE] ($cmds|help) ..."
 	elif [ -r "@cmddir@"/tg-$1 ] ; then
-		@cmddir@/tg-$1 -h || :
+		setup_pager
+		@cmddir@/tg-$1 -h 2>&1 || :
 		echo
 		if [ -r "@sharedir@/tg-$1.txt" ] ; then
 			cat "@sharedir@/tg-$1.txt"
