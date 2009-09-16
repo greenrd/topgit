@@ -185,8 +185,8 @@ quilt()
 		echo "Skip empty patch $_dep";
 	else
 		if "$numbered"; then
-			number="$(printf "%04u" $(($(cat "$playground/^number" 2>/dev/null) + 1)))";
-			bn="$number-$bn";
+			number="$(echo $(($(cat "$playground/^number" 2>/dev/null) + 1)))";
+			bn="$(printf "%04u-$bn" $number)";
 			echo "$number" >"$playground/^number";
 		fi;
 
