@@ -304,7 +304,7 @@ setup_pager()
 
 
 	# now spawn pager
-	export LESS=${LESS:-FRSX}	# as in pager.c:pager_preexec()
+	export LESS="${LESS:-FRSX}"	# as in pager.c:pager_preexec()
 
 	_pager_fifo_dir="$(mktemp -t -d tg-pager-fifo.XXXXXX)"
 	_pager_fifo="$_pager_fifo_dir/0"
