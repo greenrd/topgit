@@ -38,7 +38,7 @@ patchfile="$(mktemp -t tg-mail.XXXXXX)"
 
 $tg patch "$name" >"$patchfile"
 
-header="$(sed -e '/^$/,$d' "$patchfile")"
+header="$(sed -e '/^$/,$d' -e "s,','\\\\'',g" "$patchfile")"
 
 
 
