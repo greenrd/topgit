@@ -469,9 +469,11 @@ tg export
 	In '--quilt' mode the patches are named like the originating topgit
 	branch.  So usually they end up in subdirectories of the output
 	directory.  With option '--flatten' the names are mangled such that
-	they end up directly in the output dir (i.e. slashed are substituted by
-	underscores).  With '--numbered' (which implies '--flatten') the patch
-	names get a number as prefix to allow getting the order without
+	they end up directly in the output dir (i.e. slashes are substituted by
+	underscores).  With option '--strip[=N]' the first 'N' subdirectories (all
+	if no 'N' is given) get stripped off.  Names are always '--strip'ped
+	before '--flatten'ed.  With option '--numbered' (which implies '--flatten')
+	the patch names get a number as prefix to allow getting the order without
 	consulting the series file, which eases sending out the patches.
 
 	Usage: tg export ([(--collapse | --linearize)] BRANCH | --quilt DIR)

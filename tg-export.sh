@@ -9,6 +9,8 @@ output=
 driver=collapse
 flatten=false
 numbered=false
+strip=false
+stripval=0
 
 
 ## Parse options
@@ -23,6 +25,17 @@ while [ -n "$1" ]; do
 	--numbered)
 		flatten=true;
 		numbered=true;;
+	--strip*)
+		val=${arg#*=}
+		if [ "$val" = "--strip" ]; then
+			strip=true
+			stripval=9999
+		elif [ -n "$val" -a "x$(echo $val | sed -e 's/[0-9]//g')" = "x" ]; then
+			strip=true
+			stripval=$val
+		else
+			die "invalid parameter $arg"
+		fi;;
 	--quilt)
 		driver=quilt;;
 	--collapse)
@@ -48,6 +61,9 @@ done
 
 [ "$driver" = "quilt" ] || ! "$flatten" ||
 	die "--flatten works only with the quilt driver"
+
+[ "$driver" = "quilt" ] || ! "$strip" ||
+	die "--strip works only with the quilt driver"
 
 if [ -z "$branches" ]; then
 	# this check is only needed when no branches have been passed
@@ -152,16 +168,27 @@ quilt()
 		return
 	fi
 
-	if "$flatten"; then
-		bn="$(echo "$_dep.diff" | sed -e 's#_#__#g' -e 's#/#_#g')";
-		dn="";
-	else
-		bn="$(basename "$_dep.diff")";
-		dn="$(dirname "$_dep.diff")/";
-		if [ "x$dn" = "x./" ]; then
-			dn="";
-		fi;
-	fi;
+	_dep_tmp=$_dep
+
+	if "$strip"; then
+		i=$stripval
+		while [ "$i" -gt 0 ]; do
+			[ "$_dep_tmp" = "${_dep_tmp#*/}" ] && break
+			_dep_tmp=${_dep_tmp#*/}
+			i=$((i - 1))
+		done
+	fi
+
+	bn="$(basename "$_dep_tmp.diff")"
+	dn="$(dirname "$_dep_tmp.diff")/"
+	[ "x$dn" = "x./" ] && dn=""
+
+	if "$flatten" && [ "$dn" ]; then
+		bn="$(echo "$_dep_tmp.diff" | sed -e 's#_#__#g' -e 's#/#_#g')"
+		dn=""
+	fi
+
+	unset _dep_tmp
 
 	if [ -e "$playground/$_dep" ]; then
 		# We've already seen this dep
