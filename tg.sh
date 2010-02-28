@@ -126,6 +126,13 @@ branch_annihilated()
 	test "$(git rev-parse "$mb^{tree}")" = "$(git rev-parse "$_name^{tree}")";
 }
 
+# is_sha1 REF
+# Whether REF is a SHA1 (compared to a symbolic name).
+is_sha1()
+{
+	[ "$(git rev-parse "$1")" = "$1" ]
+}
+
 # recurse_deps CMD NAME [BRANCHPATH...]
 # Recursively eval CMD on all dependencies of NAME.
 # CMD can refer to $_name for queried branch name,
