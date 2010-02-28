@@ -244,6 +244,10 @@ tg delete
 	only empty branch (base == head); use '-f' to remove
 	non-empty branch.
 
+	The '-f' option is also useful to force removal of a branch's base, if
+	you used 'git branch -D B' to remove the branch B, and then certain
+	TopGit commands complain, because the base of branch B is still there.
+
 	Currently, this command will _NOT_ remove the branch from
 	the dependency list in other branches. You need to take
 	care of this _manually_. This is even more complicated

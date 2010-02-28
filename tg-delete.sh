@@ -3,7 +3,7 @@
 # (c) Petr Baudis <pasky@suse.cz>  2008
 # GPLv2
 
-force= # Whether to delete non-empty branch
+force= # Whether to delete non-empty branch, or branch where only the base is left.
 name=
 
 
@@ -28,21 +28,22 @@ done
 
 [ -n "$name" ] || die "no branch name specified"
 branchrev="$(git rev-parse --verify "$name" 2>/dev/null)" ||
-	die "invalid branch name: $name"
+	if [ -n "$force" ]; then
+		info "invalid branch name: $name; assuming it has been deleted already"
+	else
+		die "invalid branch name: $name"
+	fi
 baserev="$(git rev-parse --verify "refs/top-bases/$name" 2>/dev/null)" ||
 	die "not a TopGit topic branch: $name"
 ! git symbolic-ref HEAD >/dev/null || [ "$(git symbolic-ref HEAD)" != "refs/heads/$name" ] ||
 	die "cannot delete your current branch"
 
-nonempty=
-branch_empty "$name" || nonempty=1
-
-[ -z "$nonempty" ] || [ -n "$force" ] || die "branch is non-empty: $name"
+[ -z "$force" ] && { branch_empty "$name" || die "branch is non-empty: $name"; }
 
 
 ## Wipe out
 
 git update-ref -d "refs/top-bases/$name" "$baserev"
-git update-ref -d "refs/heads/$name" "$branchrev"
+[ -z "$branchrev" ] || git update-ref -d "refs/heads/$name" "$branchrev"
 
 # vim:noet
