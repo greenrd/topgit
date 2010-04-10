@@ -308,6 +308,13 @@ tg mail
 	The '-r' parameter with msgid can be used to generate in-reply-to
 	and reference headers to an earlier mail.
 
+	Note: be careful when using this command.  It easily sends out several
+	mails.  You might want to run
+
+		git config sendemail.confirm always
+
+	to let `git send-email` ask for confirmation before sending any mail.
+
 	TODO: 'tg mail patchfile' to mail an already exported patch
 	TODO: mailing patch series
 	TODO: specifying additional options and addresses on command
