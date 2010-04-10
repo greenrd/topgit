@@ -54,6 +54,8 @@ setup_hook()
 	else
 		hook_call="exec $hook_call"
 	fi
+	# Don't call hook if tg is not installed
+	hook_call="if which \"$tg\" > /dev/null; then $hook_call; fi"
 	# Insert call into the hook
 	{
 		echo "#!/bin/sh"
