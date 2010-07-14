@@ -351,6 +351,13 @@ tg summary
 	pass '--graphviz' to get a dot-suitable output to draw a dependency
 	graph between the topic branches.
 
+	You can also use the --sort option to sort the branches using
+	a topological sort.  This is especially useful if each
+	TopGit-tracked topic branch depends on a single parent branch,
+	since it will then print the branches in the dependency
+	order.  In more complex scenarios, a text graph view would be
+	much more useful, but that is not yet implemented.
+
 	TODO: Speed up by an order of magnitude
 	TODO: Text graph view
 
