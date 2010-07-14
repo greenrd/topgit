@@ -358,6 +358,10 @@ tg summary
 	order.  In more complex scenarios, a text graph view would be
 	much more useful, but that is not yet implemented.
 
+	The --deps option outputs dependency informations between
+	branches in a machine-readable format.  Feed this to "tsort"
+	to get the output from --sort.
+
 	TODO: Speed up by an order of magnitude
 	TODO: Text graph view
 

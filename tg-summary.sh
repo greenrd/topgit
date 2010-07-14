@@ -6,6 +6,7 @@
 terse=
 graphviz=
 sort=
+deps=
 
 
 ## Parse options
@@ -19,22 +20,19 @@ while [ -n "$1" ]; do
 		graphviz=1;;
 	--sort)
 		sort=1;;
+	--deps)
+		deps=1;;
 	*)
-		echo "Usage: tg [...] summary [-t | --sort | --graphviz]" >&2
+		echo "Usage: tg [...] summary [-t | --sort | --deps | --graphviz]" >&2
 		exit 1;;
 	esac
 done
 
 curname="$(git symbolic-ref HEAD | sed 's#^refs/\(heads\|top-bases\)/##')"
 
-! [ -n "$terse" -a -n "$graphviz" ] ||
-	die "-t and --graphviz options are mutual exclusive"
-
-! [ -n "$sort" -a -n "$graphviz" ] ||
-	die "--sort and --graphviz options are mutual exclusive"
-
-! [ -n "$sort" -a -n "$terse" ] ||
-	die "-t and --sort options are mutual exclusive"
+[ "$terse$graphviz$sort$deps" = "" ] ||
+	[ "$terse$graphviz$sort$deps" = "1" ] ||
+	die "mutually exclusive options given"
 
 if [ -n "$graphviz" ]; then
 	cat <<EOT
@@ -76,7 +74,7 @@ git for-each-ref refs/top-bases |
 			echo "$name"
 			continue
 		fi
-		if [ -n "$graphviz" ] || [ -n "$sort" ]; then
+		if [ -n "$graphviz$sort$deps" ]; then
 			git cat-file blob "$name:.topdeps" | while read dep; do
 				dep_is_tgish=true
 				ref_exists "refs/top-bases/$dep"  ||
@@ -84,6 +82,8 @@ git for-each-ref refs/top-bases |
 				if ! "$dep_is_tgish" || ! branch_annihilated $dep; then
 					if [ -n "$graphviz" ]; then
 						echo "\"$name\" -> \"$dep\";"
+					elif [ -n "$deps" ]; then
+						echo "$name $dep"
 					else
 						echo "$name $dep" >&4
 					fi
