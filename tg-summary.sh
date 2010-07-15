@@ -5,7 +5,7 @@
 
 terse=
 graphviz=
-sort=
+tsort=
 deps=
 
 
@@ -18,20 +18,25 @@ while [ -n "$1" ]; do
 		terse=1;;
 	--graphviz)
 		graphviz=1;;
+	--sort=alphabetical)
+		;;
+	--sort=topological)
+		tsort=1;;
 	--sort)
-		sort=1;;
+		tsort=1;;
 	--deps)
 		deps=1;;
 	*)
-		echo "Usage: tg [...] summary [-t | --sort | --deps | --graphviz]" >&2
+		echo "Usage: tg [...] summary [-t | --sort[=(alphabetical|topological)] | --deps | --graphviz]" >&2
 		exit 1;;
 	esac
 done
 
 curname="$(git symbolic-ref HEAD | sed 's#^refs/\(heads\|top-bases\)/##')"
 
-[ "$terse$graphviz$sort$deps" = "" ] ||
-	[ "$terse$graphviz$sort$deps" = "1" ] ||
+[ "$terse$graphviz$tsort$deps" = "" ] ||
+	[ "$terse$graphviz$tsort$deps" = "1" ] ||
+	[ "$terse$tsort" = "11" -a "$graphviz$deps" = "" ] ||
 	die "mutually exclusive options given"
 
 if [ -n "$graphviz" ]; then
@@ -52,13 +57,6 @@ graph [
 ];
 
 EOT
-fi
-
-if [ -n "$sort" ]; then
-	tsort_input=`mktemp`
-	exec 4>$tsort_input
-	exec 5<$tsort_input
-	rm $tsort_input
 fi
 
 ## List branches
@@ -99,6 +97,27 @@ process_branch()
 		"$name" "$subject"
 }
 
+if [ -n "$tsort" ] && [ -n "$terse" ]; then
+	tg summary --deps|
+	tsort|
+	while read name
+	do
+		ref_exists refs/top-bases/$name && echo $name
+	done
+	exit 0
+fi
+
+if [ -n "$tsort" ]; then
+	tg summary --sort=topological -t |
+	while read name
+	do
+		ref=refs/top-bases/$name
+		rev=`git rev-parse $ref`
+		process_branch
+	done
+	exit 0
+fi
+
 git for-each-ref refs/top-bases |
 	while read rev type ref; do
 		name="${ref#refs/top-bases/}"
@@ -110,7 +129,7 @@ git for-each-ref refs/top-bases |
 			echo "$name"
 			continue
 		fi
-		if [ -n "$graphviz$sort$deps" ]; then
+		if [ -n "$graphviz$deps" ]; then
 			git cat-file blob "$name:.topdeps" | while read dep; do
 				dep_is_tgish=true
 				ref_exists "refs/top-bases/$dep"  ||
@@ -118,10 +137,8 @@ git for-each-ref refs/top-bases |
 				if ! "$dep_is_tgish" || ! branch_annihilated $dep; then
 					if [ -n "$graphviz" ]; then
 						echo "\"$name\" -> \"$dep\";"
-					elif [ -n "$deps" ]; then
-						echo "$name $dep"
 					else
-						echo "$name $dep" >&4
+						echo "$name $dep"
 					fi
 				fi
 			done
@@ -134,10 +151,5 @@ git for-each-ref refs/top-bases |
 if [ -n "$graphviz" ]; then
 	echo '}'
 fi
-
-if [ -n "$sort" ]; then
-	tsort <&5
-fi
-
 
 # vim:noet
