@@ -23,6 +23,8 @@
 /tg-remote.txt
 /tg-push
 /tg-push.txt
+/tg-checkout
+/tg-checkout.txt
 /tg
 .*.swp
 
