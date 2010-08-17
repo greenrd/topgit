@@ -508,6 +508,13 @@ tg push
 	repository.  By default the remote gets all dependencies
 	(both tgish and non-tgish) and bases pushed to.
 
+tg base
+~~~~~~~
+	Prints the base commit of the current topic branch.  Silently
+	exits with exit code 1 if you are not working on a TopGit
+	branch.
+
+
 TODO: tg rename
 
 
