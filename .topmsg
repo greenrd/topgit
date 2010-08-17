@@ -1,0 +1,13 @@
+From: Per Cederqvist <ceder@lysator.liu.se>
+Subject: Added 'tg checkout'.
+
+This is a convenience command, that helps select the next topic branch
+to work on.  You can navigate the dependency graph with 'tg checkout
+push' and 'tg checkout pop', and select a specific branch with 'tg
+checkout goto PATTERN'.
+
+Using this command, you can give your topic branches descriptive
+names, while not having to type those names repeatedly as you switch
+branches.
+
+Signed-off-by: Per Cederqvist <ceder@lysator.liu.se>
