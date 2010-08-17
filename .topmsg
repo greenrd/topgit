@@ -1,7 +1,14 @@
 From: Per Cederqvist <ceder@lysator.liu.se>
-Subject: Refactor tg summary.
+Subject: Specify the sort order of tg summary.
 
-Break out the normal procesing performed when no options are given to
-a shell function.
+The --sort option now has more features:
+
+  --sort=alphabetical   Sort the branches alphabetically.  This was
+                        the old behaviour, and is still the default.
+
+  --sort=topological    Do a dependency sort.
+  --sort                Same as --sort=topological.
+
+Use '--sort -t' to list the branch names, one per line.
 
 Signed-off-by: Per Cederqvist <ceder@lysator.liu.se>
