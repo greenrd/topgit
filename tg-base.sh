@@ -5,5 +5,5 @@
 # GPLv2
 
 name="$(git symbolic-ref HEAD | sed 's#^refs/\(heads\|top-bases\)/##')"
-base_rev="$(git rev-parse --short --verify "refs/top-bases/$name" 2>/dev/null)" || exit 0
+base_rev="$(git rev-parse --short --verify "refs/top-bases/$name" 2>/dev/null)" || exit 1
 echo $base_rev
