@@ -68,7 +68,7 @@ trap 'rm -rf "$playground"' EXIT
 pretty_tree()
 {
 	(export GIT_INDEX_FILE="$playground/^index"
-	 cd `git rev-parse --show-toplevel`
+	 cd $root_dir
 	 git read-tree "$1"
 	 git update-index --force-remove ".topmsg" ".topdeps"
 	 git write-tree)
