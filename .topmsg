@@ -1,0 +1,7 @@
+From: Per Cederqvist <ceder@lysator.liu.se>
+Subject: Don't export .topmsg and .topdeps
+
+"tg export new-branch" no longer exports .topmsg and .topdeps when you
+are standing in a subdirectory of the repository when you run it.
+
+Signed-off-by: Per Cederqvist <ceder@lysator.liu.se>
