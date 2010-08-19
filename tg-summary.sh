@@ -98,7 +98,7 @@ process_branch()
 }
 
 if [ -n "$tsort" ] && [ -n "$terse" ]; then
-	tg summary --deps|
+	$tg summary --deps|
 	tsort|
 	while read name
 	do
@@ -108,7 +108,7 @@ if [ -n "$tsort" ] && [ -n "$terse" ]; then
 fi
 
 if [ -n "$tsort" ]; then
-	tg summary --sort=topological -t |
+	$tg summary --sort=topological -t |
 	while read name
 	do
 		ref=refs/top-bases/$name
