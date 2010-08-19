@@ -1,0 +1,8 @@
+From: Per Cederqvist <ceder@lysator.liu.se>
+Subject: Write the usage message of tg depend only once.
+
+The implmentation of "tg depend" had the usage message in two places.
+Fixed by creating the usage function, so that there is a single place
+to edit if the usage changes.
+
+Signed-off-by: Per Cederqvist <ceder@lysator.liu.se>
