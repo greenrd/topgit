@@ -29,7 +29,6 @@ while [ -n "$1" ]; do
 done
 
 curname="$(git symbolic-ref HEAD | sed 's#^refs/\(heads\|top-bases\)/##')"
-curname_seen=false
 
 [ "$terse$graphviz$sort$deps" = "" ] ||
 	[ "$terse$graphviz$sort$deps" = "1" ] ||
@@ -83,7 +82,11 @@ git for-each-ref refs/top-bases |
 				if ! "$dep_is_tgish" || ! branch_annihilated $dep; then
 					if [ -n "$graphviz" ]; then
 						echo "\"$name\" -> \"$dep\";"
-						[ "$name" = "$curname" ] && curname_seen=true
+						set -x
+						if [ "$name" = "$curname" ]; then
+							echo "\"$curname\" [style=filled,fillcolor=yellow];"
+						fi
+						set +x
 					elif [ -n "$deps" ]; then
 						echo "$name $dep"
 					else
@@ -129,7 +132,6 @@ git for-each-ref refs/top-bases |
 	done
 
 if [ -n "$graphviz" ]; then
-	$curname_seen && echo "\"$curname\" [style=filled,fillcolor=yellow];"
 	echo '}'
 fi
 
