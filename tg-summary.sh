@@ -127,7 +127,7 @@ git for-each-ref refs/top-bases |
 	done
 
 if [ -n "$graphviz" ]; then
-	echo "\"$curname\" [style=filled,fillcolor=yellow];"
+	[ -n "$curname" ] && echo "\"$curname\" [style=filled,fillcolor=yellow];"
 	echo '}'
 fi
 
