@@ -82,11 +82,9 @@ git for-each-ref refs/top-bases |
 				if ! "$dep_is_tgish" || ! branch_annihilated $dep; then
 					if [ -n "$graphviz" ]; then
 						echo "\"$name\" -> \"$dep\";"
-						set -x
 						if [ "$name" = "$curname" ]; then
 							echo "\"$curname\" [style=filled,fillcolor=yellow];"
 						fi
-						set +x
 					elif [ -n "$deps" ]; then
 						echo "$name $dep"
 					else
