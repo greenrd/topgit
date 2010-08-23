@@ -1,7 +1,11 @@
 From: Per Cederqvist <ceder@lysator.liu.se>
-Subject: Generalize subbcommand selection in "tg depend"
+Subject: Do basic error checking in "tg depend add".
 
-Prepare "tg depend" for new subcommands by moving the implementation
-of "tg add" to a function.
+Check for the following errors:
+
+ - Working on a non-TopGit branch.
+ - Adding a branch as a dependency of itself.
+ - Adding a dependency that introduces a loop.
+ - Adding a dependency that already exists.
 
 Signed-off-by: Per Cederqvist <ceder@lysator.liu.se>
