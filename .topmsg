@@ -1,4 +1,7 @@
 From: Per Cederqvist <ceder@lysator.liu.se>
-Subject: Add "tg base" that prints the base version.
+Subject: [PATCH] t/ready-for-integration
+
+This is an empty TopGit patch that depends on all my TopGit patches
+that I consider to be ready for integration.
 
 Signed-off-by: Per Cederqvist <ceder@lysator.liu.se>

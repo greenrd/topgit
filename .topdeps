@@ -1,1 +1,6 @@
-master
+t/base
+t/ignore-emacs-autosave
+t/no-export-topmsg-topdeps
+t/graphviz-indicate-current
+t/checkout
+t/depend-add-error-checking
