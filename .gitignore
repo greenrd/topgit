@@ -33,3 +33,6 @@
 
 # .deb build stamp
 /build-stamp
+
+# Emacs auto-save files.
+*~
