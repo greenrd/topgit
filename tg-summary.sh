@@ -5,7 +5,7 @@
 
 terse=
 graphviz=
-sort=
+tsort=
 deps=
 
 
@@ -18,20 +18,25 @@ while [ -n "$1" ]; do
 		terse=1;;
 	--graphviz)
 		graphviz=1;;
+	--sort=alphabetical)
+		;;
+	--sort=topological)
+		tsort=1;;
 	--sort)
-		sort=1;;
+		tsort=1;;
 	--deps)
 		deps=1;;
 	*)
-		echo "Usage: tg [...] summary [-t | --sort | --deps | --graphviz]" >&2
+		echo "Usage: tg [...] summary [-t | --sort[=(alphabetical|topological)] | --deps | --graphviz]" >&2
 		exit 1;;
 	esac
 done
 
 curname="$(git symbolic-ref HEAD | sed 's#^refs/\(heads\|top-bases\)/##')"
 
-[ "$terse$graphviz$sort$deps" = "" ] ||
-	[ "$terse$graphviz$sort$deps" = "1" ] ||
+[ "$terse$graphviz$tsort$deps" = "" ] ||
+	[ "$terse$graphviz$tsort$deps" = "1" ] ||
+	[ "$terse$tsort" = "11" -a "$graphviz$deps" = "" ] ||
 	die "mutually exclusive options given"
 
 if [ -n "$graphviz" ]; then
@@ -54,14 +59,64 @@ graph [
 EOT
 fi
 
-if [ -n "$sort" ]; then
-	tsort_input=`mktemp`
-	exec 4>$tsort_input
-	exec 5<$tsort_input
-	rm $tsort_input
+## List branches
+
+process_branch()
+{
+	missing_deps=
+
+	current=' '
+	[ "$name" != "$curname" ] || current='>'
+	nonempty=' '
+	! branch_empty "$name" || nonempty='0'
+	remote=' '
+	[ -z "$base_remote" ] || remote='l'
+	! has_remote "$name" || remote='r'
+	rem_update=' '
+	[ "$remote" != 'r' ] || ! ref_exists "refs/remotes/$base_remote/top-bases/$name" || {
+		branch_contains "refs/top-bases/$name" "refs/remotes/$base_remote/top-bases/$name" &&
+		branch_contains "$name" "refs/remotes/$base_remote/$name"
+	} || rem_update='R'
+	[ "$rem_update" = 'R' ] || branch_contains "refs/remotes/$base_remote/$name" "$name" 2>/dev/null ||
+		rem_update='L'
+	deps_update=' '
+	needs_update "$name" >/dev/null || deps_update='D'
+	deps_missing=' '
+	[ -z "$missing_deps" ] || deps_missing='!'
+	base_update=' '
+	branch_contains "$name" "refs/top-bases/$name" || base_update='B'
+
+	if [ "$(git rev-parse "$name")" != "$rev" ]; then
+		subject="$(git cat-file blob "$name:.topmsg" | sed -n 's/^Subject: //p')"
+	else
+		# No commits yet
+		subject="(No commits)"
+	fi
+
+	printf '%s\t%-31s\t%s\n' "$current$nonempty$remote$rem_update$deps_update$deps_missing$base_update" \
+		"$name" "$subject"
+}
+
+if [ -n "$tsort" ] && [ -n "$terse" ]; then
+	$tg summary --deps|
+	tsort|
+	while read name
+	do
+		ref_exists refs/top-bases/$name && echo $name
+	done
+	exit 0
 fi
 
-## List branches
+if [ -n "$tsort" ]; then
+	$tg summary --sort=topological -t |
+	while read name
+	do
+		ref=refs/top-bases/$name
+		rev=`git rev-parse $ref`
+		process_branch
+	done
+	exit 0
+fi
 
 git for-each-ref refs/top-bases |
 	while read rev type ref; do
@@ -74,7 +129,7 @@ git for-each-ref refs/top-bases |
 			echo "$name"
 			continue
 		fi
-		if [ -n "$graphviz$sort$deps" ]; then
+		if [ -n "$graphviz$deps" ]; then
 			git cat-file blob "$name:.topdeps" | while read dep; do
 				dep_is_tgish=true
 				ref_exists "refs/top-bases/$dep"  ||
@@ -82,57 +137,22 @@ git for-each-ref refs/top-bases |
 				if ! "$dep_is_tgish" || ! branch_annihilated $dep; then
 					if [ -n "$graphviz" ]; then
 						echo "\"$name\" -> \"$dep\";"
-					elif [ -n "$deps" ]; then
-						echo "$name $dep"
+						if [ "$name" = "$curname" ] || [ "$dep" = "$curname" ]; then
+							echo "\"$curname\" [style=filled,fillcolor=yellow];"
+						fi
 					else
-						echo "$name $dep" >&4
+						echo "$name $dep"
 					fi
 				fi
 			done
 			continue
 		fi
 
-		missing_deps=
-
-		current=' '
-		[ "$name" != "$curname" ] || current='>'
-		nonempty=' '
-		! branch_empty "$name" || nonempty='0'
-		remote=' '
-		[ -z "$base_remote" ] || remote='l'
-		! has_remote "$name" || remote='r'
-		rem_update=' '
-		[ "$remote" != 'r' ] || ! ref_exists "refs/remotes/$base_remote/top-bases/$name" || {
-			branch_contains "refs/top-bases/$name" "refs/remotes/$base_remote/top-bases/$name" &&
-			branch_contains "$name" "refs/remotes/$base_remote/$name"
-		} || rem_update='R'
-		[ "$rem_update" = 'R' ] || branch_contains "refs/remotes/$base_remote/$name" "$name" 2>/dev/null ||
-			rem_update='L'
-		deps_update=' '
-		needs_update "$name" >/dev/null || deps_update='D'
-		deps_missing=' '
-		[ -z "$missing_deps" ] || deps_missing='!'
-		base_update=' '
-		branch_contains "$name" "refs/top-bases/$name" || base_update='B'
-
-		if [ "$(git rev-parse "$name")" != "$rev" ]; then
-			subject="$(git cat-file blob "$name:.topmsg" | sed -n 's/^Subject: //p')"
-		else
-			# No commits yet
-			subject="(No commits)"
-		fi
-
-		printf '%s\t%-31s\t%s\n' "$current$nonempty$remote$rem_update$deps_update$deps_missing$base_update" \
-			"$name" "$subject"
+		process_branch
 	done
 
 if [ -n "$graphviz" ]; then
 	echo '}'
 fi
-
-if [ -n "$sort" ]; then
-	tsort <&5
-fi
-
 
 # vim:noet
