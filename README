@@ -508,6 +508,21 @@ tg push
 	repository.  By default the remote gets all dependencies
 	(both tgish and non-tgish) and bases pushed to.
 
+tg base
+~~~~~~~
+	Prints the base commit of the current topic branch.  Silently
+	exits with exit code 1 if you are not working on a TopGit
+	branch.  The following command can be useful to get a summary
+	of the work you have made on a topic branch:
+
+		git log --first-parent --no-merges `tg base`..
+
+	(Note: if you have shared the TopGit branch, the above command
+	only lists the commits that were made in the current
+	repository, so you will not see work done by your
+	collaborators.)
+
+
 TODO: tg rename
 
 
