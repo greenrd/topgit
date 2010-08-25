@@ -1,0 +1,7 @@
+From: Per Cederqvist <ceder@lysator.liu.se>
+Subject: Generalize subbcommand selection in "tg depend"
+
+Prepare "tg depend" for new subcommands by moving the implementation
+of "tg add" to a function.
+
+Signed-off-by: Per Cederqvist <ceder@lysator.liu.se>
