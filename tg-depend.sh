@@ -43,10 +43,14 @@ branchrev="$(git rev-parse --verify "$name" 2>/dev/null)" ||
 	die "invalid branch name: $name"
 
 ## Record new dependency
+depend_add()
+{
+	echo "$name" >>"$root_dir/.topdeps"
+	git add -f "$root_dir/.topdeps"
+	git commit -m"New TopGit dependency: $name"
+	$tg update
+}
 
-echo "$name" >>"$root_dir/.topdeps"
-git add -f "$root_dir/.topdeps"
-git commit -m"New TopGit dependency: $name"
-$tg update
+depend_$subcmd
 
 # vim:noet
