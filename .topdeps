@@ -1,4 +1,3 @@
-t/base
 t/ignore-emacs-autosave
 t/no-export-topmsg-topdeps
 t/graphviz-indicate-current
