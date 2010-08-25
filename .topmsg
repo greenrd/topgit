@@ -1,7 +1,4 @@
 From: Per Cederqvist <ceder@lysator.liu.se>
-Subject: Indicate the current branch in "tg summary --graphviz"
-
-Give the current branch a yellow background in the output of
-"tg summary --graphviz".
+Subject: Add "tg base" that prints the base version.
 
 Signed-off-by: Per Cederqvist <ceder@lysator.liu.se>
