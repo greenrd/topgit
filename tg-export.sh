@@ -67,10 +67,9 @@ trap 'rm -rf "$playground"' EXIT
 # Output tree ID of a cleaned-up tree without tg's artifacts.
 pretty_tree()
 {
-	(export GIT_INDEX_FILE="$playground/^index"
-	 git read-tree "$1"
-	 git update-index --force-remove ".topmsg" ".topdeps"
-	 git write-tree)
+	git ls-tree --full-tree "$1" \
+	| awk -F '	' '$2 !~ /^.top/' \
+	| git mktree
 }
 
 create_tg_commit()
