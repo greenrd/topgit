@@ -1,3 +1,4 @@
 t/graphviz-indicate-current
 t/checkout
 t/depend-add-error-checking
+t/base-usage
