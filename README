@@ -622,3 +622,13 @@ All commands by default refer to the remote that 'tg remote --populate'
 was called on the last time ('topgit.remote' configuration variable). You can
 manually run any command with a different base remote by passing '-r REMOTE'
 _before_ the subcommand name.
+
+
+POINTERS
+--------
+
+The following references are useful to understand the development of topgit and
+its subcommands.
+
+tg depend:
+  http://lists-archives.org/git/688698-add-list-and-rm-sub-commands-to-tg-depend.html
