@@ -14,7 +14,7 @@ case "$1" in
 		break;;
 esac
 
-if [ "$#" = "0"]; then
+if [ "$#" -eq 0 ]; then
 	set -- HEAD
 fi
 
