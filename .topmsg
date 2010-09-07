@@ -1,7 +1,10 @@
 From: Per Cederqvist <ceder@lysator.liu.se>
-Subject: Fix "tg base -h"
+Subject: Fix "tg base -h" and generalize "tg base".
 
 All TopGit must output a usage message when supplied the "-h" option,
 or "tg help subcmd" will not work.  Fix "tg base".
+
+Allow "tg base" to receive a number of TopGit-controlled branches, and
+print the base for each of them.
 
 Signed-off-by: Per Cederqvist <ceder@lysator.liu.se>

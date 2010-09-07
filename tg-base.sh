@@ -6,11 +6,25 @@
 
 ## Parse options
 
-if [ -n "$1" ]; then
-	echo "Usage: tg [...] base" >&2
-	exit 1
+case "$1" in
+	-h|--help)
+		echo "Usage: tg [...] base [ branch... ]" >&2
+		exit 0;;
+	*)
+		break;;
+esac
+
+if [ "$#" = "0"]; then
+	set -- HEAD
 fi
 
-name="$(git symbolic-ref HEAD | sed 's#^refs/\(heads\|top-bases\)/##')"
-base_rev="$(git rev-parse --short --verify "refs/top-bases/$name" 2>/dev/null)" || exit 1
-echo $base_rev
+rv=0
+for rev in "$@"; do
+	name="$(git symbolic-ref "$rev" | sed 's#^refs/\(heads\|top-bases\)/##')"
+	base_rev="$(git rev-parse --short --verify "refs/top-bases/$name" 2>/dev/null)" || {
+		rv=1
+		echo $rev is not a TopGit branch >&2
+	}
+	echo $base_rev
+done
+exit $rv
