@@ -63,6 +63,42 @@ fi
 
 ## List branches
 
+process_branch()
+{
+	missing_deps=
+
+	current=' '
+	[ "$name" != "$curname" ] || current='>'
+	nonempty=' '
+	! branch_empty "$name" || nonempty='0'
+	remote=' '
+	[ -z "$base_remote" ] || remote='l'
+	! has_remote "$name" || remote='r'
+	rem_update=' '
+	[ "$remote" != 'r' ] || ! ref_exists "refs/remotes/$base_remote/top-bases/$name" || {
+		branch_contains "refs/top-bases/$name" "refs/remotes/$base_remote/top-bases/$name" &&
+		branch_contains "$name" "refs/remotes/$base_remote/$name"
+	} || rem_update='R'
+	[ "$rem_update" = 'R' ] || branch_contains "refs/remotes/$base_remote/$name" "$name" 2>/dev/null ||
+		rem_update='L'
+	deps_update=' '
+	needs_update "$name" >/dev/null || deps_update='D'
+	deps_missing=' '
+	[ -z "$missing_deps" ] || deps_missing='!'
+	base_update=' '
+	branch_contains "$name" "refs/top-bases/$name" || base_update='B'
+
+	if [ "$(git rev-parse "$name")" != "$rev" ]; then
+		subject="$(git cat-file blob "$name:.topmsg" | sed -n 's/^Subject: //p')"
+	else
+		# No commits yet
+		subject="(No commits)"
+	fi
+
+	printf '%s\t%-31s\t%s\n' "$current$nonempty$remote$rem_update$deps_update$deps_missing$base_update" \
+		"$name" "$subject"
+}
+
 git for-each-ref refs/top-bases |
 	while read rev type ref; do
 		name="${ref#refs/top-bases/}"
@@ -92,38 +128,7 @@ git for-each-ref refs/top-bases |
 			continue
 		fi
 
-		missing_deps=
-
-		current=' '
-		[ "$name" != "$curname" ] || current='>'
-		nonempty=' '
-		! branch_empty "$name" || nonempty='0'
-		remote=' '
-		[ -z "$base_remote" ] || remote='l'
-		! has_remote "$name" || remote='r'
-		rem_update=' '
-		[ "$remote" != 'r' ] || ! ref_exists "refs/remotes/$base_remote/top-bases/$name" || {
-			branch_contains "refs/top-bases/$name" "refs/remotes/$base_remote/top-bases/$name" &&
-			branch_contains "$name" "refs/remotes/$base_remote/$name"
-		} || rem_update='R'
-		[ "$rem_update" = 'R' ] || branch_contains "refs/remotes/$base_remote/$name" "$name" 2>/dev/null ||
-			rem_update='L'
-		deps_update=' '
-		needs_update "$name" >/dev/null || deps_update='D'
-		deps_missing=' '
-		[ -z "$missing_deps" ] || deps_missing='!'
-		base_update=' '
-		branch_contains "$name" "refs/top-bases/$name" || base_update='B'
-
-		if [ "$(git rev-parse "$name")" != "$rev" ]; then
-			subject="$(git cat-file blob "$name:.topmsg" | sed -n 's/^Subject: //p')"
-		else
-			# No commits yet
-			subject="(No commits)"
-		fi
-
-		printf '%s\t%-31s\t%s\n' "$current$nonempty$remote$rem_update$deps_update$deps_missing$base_update" \
-			"$name" "$subject"
+		process_branch
 	done
 
 if [ -n "$graphviz" ]; then
