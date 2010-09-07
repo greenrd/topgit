@@ -1,7 +1,0 @@
-From: Per Cederqvist <ceder@lysator.liu.se>
-Subject: Refactor tg summary.
-
-Break out the normal procesing performed when no options are given to
-a shell function.
-
-Signed-off-by: Per Cederqvist <ceder@lysator.liu.se>
