@@ -97,24 +97,26 @@ process_branch()
 		"$name" "$subject"
 }
 
-if [ -n "$tsort" ] && [ -n "$terse" ]; then
-	$tg summary --deps|
+if [ -n "$tsort" ]; then
+	list_deps|
 	tsort|
 	while read name
 	do
-		ref_exists refs/top-bases/$name && echo $name
+		ref_exists refs/top-bases/$name || continue
+
+		if [ -n "$terse" ] ; then
+			echo $name
+		else
+			ref=refs/top-bases/$name
+			rev=`git rev-parse $ref`
+			process_branch
+		fi
 	done
 	exit 0
 fi
 
-if [ -n "$tsort" ]; then
-	$tg summary --sort=topological -t |
-	while read name
-	do
-		ref=refs/top-bases/$name
-		rev=`git rev-parse $ref`
-		process_branch
-	done
+if [ -n "$deps" ]; then
+	list_deps
 	exit 0
 fi
 
@@ -123,32 +125,25 @@ git for-each-ref refs/top-bases |
 		name="${ref#refs/top-bases/}"
 		if branch_annihilated "$name"; then
 			continue;
-		fi;
+		fi
 
 		if [ -n "$terse" ]; then
 			echo "$name"
-			continue
-		fi
-		if [ -n "$graphviz$deps" ]; then
+		elif [ -n "$graphviz" ]; then
 			git cat-file blob "$name:.topdeps" | while read dep; do
 				dep_is_tgish=true
 				ref_exists "refs/top-bases/$dep"  ||
 					dep_is_tgish=false
 				if ! "$dep_is_tgish" || ! branch_annihilated $dep; then
-					if [ -n "$graphviz" ]; then
-						echo "\"$name\" -> \"$dep\";"
-						if [ "$name" = "$curname" ] || [ "$dep" = "$curname" ]; then
-							echo "\"$curname\" [style=filled,fillcolor=yellow];"
-						fi
-					else
-						echo "$name $dep"
+					echo "\"$name\" -> \"$dep\";"
+					if [ "$name" = "$curname" ] || [ "$dep" = "$curname" ]; then
+						echo "\"$curname\" [style=filled,fillcolor=yellow];"
 					fi
 				fi
 			done
-			continue
+		else
+			process_branch
 		fi
-
-		process_branch
 	done
 
 if [ -n "$graphviz" ]; then
