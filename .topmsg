@@ -1,7 +1,0 @@
-From: Per Cederqvist <ceder@lysator.liu.se>
-Subject: Implement "tg summary --deps" as a shell function.
-
-This avoids running "$tg summary --deps" from all commands that need
-that information internally.
-
-Signed-off-by: Per Cederqvist <ceder@lysator.liu.se>
