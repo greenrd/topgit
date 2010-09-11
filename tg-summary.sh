@@ -102,8 +102,10 @@ if [ -n "$tsort" ]; then
 	tsort|
 	while read name
 	do
+		ref_exists refs/top-bases/$name || continue
+
 		if [ -n "$terse" ] ; then
-			ref_exists refs/top-bases/$name && echo $name
+			echo $name
 		else
 			ref=refs/top-bases/$name
 			rev=`git rev-parse $ref`
