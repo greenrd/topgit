@@ -99,18 +99,21 @@ process_branch()
 		"$name" "$subject"
 }
 
+if [ -n "$deps" ]; then
+	list_deps
+	exit 0
+fi
+
 git for-each-ref refs/top-bases |
 	while read rev type ref; do
 		name="${ref#refs/top-bases/}"
 		if branch_annihilated "$name"; then
 			continue;
-		fi;
+		fi
 
 		if [ -n "$terse" ]; then
 			echo "$name"
-			continue
-		fi
-		if [ -n "$graphviz$sort$deps" ]; then
+		elif [ -n "$graphviz$sort" ]; then
 			git cat-file blob "$name:.topdeps" | while read dep; do
 				dep_is_tgish=true
 				ref_exists "refs/top-bases/$dep"  ||
@@ -118,17 +121,14 @@ git for-each-ref refs/top-bases |
 				if ! "$dep_is_tgish" || ! branch_annihilated $dep; then
 					if [ -n "$graphviz" ]; then
 						echo "\"$name\" -> \"$dep\";"
-					elif [ -n "$deps" ]; then
-						echo "$name $dep"
 					else
 						echo "$name $dep" >&4
 					fi
 				fi
 			done
-			continue
+		else
+			process_branch
 		fi
-
-		process_branch
 	done
 
 if [ -n "$graphviz" ]; then
