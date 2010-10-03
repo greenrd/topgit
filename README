@@ -483,12 +483,14 @@ tg import
 
 tg update
 ~~~~~~~~~
-	Update the current topic branch wrt. changes in the branches
-	it depends on and remote branches.
+	Update the current or specified topic branch wrt. changes in the
+	branches it depends on and remote branches.
 	This is performed in two phases - first,
 	changes within the dependencies are merged to the base,
 	then the base is merged into the topic branch.
 	The output will guide you in case of conflicts.
+
+	After the update the current branch is the specified one.
 
 	In case your dependencies are not up-to-date, tg update
 	will first recurse into them and update these.

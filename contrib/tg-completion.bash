@@ -423,7 +423,12 @@ _tg_summary ()
 
 _tg_update ()
 {
-	COMPREPLY=()
+	local cur="${COMP_WORDS[COMP_CWORD]}"
+
+	case "$cur" in
+	*)
+		__tgcomp "$(__tg_topics)"
+	esac
 }
 
 ### }}}
