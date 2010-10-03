@@ -524,6 +524,9 @@ tg base
 	repository, so you will not see work done by your
 	collaborators.)
 
+tg log
+~~~~~~
+	Prints the git log of the named topgit branch.
 
 TODO: tg rename
 
