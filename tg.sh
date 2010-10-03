@@ -239,6 +239,27 @@ branch_empty()
 	[ -z "$(git diff-tree "refs/top-bases/$1" "$1" -- | fgrep -v "	.top")" ]
 }
 
+# list_deps
+list_deps()
+{
+	git for-each-ref refs/top-bases |
+		while read rev type ref; do
+			name="${ref#refs/top-bases/}"
+			if branch_annihilated "$name"; then
+				continue;
+			fi
+
+			git cat-file blob "$name:.topdeps" | while read dep; do
+				dep_is_tgish=true
+				ref_exists "refs/top-bases/$dep"  ||
+					dep_is_tgish=false
+				if ! "$dep_is_tgish" || ! branch_annihilated $dep; then
+					echo "$name $dep"
+				fi
+			done
+		done
+}
+
 # switch_to_base NAME [SEED]
 switch_to_base()
 {
