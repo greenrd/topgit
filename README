@@ -327,7 +327,7 @@ tg remote
 	and 'git push' to operate on them. (Do NOT use 'git push --all'
 	for your pushes - plain 'git push' will do the right thing.)
 
-	It takes a mandatory remote name argument, and optional
+	It takes a optional remote name argument, and optional
 	'--populate' switch - use that for your origin-style remote,
 	it will seed the local topic branch system based on the
 	remote topic branches. '--populate' will also make 'tg remote'
