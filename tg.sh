@@ -14,7 +14,7 @@ info()
 
 die()
 {
-	info "fatal: $*"
+	info "fatal: $*" >&2
 	exit 1
 }
 
