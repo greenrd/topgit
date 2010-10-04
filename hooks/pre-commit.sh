@@ -93,3 +93,15 @@ BEGIN      { in_hunk = 0; }
 		# therefore no endless loop in the cycle-check
 		no_remotes=1 recurse_deps check_cycle_name "$newly_added"
 	done
+
+# check for repetitions of deps
+depdir="$(mktemp -t -d tg-depdir.XXXXXX)" ||
+	die "Can't check for multiple occurrences of deps"
+trap "rm -rf '$depdir'" 0
+cat_file "(i):.topdeps" |
+	while read dep; do
+		[ ! -d "$depdir/$dep" ] ||
+			die "Multiple occurrences of the same dep: $dep"
+		mkdir -p "$depdir/$dep" ||
+			die "Can't check for multiple occurrences of deps"
+	done
