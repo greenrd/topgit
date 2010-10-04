@@ -20,7 +20,8 @@ tg_util
 if head_=$(git symbolic-ref -q HEAD); then
 	case "$head_" in
 		refs/heads/*)
-			git rev-parse -q --verify "refs/top-bases${head_#refs/heads}" >/dev/null || exit 0;;
+			head_="${head_#refs/heads/}"
+			git rev-parse -q --verify "refs/top-bases/$head_" >/dev/null || exit 0;;
 		*)
 			exit 0;;
 	esac
@@ -61,4 +62,34 @@ tree=$(git write-tree) ||
 check_topfile "$tree" ".topdeps"
 check_topfile "$tree" ".topmsg"
 
-# TODO: Verify .topdeps for valid branch names and against cycles
+check_cycle_name()
+{
+	[ "$head_" != "$_dep" ] ||
+		die "TopGit dependencies form a cycle: perpetrator is $_name"
+}
+
+# we only need to check newly added deps and for these if a path exists to the
+# current HEAD
+git diff --cached "$root_dir/.topdeps" |
+	awk '
+BEGIN      { in_hunk = 0; }
+/^@@ /     { in_hunk = 1; }
+/^\+/      { if (in_hunk == 1) printf("%s\n", substr($0, 2)); }
+/^[^@ +-]/ { in_hunk = 0; }
+' |
+	while read newly_added; do
+		# check for self as dep
+		[ "$head_" != "$newly_added" ] ||
+			die "Can't have myself as dep"
+
+		# deps can be non-tgish but we can't run recurse_deps() on them
+		ref_exists "refs/top-bases/$newly_added" ||
+			continue
+
+		# recurse_deps uses dfs but takes the .topdeps from the tree,
+		# therefore no endless loop in the cycle-check
+		no_remotes=1 recurse_deps check_cycle_name "$newly_added"
+	done
+
+
+# TODO: Verify .topdeps for valid branch names
