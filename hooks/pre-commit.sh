@@ -29,10 +29,36 @@ else
 	exit 0;
 fi
 
-# TODO: check the index, not the working copy
-[ -s "$root_dir/.topdeps" ] ||
-	die ".topdeps is missing"
-[ -s "$root_dir/.topmsg" ] ||
-	die ".topmsg is missing"
+check_topfile()
+{
+	local tree file ls_line type size
+	tree=$1
+	file=$2
+
+	ls_line="$(git ls-tree --long "$tree" "$file")" ||
+		die "Can't ls tree for $file"
+
+	[ -n "$ls_line" ] ||
+		die "$file is missing"
+
+	# check for type and size
+	set -- $ls_line
+	type=$2
+	size=$4
+
+	# check file is of type blob (file)
+	[ "x$type" = "xblob" ] ||
+		die "$file is not a file"
+
+	# check for positive size
+	[ "$size" -gt 0 ] ||
+		die "$file has empty size"
+}
+
+tree=$(git write-tree) ||
+	die "Can't write tree"
+
+check_topfile "$tree" ".topdeps"
+check_topfile "$tree" ".topmsg"
 
 # TODO: Verify .topdeps for valid branch names and against cycles
