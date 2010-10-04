@@ -25,17 +25,15 @@ cat_file()
 	arg="$1"
 	case "$arg" in
 	'(w):'*)
-		arg=$(echo "$arg" | tail --bytes=+5)
-		cat "$arg"
-		return
+		cat "${arg#(w):}"
 		;;
 	'(i):'*)
 		# ':file' means cat from index
-		arg=$(echo "$arg" | tail --bytes=+5)
-		git cat-file blob ":$arg"
+		git cat-file blob "${arg#(i)}"
 		;;
 	*)
 		git cat-file blob "$arg"
+		;;
 	esac
 }
 
