@@ -78,6 +78,9 @@ BEGIN      { in_hunk = 0; }
 /^[^@ +-]/ { in_hunk = 0; }
 ' |
 	while read newly_added; do
+		ref_exists "$newly_added" ||
+			die "Invalid branch as dependent: $newly_added"
+
 		# check for self as dep
 		[ "$head_" != "$newly_added" ] ||
 			die "Can't have myself as dep"
@@ -90,6 +93,3 @@ BEGIN      { in_hunk = 0; }
 		# therefore no endless loop in the cycle-check
 		no_remotes=1 recurse_deps check_cycle_name "$newly_added"
 	done
-
-
-# TODO: Verify .topdeps for valid branch names
