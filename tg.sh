@@ -429,19 +429,28 @@ get_temp()
 
 ## Initial setup
 
-set -e
-git_dir="$(git rev-parse --git-dir)"
-root_dir="$(git rev-parse --show-cdup)"; root_dir="${root_dir:-.}"
+cmd="$1"
+[ -z "$tg__include" ] || cmd="include" # ensure setup happens
+case "$cmd" in
+help|--help|-h)
+        :;;
+*)
+        if [ -n "$cmd" ]; then
+            set -e
+            git_dir="$(git rev-parse --git-dir)"
+            root_dir="$(git rev-parse --show-cdup)"; root_dir="${root_dir:-.}"
 # Make sure root_dir doesn't end with a trailing slash.
-root_dir="${root_dir%/}"
-base_remote="$(git config topgit.remote 2>/dev/null)" || :
-tg="tg"
+            root_dir="${root_dir%/}"
+            base_remote="$(git config topgit.remote 2>/dev/null)" || :
+            tg="tg"
 # make sure merging the .top* files will always behave sanely
-setup_ours
-setup_hook "pre-commit"
-# create global temporary directories, inside GIT_DIR
-tg_tmp_dir="$(mktemp -d "$git_dir/tg-tmp.XXXXXX")"
-trap "rm -rf \"$tg_tmp_dir\"" EXIT
+            setup_ours
+            setup_hook "pre-commit"
+            # create global temporary directories, inside GIT_DIR
+            tg_tmp_dir="$(mktemp -d "$git_dir/tg-tmp.XXXXXX")"
+            trap "rm -rf \"$tg_tmp_dir\"" EXIT
+        fi
+esac
 
 ## Dispatch
 
@@ -461,7 +470,6 @@ if [ "$1" = "-r" ]; then
 	tg="$tg -r $base_remote"
 fi
 
-cmd="$1"
 [ -n "$cmd" ] || { do_help; exit 1; }
 shift
 
