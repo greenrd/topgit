@@ -370,6 +370,10 @@ tg summary
 	branches in a machine-readable format.  Feed this to "tsort"
 	to get the output from --sort.
 
+	Options:
+	  -i		Use TopGit meta data from the index instead of branch
+	  -w		Use TopGit meta data from the working tree instead of branch
+
 	TODO: Speed up by an order of magnitude
 	TODO: Text graph view
 

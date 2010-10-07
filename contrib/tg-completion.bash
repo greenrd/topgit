@@ -426,7 +426,11 @@ _tg_summary ()
 	*)
 		__tgcomp "
 			--graphviz
+			--sort
+			--deps
 			-t
+			-i
+			-w
 		"
 	esac
 }
