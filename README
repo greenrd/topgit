@@ -539,8 +539,24 @@ tg log
 	Note: if you have merged changes from a different repository, this
 	command might not list all interesting commits.
 
-TODO: tg rename
+tg prev
+~~~~~~~
+	Outputs the direct dependencies for the current or named patch.
 
+	Options:
+	  -i		show dependencies based on index instead of branch
+	  -w		show dependencies based on working tree instead of branch
+
+tg next
+~~~~~~~
+	Outputs all patches which directly depend on the current or
+	named patch.
+
+	Options:
+	  -i		show dependencies based on index instead of branch
+	  -w		show dependencies based on working tree instead of branch
+
+TODO: tg rename
 
 IMPLEMENTATION
 --------------
