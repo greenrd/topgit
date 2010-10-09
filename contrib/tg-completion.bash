@@ -359,6 +359,14 @@ _tg_mail ()
 	local cur="${COMP_WORDS[COMP_CWORD]}"
 
 	case "$cur" in
+	-*)
+		__tgcomp "
+			-i
+			-w
+			-s
+			-r
+		"
+		;;
 	*)
 		__tgcomp "$(__tg_topics)"
 	esac

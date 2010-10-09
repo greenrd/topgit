@@ -323,6 +323,10 @@ tg mail
 
 	to let `git send-email` ask for confirmation before sending any mail.
 
+	Options:
+	  -i		base patch generation on index instead of branch
+	  -w		base patch generation on working tree instead of branch
+
 	TODO: 'tg mail patchfile' to mail an already exported patch
 	TODO: mailing patch series
 	TODO: specifying additional options and addresses on command
