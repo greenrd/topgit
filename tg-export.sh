@@ -57,8 +57,7 @@ if [ -z "$branches" ]; then
 fi
 
 
-playground="$(mktemp -d -t tg-export.XXXXXX)"
-trap 'rm -rf "$playground"' EXIT
+playground="$(get_temp tg-export -d)"
 
 
 ## Collapse driver

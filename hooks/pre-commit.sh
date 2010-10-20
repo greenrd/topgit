@@ -95,9 +95,8 @@ BEGIN      { in_hunk = 0; }
 	done
 
 # check for repetitions of deps
-depdir="$(mktemp -t -d tg-depdir.XXXXXX)" ||
+depdir="$(get_temp tg-depdir -d)" ||
 	die "Can't check for multiple occurrences of deps"
-trap "rm -rf '$depdir'" 0
 cat_file "(i):.topdeps" |
 	while read dep; do
 		[ ! -d "$depdir/$dep" ] ||

@@ -34,7 +34,7 @@ if [ -n "$in_reply_to" ]; then
 fi
 
 
-patchfile="$(mktemp -t tg-mail.XXXXXX)"
+patchfile="$(get_temp tg-mail)"
 
 $tg patch "$name" >"$patchfile"
 
@@ -53,7 +53,5 @@ people=
 
 # NOTE: git-send-email handles cc itself
 eval git send-email $send_email_args "$people" "$patchfile"
-
-rm "$patchfile"
 
 # vim:noet

@@ -55,10 +55,9 @@ EOT
 fi
 
 if [ -n "$sort" ]; then
-	tsort_input=`mktemp`
+	tsort_input="$(get_temp tg-summary-sort)"
 	exec 4>$tsort_input
 	exec 5<$tsort_input
-	rm $tsort_input
 fi
 
 ## List branches

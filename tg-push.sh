@@ -45,8 +45,7 @@ for name in $branches; do
 	ref_exists "$name" || die "detached HEAD? Can't push $name"
 done
 
-_listfile="$(mktemp -t tg-push-listfile.XXXXXX)"
-trap "rm -f \"$_listfile\"" 0
+_listfile="$(get_temp tg-push-listfile)"
 
 push_branch()
 {
