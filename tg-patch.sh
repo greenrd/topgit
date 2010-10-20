@@ -5,7 +5,7 @@
 
 name=
 
-topic=
+head_from=
 diff_opts=
 diff_committed_only=yes	# will be unset for index/worktree
 
@@ -16,11 +16,13 @@ while [ -n "$1" ]; do
 	arg="$1"; shift
 	case "$arg" in
 	-i)
-		topic='(i)'
+		[ -z "$head_from" ] || die "-i and -w are mutually exclusive"
+		head_from=-i
 		diff_opts="$diff_opts --cached";
 		diff_committed_only=;;
 	-w)
-		topic='(w)'
+		[ -z "$head_from" ] || die "-i and -w are mutually exclusive"
+		head_from=-w
 		diff_committed_only=;;
 	-*)
 		echo "Usage: tg [...] patch [-i | -w] [NAME]" >&2
@@ -31,22 +33,23 @@ while [ -n "$1" ]; do
 	esac
 done
 
+head="$(git symbolic-ref HEAD)"
+head="${head#refs/heads/}"
 
-[ -n "$name"  -a  -z "$diff_committed_only" ]  &&
-	die "-i/-w are mutually exclusive with NAME"
-
-[ -n "$name" ] || name="$(git symbolic-ref HEAD | sed 's#^refs/\(heads\|top-bases\)/##')"
+[ -n "$name" ] ||
+	name="$head"
 base_rev="$(git rev-parse --short --verify "refs/top-bases/$name" 2>/dev/null)" ||
 	die "not a TopGit-controlled branch"
 
-# if not index/worktree, topic is current branch
-[ -z "$topic" ] && topic="$name"
+if [ -n "$head_from" ] && [ "$name" != "$head" ]; then
+	die "$head_from makes only sense for the current branch"
+fi
 
 
 
 setup_pager
 
-cat_file "$topic:.topmsg"
+cat_file "$name:.topmsg" $head_from
 echo
 [ -n "$(git grep $diff_opts '^[-]--' ${diff_committed_only:+"$name"} -- ".topmsg")" ] || echo '---'
 
@@ -63,7 +66,7 @@ else
 fi
 
 echo '-- '
-echo "tg: ($base_rev..) $name (depends on: $(cat_file "$topic:.topdeps" | paste -s -d' '))"
+echo "tg: ($base_rev..) $name (depends on: $(cat_file "$name:.topdeps" $head_from | paste -s -d' '))"
 branch_contains "$name" "$base_rev" ||
 	echo "tg: The patch is out-of-date wrt. the base! Run \`$tg update\`."
 
