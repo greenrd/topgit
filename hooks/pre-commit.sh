@@ -20,7 +20,8 @@ tg_util
 if head_=$(git symbolic-ref -q HEAD); then
 	case "$head_" in
 		refs/heads/*)
-			git rev-parse -q --verify "refs/top-bases${head_#refs/heads}" >/dev/null || exit 0;;
+			head_="${head_#refs/heads/}"
+			git rev-parse -q --verify "refs/top-bases/$head_" >/dev/null || exit 0;;
 		*)
 			exit 0;;
 	esac
@@ -29,10 +30,78 @@ else
 	exit 0;
 fi
 
-# TODO: check the index, not the working copy
-[ -s "$root_dir/.topdeps" ] ||
-	die ".topdeps is missing"
-[ -s "$root_dir/.topmsg" ] ||
-	die ".topmsg is missing"
+check_topfile()
+{
+	local tree file ls_line type size
+	tree=$1
+	file=$2
 
-# TODO: Verify .topdeps for valid branch names and against cycles
+	ls_line="$(git ls-tree --long "$tree" "$file")" ||
+		die "Can't ls tree for $file"
+
+	[ -n "$ls_line" ] ||
+		die "$file is missing"
+
+	# check for type and size
+	set -- $ls_line
+	type=$2
+	size=$4
+
+	# check file is of type blob (file)
+	[ "x$type" = "xblob" ] ||
+		die "$file is not a file"
+
+	# check for positive size
+	[ "$size" -gt 0 ] ||
+		die "$file has empty size"
+}
+
+tree=$(git write-tree) ||
+	die "Can't write tree"
+
+check_topfile "$tree" ".topdeps"
+check_topfile "$tree" ".topmsg"
+
+check_cycle_name()
+{
+	[ "$head_" != "$_dep" ] ||
+		die "TopGit dependencies form a cycle: perpetrator is $_name"
+}
+
+# we only need to check newly added deps and for these if a path exists to the
+# current HEAD
+git diff --cached "$root_dir/.topdeps" |
+	awk '
+BEGIN      { in_hunk = 0; }
+/^@@ /     { in_hunk = 1; }
+/^\+/      { if (in_hunk == 1) printf("%s\n", substr($0, 2)); }
+/^[^@ +-]/ { in_hunk = 0; }
+' |
+	while read newly_added; do
+		ref_exists "$newly_added" ||
+			die "Invalid branch as dependent: $newly_added"
+
+		# check for self as dep
+		[ "$head_" != "$newly_added" ] ||
+			die "Can't have myself as dep"
+
+		# deps can be non-tgish but we can't run recurse_deps() on them
+		ref_exists "refs/top-bases/$newly_added" ||
+			continue
+
+		# recurse_deps uses dfs but takes the .topdeps from the tree,
+		# therefore no endless loop in the cycle-check
+		no_remotes=1 recurse_deps check_cycle_name "$newly_added"
+	done
+
+# check for repetitions of deps
+depdir="$(mktemp -t -d tg-depdir.XXXXXX)" ||
+	die "Can't check for multiple occurrences of deps"
+trap "rm -rf '$depdir'" 0
+cat_file "(i):.topdeps" |
+	while read dep; do
+		[ ! -d "$depdir/$dep" ] ||
+			die "Multiple occurrences of the same dep: $dep"
+		mkdir -p "$depdir/$dep" ||
+			die "Can't check for multiple occurrences of deps"
+	done
