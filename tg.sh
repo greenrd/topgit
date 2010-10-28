@@ -14,7 +14,7 @@ info()
 
 die()
 {
-	info "fatal: $*"
+	info "fatal: $*" >&2
 	exit 1
 }
 
@@ -25,17 +25,15 @@ cat_file()
 	arg="$1"
 	case "$arg" in
 	'(w):'*)
-		arg=$(echo "$arg" | tail --bytes=+5)
-		cat "$arg"
-		return
+		cat "${arg#(w):}"
 		;;
 	'(i):'*)
 		# ':file' means cat from index
-		arg=$(echo "$arg" | tail --bytes=+5)
-		git cat-file blob ":$arg"
+		git cat-file blob "${arg#(i)}"
 		;;
 	*)
 		git cat-file blob "$arg"
+		;;
 	esac
 }
 
@@ -259,7 +257,6 @@ list_deps()
 			done
 		done
 }
-
 
 # switch_to_base NAME [SEED]
 switch_to_base()
