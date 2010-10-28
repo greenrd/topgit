@@ -14,7 +14,7 @@ info()
 
 die()
 {
-	info "fatal: $*"
+	info "fatal: $*" >&2
 	exit 1
 }
 
@@ -25,17 +25,15 @@ cat_file()
 	arg="$1"
 	case "$arg" in
 	'(w):'*)
-		arg=$(echo "$arg" | tail --bytes=+5)
-		cat "$arg"
-		return
+		cat "${arg#(w):}"
 		;;
 	'(i):'*)
 		# ':file' means cat from index
-		arg=$(echo "$arg" | tail --bytes=+5)
-		git cat-file blob ":$arg"
+		git cat-file blob "${arg#(i)}"
 		;;
 	*)
 		git cat-file blob "$arg"
+		;;
 	esac
 }
 
@@ -237,6 +235,27 @@ needs_update()
 branch_empty()
 {
 	[ -z "$(git diff-tree "refs/top-bases/$1" "$1" -- | fgrep -v "	.top")" ]
+}
+
+# list_deps
+list_deps()
+{
+	git for-each-ref refs/top-bases |
+		while read rev type ref; do
+			name="${ref#refs/top-bases/}"
+			if branch_annihilated "$name"; then
+				continue;
+			fi
+
+			git cat-file blob "$name:.topdeps" | while read dep; do
+				dep_is_tgish=true
+				ref_exists "refs/top-bases/$dep"  ||
+					dep_is_tgish=false
+				if ! "$dep_is_tgish" || ! branch_annihilated $dep; then
+					echo "$name $dep"
+				fi
+			done
+		done
 }
 
 # switch_to_base NAME [SEED]

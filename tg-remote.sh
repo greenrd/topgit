@@ -15,12 +15,15 @@ while [ -n "$1" ]; do
 	--populate)
 		populate=1;;
 	-*)
-		echo "Usage: tg [...] remote [--populate] REMOTE" >&2
+		echo "Usage: tg [...] remote [--populate] [REMOTE]" >&2
 		exit 1;;
 	*)
 		name="$arg";;
 	esac
 done
+
+[ -n "$name" ] ||
+	name="$base_remote"
 
 git config "remote.$name.url" >/dev/null || die "unknown remote '$name'"
 
