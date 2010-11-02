@@ -528,10 +528,8 @@ tg log
 ~~~~~~
 	Prints the git log of the named topgit branch.
 
-	Note: if you have shared the TopGit branch, this command
-	only lists the commits that were made in the current
-	repository, so you will not see work done by your
-	collaborators.
+	Note: if you have merged changes from a different repository, this
+	command might not list all interesting commits.
 
 TODO: tg rename
 
