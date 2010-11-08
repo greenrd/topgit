@@ -4,7 +4,7 @@
 # GPLv2
 
 name=
-topic=
+head_from=
 
 
 ## Parse options
@@ -12,12 +12,9 @@ topic=
 while [ -n "$1" ]; do
 	arg="$1"; shift
 	case "$arg" in
-	-i)
-		[ -z "$topic" ] || die "-i and -w are mutually exclusive"
-		topic=-i;;
-	-w)
-		[ -z "$topic" ] || die "-i and -w are mutually exclusive"
-		topic=-w;;
+	-i|-w)
+		[ -z "$head_from" ] || die "-i and -w are mutually exclusive"
+		head_from="$arg";;
 	-*)
 		echo "Usage: tg [...] files [-i | -w] [NAME]" >&2
 		exit 1;;
@@ -28,16 +25,22 @@ while [ -n "$1" ]; do
 done
 
 
-[ -n "$name" -a -n "$topic" ] &&
-	die "-i/-w are mutually exclusive with NAME"
+head="$(git symbolic-ref HEAD)"
+head="${head#refs/heads/}"
 
-[ -n "$name" ] || name="$(git symbolic-ref HEAD | sed 's#^refs/\(heads\|top-bases\)/##')"
+[ -n "$name" ] ||
+	name="$head"
 base_rev="$(git rev-parse --short --verify "refs/top-bases/$name" 2>/dev/null)" ||
 	die "not a TopGit-controlled branch"
 
+if [ -n "$head_from" ] && [ "$name" != "$head" ]; then
+	die "$head_from makes only sense for the current branch"
+fi
+
 b_tree=$(pretty_tree "$name" -b)
-t_tree=$(pretty_tree "$name" $topic)
+t_tree=$(pretty_tree "$name" $head_from)
 
 git diff-tree --name-only -r $b_tree $t_tree
 
 # vim:noet
+
