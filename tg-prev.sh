@@ -1,6 +1,7 @@
 #!/bin/sh
 # TopGit - A different patch queue manager
 # (c) Petr Baudis <pasky@suse.cz>  2008
+# (c) Bert Wesarg <Bert.Wesarg@googlemail.com>  2009
 # GPLv2
 
 name=
@@ -16,7 +17,7 @@ while [ -n "$1" ]; do
 		[ -z "$head_from" ] || die "-i and -w are mutually exclusive"
 		head_from="$arg";;
 	-*)
-		echo "Usage: tg [...] files [-i | -w] [NAME]" >&2
+		echo "Usage: tg next [-i | -w] [NAME]" >&2
 		exit 1;;
 	*)
 		[ -z "$name" ] || die "name already specified ($name)"
@@ -24,23 +25,14 @@ while [ -n "$1" ]; do
 	esac
 done
 
-
-head="$(git symbolic-ref HEAD)"
-head="${head#refs/heads/}"
-
+head="$(git rev-parse --abbrev-ref=loose HEAD)"
 [ -n "$name" ] ||
 	name="$head"
 base_rev="$(git rev-parse --short --verify "refs/top-bases/$name" 2>/dev/null)" ||
 	die "not a TopGit-controlled branch"
 
-if [ -n "$head_from" ] && [ "$name" != "$head" ]; then
-	die "$head_from makes only sense for the current branch"
-fi
+# select .topdeps source for HEAD branch
+[ "x$name" = "x$head" ] ||
+	head_from=
 
-b_tree=$(pretty_tree "$name" -b)
-t_tree=$(pretty_tree "$name" $head_from)
-
-git diff-tree --name-only -r $b_tree $t_tree
-
-# vim:noet
-
+cat_file "$name:.topdeps" $head_from

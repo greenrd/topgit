@@ -102,7 +102,7 @@ collapsed_commit()
 			echo "TopGit-driven merge of branches:"
 			echo
 			cut -f 2 "$playground/$name^parents"
-		} | git commit-tree "$(pretty_tree "refs/top-bases/$name")" \
+		} | git commit-tree "$(pretty_tree "$name" -b)" \
 			$(for p in $parent; do echo -p $p; done))"
 	fi
 
@@ -217,7 +217,7 @@ linearize()
 	else
 		retmerge=0;
 
-		git merge-recursive "$(pretty_tree "refs/top-bases/$_dep")" -- HEAD "$(pretty_tree "refs/heads/$_dep")" || retmerge="$?";
+		git merge-recursive "$(pretty_tree "$_dep" -b)" -- HEAD "$(pretty_tree "refs/heads/$_dep")" || retmerge="$?";
 
 		if test "x$retmerge" != "x0"; then
 			git rerere;

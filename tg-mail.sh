@@ -3,6 +3,7 @@
 # GPLv2
 
 name=
+head_from=
 send_email_args=
 in_reply_to=
 
@@ -12,12 +13,15 @@ in_reply_to=
 while [ -n "$1" ]; do
 	arg="$1"; shift
 	case "$arg" in
+	-i|-w)
+		[ -z "$head_from" ] || die "-i and -w are mutually exclusive"
+		head_from="$arg";;
 	-s)
 		send_email_args="$1"; shift;;
 	-r)
 		in_reply_to="$1"; shift;;
 	-*)
-		echo "Usage: tg [...] mail [-s SEND_EMAIL_ARGS] [-r REFERENCE_MSGID] [NAME]" >&2
+		echo "Usage: tg [...] mail [-s SEND_EMAIL_ARGS] [-r REFERENCE_MSGID] [-i | -w] [NAME]" >&2
 		exit 1;;
 	*)
 		[ -z "$name" ] || die "name already specified ($name)"
@@ -25,7 +29,8 @@ while [ -n "$1" ]; do
 	esac
 done
 
-[ -n "$name" ] || name="$(git symbolic-ref HEAD | sed 's#^refs/heads/##')"
+head="$(git symbolic-ref HEAD | sed 's#^refs/heads/##')"
+[ -n "$name" ] || name="$head"
 base_rev="$(git rev-parse --short --verify "refs/top-bases/$name" 2>/dev/null)" ||
 	die "not a TopGit-controlled branch"
 
@@ -36,7 +41,8 @@ fi
 
 patchfile="$(get_temp tg-mail)"
 
-$tg patch "$name" >"$patchfile"
+# let tg patch sort out whether $head_from makes sense for $name
+$tg patch "$name" $head_from >"$patchfile"
 
 header="$(sed -e '/^$/,$d' -e "s,','\\\\'',g" "$patchfile")"
 
