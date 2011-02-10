@@ -34,7 +34,9 @@ baserev="$(git rev-parse --verify "refs/top-bases/$name" 2>/dev/null)" ||
 ## Annihilate
 mb="$(git merge-base "refs/top-bases/$name" "$name")"
 git read-tree "$mb^{tree}"
-git commit -m"TopGit branch $name annihilated."
+# Need to pass --no-verify in order to inhibit TopGit's pre-commit hook to run,
+# which would bark upon missing .top* files.
+git commit --no-verify -m"TopGit branch $name annihilated."
 
 info 'If you have shared your work, you might want to run `tg push` now.'
 info 'Then you probably want to switch to another branch.'
