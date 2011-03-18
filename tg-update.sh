@@ -24,7 +24,7 @@ while [ -n "$1" ]; do
 			[ -z "$name" ] || die "name already specified ($name)"
 			name="$arg"
 		else
-			pattern="$pattern refs/top-bases/$arg"
+			pattern="$pattern refs/top-bases/${arg#refs/top-bases/}"
 		fi
 		;;
 	esac
