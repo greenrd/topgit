@@ -175,9 +175,9 @@ branch_annihilated()
 	_name="$1";
 
 	# use the merge base in case the base is ahead.
-	mb="$(git merge-base "refs/top-bases/$_name" "$_name")";
+	mb="$(git merge-base "refs/top-bases/$_name" "$_name" 2> /dev/null)";
 
-	test "$(git rev-parse "$mb^{tree}")" = "$(git rev-parse "$_name^{tree}")";
+	test -z "$mb" || test "$(git rev-parse "$mb^{tree}")" = "$(git rev-parse "$_name^{tree}")";
 }
 
 # is_sha1 REF
