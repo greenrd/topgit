@@ -3,10 +3,10 @@
 # (c) Petr Baudis <pasky@suse.cz>  2008
 # GPLv2
 
-name=
-all=
-pattern=
-current=
+name= # Branch to update
+all= # Update all branches
+pattern= # Branch selection filter for -a
+current= # Branch we are currently on
 
 
 ## Parse options
