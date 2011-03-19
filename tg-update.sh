@@ -45,7 +45,14 @@ update_branch() {
 	depcheck="$(get_temp tg-depcheck)"
 	missing_deps=
 	needs_update "$name" >"$depcheck" || :
-	[ -z "$missing_deps" ] || { info "some dependencies are missing: $missing_deps; skpping"; return;  }
+	if [ -n "$missing_deps" ]; then
+	   	if [ -z "$all" ]; then
+		       	die "some dependencies are missing: $missing_deps"
+		else
+		       	info "some dependencies are missing: $missing_deps; skipping"
+		       	return
+		fi
+	fi
 	if [ -s "$depcheck" ]; then
 		# We need to switch to the base branch
 		# ...but only if we aren't there yet (from failed previous merge)
