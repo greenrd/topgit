@@ -192,11 +192,13 @@ is_sha1()
 # CMD can refer to $_name for queried branch name,
 # $_dep for dependency name,
 # $_depchain for space-seperated branch backtrace,
+# $_dep_missing boolean to check whether $_dep is present
 # and the $_dep_is_tgish boolean.
 # It can modify $_ret to affect the return value
 # of the whole function.
 # If recurse_deps() hits missing dependencies, it will append
-# them to space-separated $missing_deps list and skip them.
+# them to space-separated $missing_deps list and skip them
+# affter calling CMD with _dep_missing set.
 # remote dependencies are processed if no_remotes is unset.
 recurse_deps()
 {
@@ -219,9 +221,12 @@ recurse_deps()
 
 	_ret=0
 	while read _dep; do
+		_dep_missing=
 		if ! ref_exists "$_dep" ; then
-			# All hope is lost
+			# All hope is lost. Inform driver and continue
 			missing_deps="$missing_deps $_dep"
+			_dep_missing=1
+			eval "$_cmd"
 			continue
 		fi
 
@@ -249,6 +254,11 @@ recurse_deps()
 # description for details) and set $_ret to non-zero.
 branch_needs_update()
 {
+	if [ -n "$_dep_missing" ]; then
+		echo "! $_depchain"
+		return 0
+	fi
+
 	_dep_base_update=
 	if [ -n "$_dep_is_tgish" ]; then
 		if has_remote "$_dep"; then
@@ -274,8 +284,9 @@ branch_needs_update()
 # This function is recursive; it outputs reverse path from NAME
 # to the branch (e.g. B_DIRTY B1 B2 NAME), one path per line,
 # inner paths first. Innermost name can be ':' if the head is
-# not in sync with the base or '%' if the head is not in sync
-# with the remote (in this order of priority).
+# not in sync with the base, '%' if the head is not in sync
+# with the remote (in this order of priority) or '!' if depednecy
+# is missing.
 # It will also return non-zero status if NAME needs update.
 # If needs_update() hits missing dependencies, it will append
 # them to space-separated $missing_deps list and skip them.

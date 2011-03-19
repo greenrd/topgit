@@ -49,6 +49,9 @@ _listfile="$(get_temp tg-push-listfile)"
 
 push_branch()
 {
+	# FIXME should we abort on missing dependency?
+	[ -z "$_dep_missing" ] || return 0
+
 	# if so desired omit non tgish deps
 	$tgish_deps_only && [ -z "$_dep_is_tgish" ] && return 0
 
@@ -66,6 +69,7 @@ for name in $branches; do
 	# re-use push_branch, which expects some pre-defined variables
 	_dep="$name"
 	_dep_is_tgish=1
+	_dep_missing=
 	ref_exists "top-bases/$_dep" ||
 		_dep_is_tgish=
 	push_branch "$name"

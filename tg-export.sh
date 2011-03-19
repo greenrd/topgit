@@ -261,6 +261,9 @@ fi
 
 driver()
 {
+	# FIXME should we abort on missing dependency?
+	[ -z "$_dep_missing" ] || return 0
+
 	case $_dep in refs/remotes/*) return;; esac
 	branch_needs_update >/dev/null
 	[ "$_ret" -eq 0 ] ||
@@ -273,7 +276,7 @@ driver()
 # in topological order.
 if [ -z "$branches" ]; then
 	recurse_deps driver "$name"
-	(_ret=0; _dep="$name"; _name=""; _dep_is_tgish=1; driver)
+	(_ret=0; _dep="$name"; _name=; _dep_is_tgish=1; _dep_missing=; driver)
 else
 	echo "$branches" | tr ',' '\n' | while read _dep; do
 		_dep_is_tgish=1
