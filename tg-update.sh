@@ -31,11 +31,15 @@ while [ -n "$1" ]; do
 done
 [ -z "$pattern" ] && pattern=refs/top-bases
 
-current="$(git symbolic-ref HEAD | sed 's#^refs/\(heads\|top-bases\)/##')"
-if [ -z "$all" -a -z "$name" ]; then
-	name="$current"
-	base_rev="$(git rev-parse --short --verify "refs/top-bases/$name" 2>/dev/null)" ||
-	die "not a TopGit-controlled branch"
+current="$(git symbolic-ref HEAD 2>/dev/null | sed 's#^refs/\(heads\|top-bases\)/##')"
+if [ -z "$all" ]; then
+	if [ -z "$name" ]; then
+		name="$current"
+		base_rev="$(git rev-parse --short --verify "refs/top-bases/$name" 2>/dev/null)" ||
+			die "not a TopGit-controlled branch"
+	fi
+else
+	[ -n "$current" ] || die "cannot return to detached tree; switch to another branch"
 fi
 
 update_branch() {
