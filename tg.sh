@@ -216,7 +216,7 @@ recurse_deps()
 	# if the branch was annihilated, there exists no .topdeps file
 	if ! branch_annihilated "$_name"; then
 		#TODO: handle nonexisting .topdeps?
-		git cat-file blob "$_name:.topdeps" >>"$_depsfile";
+		git cat-file blob "$_name:.topdeps" | sed '/^[[:space:]]*$/d' >>"$_depsfile";
 	fi;
 
 	_ret=0
