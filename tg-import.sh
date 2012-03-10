@@ -22,7 +22,7 @@ while [ -n "$1" ]; do
 	-s)
 		single="$1"; shift;;
 	-*)
-		echo "Usage: tg [...] import [-d BASE_BRANCH] {[-p PREFIX] RANGE...|-s NAME COMMIT}" >&2
+		echo "Usage: tg [...] import [-d BASE_BRANCH] {[-p PREFIX] RANGE...|-s NAME [COMMIT]}" >&2
 		exit 1;;
 	*)
 		ranges="$ranges $arg";;
@@ -74,7 +74,7 @@ process_commit()
 	basedep=
 	get_commit_msg "$commit" > .topmsg
 	git add -f .topmsg .topdeps
-	if ! git cherry-pick --no-commit "$commit"; then
+	if [ -n "$ranges" -a ! git cherry-pick --no-commit "$commit" ]; then
 		info "The commit will also finish the import of this patch."
 		exit 2
 	fi
@@ -83,7 +83,16 @@ process_commit()
 }
 
 if [ -n "$single" ]; then
-	process_commit $ranges "$single"
+        if [ -n "$ranges" ]; then
+	        process_commit $ranges "$single"
+        else
+                git diff-files -q --quiet --ignore-submodules || die "working directory is not clean"
+                tempbranch=tg-import-temp
+                git branch $tempbranch || exit
+                git reset --soft HEAD^1
+                process_commit $tempbranch "$single"
+                git branch -D $tempbranch
+        fi
 	exit
 fi
 
