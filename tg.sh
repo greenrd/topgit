@@ -399,7 +399,7 @@ setup_pager()
 	export LESS="${LESS:-FRSX}"	# as in pager.c:pager_preexec()
 
 	# setup_pager should be called only once per command
-	pager_fifo="$tg_tmp_dir/pager"
+	pager_fifo="${tg_tmp_dir:-/tmp}/pager"
 	mkfifo -m 600 "$pager_fifo"
 
 	"$TG_PAGER" < "$pager_fifo" &
@@ -411,7 +411,7 @@ setup_pager()
 
 	# atexit(close(1); wait pager)
 	# deliberately overwrites the global EXIT trap
-	trap "exec >&-; rm -rf \"$tg_tmp_dir\"; wait" EXIT
+	trap "exec >&-; rm -rf \"${tg_tmp_dir:-/tmp/pager}\"; wait" EXIT
 }
 
 # get_temp NAME [-d]
