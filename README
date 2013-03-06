@@ -272,6 +272,14 @@ tg depend
 
 	TODO: Subcommand for removing dependencies, obviously
 
+tg files
+~~~~~~~~
+	List files changed by the current or specified topic branch.
+
+	Options:
+	  -i		list files based on index instead of branch
+	  -w		list files based on working tree instead of branch
+
 tg info
 ~~~~~~~
 	Show a summary information about the current or specified
@@ -314,6 +322,10 @@ tg mail
 		git config sendemail.confirm always
 
 	to let `git send-email` ask for confirmation before sending any mail.
+
+	Options:
+	  -i		base patch generation on index instead of branch
+	  -w		base patch generation on working tree instead of branch
 
 	TODO: 'tg mail patchfile' to mail an already exported patch
 	TODO: mailing patch series
@@ -361,6 +373,10 @@ tg summary
 	The --deps option outputs dependency informations between
 	branches in a machine-readable format.  Feed this to "tsort"
 	to get the output from --sort.
+
+	Options:
+	  -i		Use TopGit meta data from the index instead of branch
+	  -w		Use TopGit meta data from the working tree instead of branch
 
 	TODO: Speed up by an order of magnitude
 	TODO: Text graph view
@@ -520,13 +536,27 @@ tg log
 ~~~~~~
 	Prints the git log of the named topgit branch.
 
-	Note: if you have shared the TopGit branch, this command
-	only lists the commits that were made in the current
-	repository, so you will not see work done by your
-	collaborators.
+	Note: if you have merged changes from a different repository, this
+	command might not list all interesting commits.
+
+tg prev
+~~~~~~~
+	Outputs the direct dependencies for the current or named patch.
+
+	Options:
+	  -i		show dependencies based on index instead of branch
+	  -w		show dependencies based on working tree instead of branch
+
+tg next
+~~~~~~~
+	Outputs all patches which directly depend on the current or
+	named patch.
+
+	Options:
+	  -i		show dependencies based on index instead of branch
+	  -w		show dependencies based on working tree instead of branch
 
 TODO: tg rename
-
 
 IMPLEMENTATION
 --------------

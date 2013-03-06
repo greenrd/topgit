@@ -18,23 +18,77 @@ die()
 	exit 1
 }
 
-# cat_file "topic:file"
-# Like `git cat-file blob $1`, but topics '(i)' and '(w)' means index and worktree
+# cat_file TOPIC:PATH [FROM]
+# cat the file PATH from branch TOPIC when FROM is empty.
+# FROM can be -i or -w, than the file will be from the index or worktree,
+# respectively. The caller should than ensure that HEAD is TOPIC, to make sense.
 cat_file()
 {
-	arg="$1"
-	case "$arg" in
-	'(w):'*)
-		cat "${arg#(w):}"
+	path="$1"
+	case "${2-}" in
+	-w)
+		cat "$root_dir/${path#*:}"
 		;;
-	'(i):'*)
+	-i)
 		# ':file' means cat from index
-		git cat-file blob "${arg#(i)}"
+		git cat-file blob ":${path#*:}"
+		;;
+	'')
+		git cat-file blob "$path"
 		;;
 	*)
-		git cat-file blob "$arg"
+		die "Wrong argument to cat_file: '$2'"
 		;;
 	esac
+}
+
+# get tree for the committed topic
+get_tree_()
+{
+	echo "$1"
+}
+
+# get tree for the base
+get_tree_b()
+{
+	echo "refs/top-bases/$1"
+}
+
+# get tree for the index
+get_tree_i()
+{
+	git write-tree
+}
+
+# get tree for the worktree
+get_tree_w()
+{
+	i_tree=$(git write-tree)
+	(
+		# the file for --index-output needs to sit next to the
+		# current index file
+		: ${GIT_INDEX_FILE:="$git_dir/index"}
+		TMP_INDEX="$(mktemp "${GIT_INDEX_FILE}-tg.XXXXXX")"
+		git read-tree -m $i_tree --index-output="$TMP_INDEX" &&
+		GIT_INDEX_FILE="$TMP_INDEX" &&
+		export GIT_INDEX_FILE &&
+		git diff --name-only -z HEAD |
+			git update-index -z --add --remove --stdin &&
+		git write-tree &&
+		rm -f "$TMP_INDEX"
+	)
+}
+
+# pretty_tree NAME [-b | -i | -w]
+# Output tree ID of a cleaned-up tree without tg's artifacts.
+# NAME will be ignored for -i and -w, but needs to be present
+pretty_tree()
+{
+	name=$1
+	source=${2#?}
+	git ls-tree --full-tree "$(get_tree_$source "$name")" |
+		awk -F '	' '$2 !~ /^.top/' |
+		git mktree
 }
 
 # setup_hook NAME
@@ -150,7 +204,7 @@ recurse_deps()
 	_name="$1"; # no shift
 	_depchain="$*"
 
-	_depsfile="$(mktemp -t tg-depsfile.XXXXXX)"
+	_depsfile="$(get_temp tg-depsfile)"
 	# If no_remotes is unset check also our base against remote base.
 	# Checking our head against remote head has to be done in the helper.
 	if test -z "$no_remotes" && has_remote "top-bases/$_name"; then
@@ -183,7 +237,6 @@ recurse_deps()
 		eval "$_cmd"
 	done <"$_depsfile"
 	missing_deps="${missing_deps# }"
-	rm "$_depsfile"
 	return $_ret
 }
 
@@ -231,15 +284,23 @@ needs_update()
 	recurse_deps branch_needs_update "$@"
 }
 
-# branch_empty NAME
+# branch_empty NAME [-i | -w]
 branch_empty()
 {
-	[ -z "$(git diff-tree "refs/top-bases/$1" "$1" -- | fgrep -v "	.top")" ]
+	[ "$(pretty_tree "$1" -b)" = "$(pretty_tree "$1" ${2-})" ]
 }
 
-# list_deps
+# list_deps [-i | -w]
+# -i/-w apply only to HEAD
 list_deps()
 {
+	local head
+	local head_from
+	local from
+	head_from=${1-}
+	head="$(git symbolic-ref -q HEAD)" ||
+		head="..detached.."
+
 	git for-each-ref refs/top-bases |
 		while read rev type ref; do
 			name="${ref#refs/top-bases/}"
@@ -247,7 +308,10 @@ list_deps()
 				continue;
 			fi
 
-			git cat-file blob "$name:.topdeps" | while read dep; do
+			from=$head_from
+			[ "refs/heads/$name" = "$head" ] ||
+				from=
+			cat_file "$name:.topdeps" $from | while read dep; do
 				dep_is_tgish=true
 				ref_exists "refs/top-bases/$dep"  ||
 					dep_is_tgish=false
@@ -334,19 +398,28 @@ setup_pager()
 	# now spawn pager
 	export LESS="${LESS:-FRSX}"	# as in pager.c:pager_preexec()
 
-	_pager_fifo_dir="$(mktemp -t -d tg-pager-fifo.XXXXXX)"
-	_pager_fifo="$_pager_fifo_dir/0"
-	mkfifo -m 600 "$_pager_fifo"
+	# setup_pager should be called only once per command
+	pager_fifo="$tg_tmp_dir/pager"
+	mkfifo -m 600 "$pager_fifo"
 
-	"$TG_PAGER" < "$_pager_fifo" &
-	exec > "$_pager_fifo"		# dup2(pager_fifo.in, 1)
+	"$TG_PAGER" < "$pager_fifo" &
+	exec > "$pager_fifo"		# dup2(pager_fifo.in, 1)
 
 	# this is needed so e.g. `git diff` will still colorize it's output if
 	# requested in ~/.gitconfig with color.diff=auto
 	export GIT_PAGER_IN_USE=1
 
 	# atexit(close(1); wait pager)
-	trap "exec >&-; rm \"$_pager_fifo\"; rmdir \"$_pager_fifo_dir\"; wait" EXIT
+	# deliberately overwrites the global EXIT trap
+	trap "exec >&-; rm -rf \"$tg_tmp_dir\"; wait" EXIT
+}
+
+# get_temp NAME [-d]
+# creates a new temporary file (or directory with -d) in the global
+# temporary directory $tg_tmp_dir with pattern prefix NAME
+get_temp()
+{
+	mktemp ${2-} "$tg_tmp_dir/$1.XXXXXX"
 }
 
 ## Startup
@@ -366,6 +439,9 @@ tg="tg"
 # make sure merging the .top* files will always behave sanely
 setup_ours
 setup_hook "pre-commit"
+# create global temporary directories, inside GIT_DIR
+tg_tmp_dir="$(mktemp -d "$git_dir/tg-tmp.XXXXXX")"
+trap "rm -rf \"$tg_tmp_dir\"" EXIT
 
 ## Dispatch
 

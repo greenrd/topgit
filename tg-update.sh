@@ -27,7 +27,7 @@ base_rev="$(git rev-parse --short --verify "refs/top-bases/$name" 2>/dev/null)" 
 
 ## First, take care of our base
 
-depcheck="$(mktemp -t tg-depcheck.XXXXXX)"
+depcheck="$(get_temp tg-depcheck)"
 missing_deps=
 needs_update "$name" >"$depcheck" || :
 [ -z "$missing_deps" ] || die "some dependencies are missing: $missing_deps"
@@ -96,7 +96,6 @@ if [ -s "$depcheck" ]; then
 else
 	info "The base is up-to-date."
 fi
-rm "$depcheck"
 
 # Home, sweet home...
 # (We want to always switch back, in case we were on the base from failed

@@ -51,7 +51,7 @@ fi
 git cat-file blob "$name:.topdeps" |
 	sed '1{ s/^/Depends: /; n; }; s/^/         /;'
 
-depcheck="$(mktemp -t tg-depcheck.XXXXXX)"
+depcheck="$(get_temp tg-depcheck)"
 missing_deps=
 needs_update "$name" >"$depcheck" || :
 if [ -n "$missing_deps" ]; then
@@ -72,6 +72,5 @@ if [ -s "$depcheck" ]; then
 else
 	echo "Up-to-date."
 fi
-rm "$depcheck"
 
 # vim:noet

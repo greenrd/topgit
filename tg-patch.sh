@@ -5,9 +5,7 @@
 
 name=
 
-topic=
-diff_opts=
-diff_committed_only=yes	# will be unset for index/worktree
+head_from=
 
 
 ## Parse options
@@ -15,13 +13,9 @@ diff_committed_only=yes	# will be unset for index/worktree
 while [ -n "$1" ]; do
 	arg="$1"; shift
 	case "$arg" in
-	-i)
-		topic='(i)'
-		diff_opts="$diff_opts --cached";
-		diff_committed_only=;;
-	-w)
-		topic='(w)'
-		diff_committed_only=;;
+	-i|-w)
+		[ -z "$head_from" ] || die "-i and -w are mutually exclusive"
+		head_from="$arg";;
 	-*)
 		echo "Usage: tg [...] patch [-i | -w] [NAME]" >&2
 		exit 1;;
@@ -31,40 +25,56 @@ while [ -n "$1" ]; do
 	esac
 done
 
+head="$(git symbolic-ref HEAD)"
+head="${head#refs/heads/}"
 
-[ -n "$name"  -a  -z "$diff_committed_only" ]  &&
-	die "-i/-w are mutually exclusive with NAME"
-
-[ -n "$name" ] || name="$(git symbolic-ref HEAD | sed 's#^refs/\(heads\|top-bases\)/##')"
+[ -n "$name" ] ||
+	name="$head"
 base_rev="$(git rev-parse --short --verify "refs/top-bases/$name" 2>/dev/null)" ||
 	die "not a TopGit-controlled branch"
 
-# if not index/worktree, topic is current branch
-[ -z "$topic" ] && topic="$name"
+if [ -n "$head_from" ] && [ "$name" != "$head" ]; then
+	die "$head_from makes only sense for the current branch"
+fi
 
 
 
 setup_pager
 
-cat_file "$topic:.topmsg"
-echo
-[ -n "$(git grep $diff_opts '^[-]--' ${diff_committed_only:+"$name"} -- ".topmsg")" ] || echo '---'
 
-# Evil obnoxious hack to work around the lack of git diff --exclude
-git_is_stupid="$(mktemp -t tg-patch-changes.XXXXXX)"
-git diff --name-only $diff_opts "$base_rev" ${diff_committed_only:+"$name"} -- |
-	fgrep -vx ".topdeps" |
-	fgrep -vx ".topmsg" >"$git_is_stupid" || : # fgrep likes to fail randomly?
-if [ -s "$git_is_stupid" ]; then
-	cd "$root_dir"
-	cat "$git_is_stupid" | xargs git diff -a --patch-with-stat $diff_opts "$base_rev" ${diff_committed_only:+"$name"} --
-else
+# put out the commit message
+# and put an empty line out, if the last one in the message was not an empty line
+# and put out "---" if the commit message does not have one yet
+cat_file "$name:.topmsg" $head_from |
+	awk '
+/^---/ {
+    has_3dash=1;
+}
+       {
+    need_empty = 1;
+    if ($0 == "")
+        need_empty = 0;
+    print;
+}
+END    {
+    if (need_empty)
+        print "";
+    if (!has_3dash)
+        print "---";
+}
+'
+
+b_tree=$(pretty_tree "$name" -b)
+t_tree=$(pretty_tree "$name" $head_from)
+
+if [ $b_tree = $t_tree ]; then
 	echo "No changes."
+else
+	git diff-tree -p --stat $b_tree $t_tree
 fi
-rm "$git_is_stupid"
 
 echo '-- '
-echo "tg: ($base_rev..) $name (depends on: $(cat_file "$topic:.topdeps" | paste -s -d' '))"
+echo "tg: ($base_rev..) $name (depends on: $(cat_file "$name:.topdeps" $head_from | paste -s -d' '))"
 branch_contains "$name" "$base_rev" ||
 	echo "tg: The patch is out-of-date wrt. the base! Run \`$tg update\`."
 
