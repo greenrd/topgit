@@ -494,8 +494,10 @@ tg import
 	an alternative prefix (even an empty one).
 
 	Alternatively, you can use the '-s NAME' parameter to specify
-	the name of target branch; the command will then take one more
-	argument describing a single commit to import.
+	the name of a target branch; the command will then take one
+	more argument describing a single commit to import. If this
+	argument is omitted, instead of copying a commit, tg import
+	will lop off the current HEAD and import that.
 
 tg update
 ~~~~~~~~~
