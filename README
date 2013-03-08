@@ -241,8 +241,8 @@ tg delete
 ~~~~~~~~~
 	Remove a TopGit-controlled topic branch of given name
 	(required argument). Normally, this command will remove
-	only empty branch (base == head); use '-f' to remove
-	non-empty branch.
+	only empty branch (base == head) without dependencies; use '-f'
+	to remove non-empty branch or branch that is dependent upon.
 
 	The '-f' option is also useful to force removal of a branch's base, if
 	you used 'git branch -D B' to remove the branch B, and then certain
@@ -501,14 +501,20 @@ tg import
 
 tg update
 ~~~~~~~~~
-	Update the current or specified topic branch wrt. changes in the
-	branches it depends on and remote branches.
+	Update the current, specified or all topic branches wrt. changes
+	in the branches they depends on and remote branches.
 	This is performed in two phases - first,
 	changes within the dependencies are merged to the base,
 	then the base is merged into the topic branch.
 	The output will guide you in case of conflicts.
 
-	After the update the current branch is the specified one.
+	When -a is specifed, updates all topic branches matched by
+	PATTERNs (see git-for-all-refs(1) for details) or all if
+	no pattern is given.
+
+	After the update if single topic branch was specified, it is left
+	as current; if -a was specified, returns to branch which was
+	current at the beginning.
 
 	In case your dependencies are not up-to-date, tg update
 	will first recurse into them and update these.
@@ -520,7 +526,7 @@ tg update
 	('tg summary' will point out branches with incomplete
 	dependencies by showing an '!' near to them).
 
-	TODO: tg update -a for updating all topic branches
+	TODO: tg update -a -c to autoremove (clean) up-to-date branches
 
 tg push
 ~~~~~~~
