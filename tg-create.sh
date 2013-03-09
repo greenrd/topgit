@@ -18,7 +18,7 @@ while [ -n "$1" ]; do
 	-r)
 		rname="$1"; shift;;
 	-*)
-		echo "Usage: tg [...] create NAME [DEPS...|-r RNAME]" >&2
+		echo "Usage: tg [...] create [<name> [<dep>...|-r <rname>] ]" >&2
 		exit 1;;
 	*)
 		if [ -z "$name" ]; then

@@ -15,7 +15,7 @@ while [ -n "$1" ]; do
 	--)
 		break;;
 	-*)
-		echo "Usage: tg [...] log [NAME] [-- GIT LOG OPTIONS...]" >&2
+		echo "Usage: tg [...] log [<name>] [-- <git-log-option>...]" >&2
 		exit 1;;
 	*)
 		[ -z "$name" ] || die "name already specified ($name)"
