@@ -195,7 +195,8 @@ SYNOPSIS
 	## Add a TopGit remote to a repository and push to it
 	$ git remote add foo URL
 	$ tg remote foo
-	$ git push foo
+	$ tg push -r foo t/whatever
+	# Note that magit still uses git push, which is wrong as of TopGit 0.8
 
 	## Update from a non-default TopGit remote
 	$ git fetch foo
@@ -336,10 +337,11 @@ tg remote
 ~~~~~~~~~
 	Register given remote as TopGit-controlled. This will create
 	the namespace for the remote branch bases and teach 'git fetch'
-	and 'git push' to operate on them. (Do NOT use 'git push --all'
-	for your pushes - plain 'git push' will do the right thing.)
+	to operate on them. However, from TopGit 0.8 onwards you need to
+	use 'tg push', or 'git push --mirror', for pushing TopGit-controlled
+	branches.
 
-	It takes a optional remote name argument, and optional
+	'tg remote' takes a optional remote name argument, and optional
 	'--populate' switch - use that for your origin-style remote,
 	it will seed the local topic branch system based on the
 	remote topic branches. '--populate' will also make 'tg remote'
@@ -618,32 +620,20 @@ the (intuitive) 'ours' merge strategy definition in .git/config.
 REMOTE HANDLING
 ---------------
 
-There are three issues with accessing topic branches in remote repositories:
+There are two remaining issues with accessing topic branches in remote
+repositories:
 
-	(i) Fetching/pushing accurate picture of the remote topic branch setup
-	(ii) Referring to remote topic branches from your local repository
-	(iii) Developing some of the remote topic branches locally
+	(i) Referring to remote topic branches from your local repository
+	(ii) Developing some of the remote topic branches locally
 
-(ii) and (iii) are fairly interconnected problems, while (i) is largely
-independent. The issue is to accurately reflect the current state of the
-quickly changing topic branches set - this can be easily done
-with the current facilities like 'git remote prune' and 'git push --mirror' -
-and to properly upload also the bases of the topic branches.
-For this, we need to modify the fetch/push refspecs to also include
-the refs/top-bases/ ref namespace; we shall provide a special 'tg remote'
-command to set up an existing remote for TopGit usage.
-
-About (ii) and (iii), there are two somewhat contradicting design
-considerations:
+There are two somewhat contradictory design considerations here:
 
 	(a) Hacking on multiple independent TopGit remotes in a single
 	repository
 	(b) Having a self-contained topic system in local refs space
 
 To us, (a) does not appear to be very convincing, while (b) is quite desirable
-for 'git-log topic' etc. working, 'git push' automatically creating
-self-contained topic system in the remote repository, and increased conceptual
-simplicity.
+for 'git-log topic' etc. working, and increased conceptual simplicity.
 
 Thus, we choose to instantiate all the topic branches of given remote locally;
 this is performed by 'tg remote --populate'.
