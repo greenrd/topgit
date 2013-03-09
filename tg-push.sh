@@ -18,7 +18,7 @@ while [ -n "$1" ]; do
 	--tgish-only)
 		tgish_deps_only=true;;
 	-h|--help)
-		echo "Usage: tg push [--dry-run] [--no-deps] [--tgish-only] [-r remote] branch*"
+		echo "Usage: tg push [--dry-run] [--no-deps] [--tgish-only] [-r <remote>] [<branch>...]"
 		exit 0;;
 	-r)
 		remote="$1"

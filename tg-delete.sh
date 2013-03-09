@@ -15,7 +15,7 @@ while [ -n "$1" ]; do
 	-f)
 		force=1;;
 	-*)
-		echo "Usage: tg [...] delete [-f] NAME" >&2
+		echo "Usage: tg [...] delete [-f] <name>" >&2
 		exit 1;;
 	*)
 		[ -z "$name" ] || die "name already specified ($name)"

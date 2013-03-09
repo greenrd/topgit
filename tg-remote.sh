@@ -15,7 +15,7 @@ while [ -n "$1" ]; do
 	--populate)
 		populate=1;;
 	-*)
-		echo "Usage: tg [...] remote [--populate] [REMOTE]" >&2
+		echo "Usage: tg [...] remote [--populate] [<remote>]" >&2
 		exit 1;;
 	*)
 		name="$arg";;

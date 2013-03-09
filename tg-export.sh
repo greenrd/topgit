@@ -43,7 +43,7 @@ while [ -n "$1" ]; do
 	--linearize)
 		driver=linearize;;
 	-*)
-		echo "Usage: tg [...] export ([--collapse] NEWBRANCH | [-b BRANCH1,BRANCH2...] --quilt DIRECTORY | --linearize NEWBRANCH)" >&2
+		echo "Usage: tg [...] export ([--collapse] <newbranch> | [-b <branch1>...] --quilt <directory> | --linearize <newbranch>)" >&2
 		exit 1;;
 	*)
 		[ -z "$output" ] || die "output already specified ($output)"
