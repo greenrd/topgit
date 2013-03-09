@@ -1,6 +1,7 @@
 From: Robin Green <greenrd@greenrd.org>
-Subject: [PATCH] t/asciidoc
+Subject: Make documentation files display nicely on GitHub
 
-Make documentation files display nicely on GitHub
+They are already in Asciidoc format, which GitHub knows how to render, but we
+need to tell GitHub that they are in that format.
 
 Signed-off-by: Robin Green <greenrd@greenrd.org>
