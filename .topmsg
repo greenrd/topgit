@@ -1,0 +1,6 @@
+From: Robin Green <greenrd@greenrd.org>
+Subject: [PATCH] t/asciidoc
+
+Make documentation files display nicely on GitHub
+
+Signed-off-by: Robin Green <greenrd@greenrd.org>

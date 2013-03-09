@@ -24,7 +24,7 @@ tg $(commands_out) $(hooks_out): % : %.sh Makefile
 	chmod +x $@+ && \
 	mv $@+ $@
 
-$(help_out): README
+$(help_out): README.asciidoc
 	@CMD=`echo $@ | sed -e 's/tg-//' -e 's/\.txt//'` && \
 	echo '[HELP]' $$CMD && \
 	./create-help.sh $$CMD

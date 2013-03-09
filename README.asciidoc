@@ -14,7 +14,7 @@ branch for each patch and providing few tools to maintain the branches.
 
 INSTALLATION
 ------------
-See the file INSTALL.
+See the file INSTALL.asciidoc
 
 
 RATIONALE
