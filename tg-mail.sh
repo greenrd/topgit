@@ -21,7 +21,7 @@ while [ -n "$1" ]; do
 	-r)
 		in_reply_to="$1"; shift;;
 	-*)
-		echo "Usage: tg [...] mail [-s SEND_EMAIL_ARGS] [-r REFERENCE_MSGID] [-i | -w] [NAME]" >&2
+		echo "Usage: tg [...] mail [-s <send-email-args>] [-r <reference-msgid>] [-i | -w] [<name>]" >&2
 		exit 1;;
 	*)
 		[ -z "$name" ] || die "name already specified ($name)"

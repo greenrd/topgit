@@ -370,7 +370,7 @@ do_help()
 		done
 
 		echo "TopGit v$TG_VERSION - A different patch queue manager"
-		echo "Usage: tg [-r REMOTE] ($cmds|help) ..."
+		echo "Usage: tg ( help [<command>] | [-r <remote>] ($cmds) ...)"
 	elif [ -r "@cmddir@"/tg-$1 ] ; then
 		setup_pager
 		@cmddir@/tg-$1 -h 2>&1 || :
