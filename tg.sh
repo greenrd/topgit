@@ -3,7 +3,7 @@
 # (c) Petr Baudis <pasky@suse.cz>  2008
 # GPLv2
 
-TG_VERSION=0.8
+TG_VERSION=0.9
 
 ## Auxiliary functions
 
