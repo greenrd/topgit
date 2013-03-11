@@ -544,10 +544,11 @@ tg update
 
 tg push
 ~~~~~~~
-	pushes a TopGit-controlled topic branch - the current branch, if
-	you don't specify which - to a remote repository.  By default,
-	the remote gets all the dependencies (both TopGit-controlled and
-	non-TopGit-controlled) and bases pushed to it too.
+	pushes one, several or all TopGit-controlled topic branches -
+	the current branch, if you don't specify which - to a remote
+	repository.  By default, the remote gets all the dependencies
+	(both TopGit-controlled and non-TopGit-controlled) and bases
+	pushed to it too.
 
 tg base
 ~~~~~~~
