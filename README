@@ -671,11 +671,25 @@ different base remote by passing '-r REMOTE' _before_ the subcommand
 name.
 
 
-POINTERS
---------
+REFERENCES
+----------
 
 The following references are useful to understand the development of
 topgit and its subcommands.
 
-tg depend:
+* tg depend:
   http://lists-archives.org/git/688698-add-list-and-rm-sub-commands-to-tg-depend.html
+
+
+THIRD-PARTY SOFTWARE
+--------------------
+
+The following software understands TopGit branches:
+
+* http://magit.github.com/magit/[magit] - a git mode for emacs
+
+IMPORTANT: Magit requires its topgit mode to be enabled first, as
+described in its documentation, in the "Activating extensions"
+subsection.  If this is not done, it will not push TopGit branches
+correctly, so it's important to enable it even if you plan to mostly use
+TopGit from the command line.
