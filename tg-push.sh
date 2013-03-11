@@ -77,7 +77,7 @@ for name in $branches; do
 	# deps but only if branch is tgish
 	$recurse_deps && [ -n "$_dep_is_tgish" ] &&
 		no_remotes=1 recurse_deps push_branch "$name"
-
-	# remove multiple occurrences of the same branch
-	sort -u "$_listfile" | xargs git push $dry_run "$remote"
 done
+
+# remove multiple occurrences of the same branch
+sort -u "$_listfile" | xargs git push $dry_run "$remote"
