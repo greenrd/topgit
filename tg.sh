@@ -448,6 +448,8 @@ help|--help|-h)
 *)
         if [ -n "$cmd" ]; then
             set -e
+            # suppress the merge log editor feature since git 1.7.10
+            export GIT_MERGE_AUTOEDIT=no
             git_dir="$(git rev-parse --git-dir)"
             root_dir="$(git rev-parse --show-cdup)"; root_dir="${root_dir:-.}"
 # Make sure root_dir doesn't end with a trailing slash.
