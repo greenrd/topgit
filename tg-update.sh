@@ -17,7 +17,7 @@ while [ -n "$1" ]; do
 	-a)
 		all=1;;
 	-*)
-		echo "Usage: tg [...] update [-a] [NAME|PATTERN ...]" >&2
+		echo "Usage: tg [...] update ([<name>] | -a [<pattern>...])" >&2
 		exit 1;;
 	*)
 		if [ -z "$all" ]; then

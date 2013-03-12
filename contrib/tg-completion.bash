@@ -268,7 +268,7 @@ _tg_delete ()
 _tg_depend ()
 {
 	local subcommands="add"
-	local subcommand="$(__git_find_subcommand "$subcommands")"
+	local subcommand="$(__git_find_subcommand "$subcommands" 2>/dev/null || __git_find_on_cmdline "$subcommands" 2>/dev/null)"
 	if [ -z "$subcommand" ]; then
 		__tgcomp "$subcommands"
 		return

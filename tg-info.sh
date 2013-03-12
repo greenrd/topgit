@@ -12,7 +12,7 @@ while [ -n "$1" ]; do
 	arg="$1"; shift
 	case "$arg" in
 	-*)
-		echo "Usage: tg [...] info [NAME]" >&2
+		echo "Usage: tg [...] info [<name>]" >&2
 		exit 1;;
 	*)
 		[ -z "$name" ] || die "name already specified ($name)"

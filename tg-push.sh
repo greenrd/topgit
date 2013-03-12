@@ -7,6 +7,7 @@
 recurse_deps=true
 tgish_deps_only=false
 dry_run=
+push_all=false
 
 while [ -n "$1" ]; do
 	arg="$1"; shift
@@ -17,8 +18,10 @@ while [ -n "$1" ]; do
 		dry_run=--dry-run;;
 	--tgish-only)
 		tgish_deps_only=true;;
+	-a|--all)
+		push_all=true;;
 	-h|--help)
-		echo "Usage: tg push [--dry-run] [--no-deps] [--tgish-only] [-r remote] branch*"
+		echo "Usage: tg push [--dry-run] [--no-deps] [--tgish-only] [-r <remote>] [--all | <branch>...]"
 		exit 0;;
 	-r)
 		remote="$1"
@@ -38,7 +41,18 @@ if [ -z "$remote" ]; then
 fi
 
 if [ -z "$branches" ]; then
-	branches="$(git symbolic-ref HEAD | sed 's#^refs/heads/##')"
+	if $push_all; then
+		branches="$( git for-each-ref refs/top-bases |
+			while read rev type ref; do
+				name="${ref#refs/top-bases/}"
+				if branch_annihilated "$name"; then
+					continue
+				fi
+        printf "$name "
+			done )"
+	else
+		branches="$(git symbolic-ref HEAD | sed 's#^refs/heads/##')"
+	fi
 fi
 
 for name in $branches; do
@@ -77,7 +91,7 @@ for name in $branches; do
 	# deps but only if branch is tgish
 	$recurse_deps && [ -n "$_dep_is_tgish" ] &&
 		no_remotes=1 recurse_deps push_branch "$name"
-
-	# remove multiple occurrences of the same branch
-	sort -u "$_listfile" | xargs git push $dry_run "$remote"
 done
+
+# remove multiple occurrences of the same branch
+sort -u "$_listfile" | xargs git push $dry_run "$remote"
