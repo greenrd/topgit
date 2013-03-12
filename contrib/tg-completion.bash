@@ -201,13 +201,14 @@ __tg_commands ()
 		return
 	fi
 	local i IFS=" "$'\n'
-	for i in $(tg help | sed -n 's/^Usage:.*(\(.*\)).*/\1/p' | tr '|' ' ')
+	for i in $(tg help | sed -n 's/^Usage:.*(\([^)]*\)).*/\1/p' | tr '|' ' ')
 	do
 		case $i in
 		*--*)             : helper pattern;;
 		*) echo $i;;
 		esac
 	done
+	echo help
 }
 __tg_all_commandlist=
 __tg_all_commandlist="$(__tg_commands 2>/dev/null)"
