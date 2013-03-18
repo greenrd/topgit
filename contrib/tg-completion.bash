@@ -201,13 +201,14 @@ __tg_commands ()
 		return
 	fi
 	local i IFS=" "$'\n'
-	for i in $(tg help | sed -n 's/^Usage:.*(\(.*\)).*/\1/p' | tr '|' ' ')
+	for i in $(tg help | sed -n 's/^Usage:.*(\([^)]*\)).*/\1/p' | tr '|' ' ')
 	do
 		case $i in
 		*--*)             : helper pattern;;
 		*) echo $i;;
 		esac
 	done
+	echo help
 }
 __tg_all_commandlist=
 __tg_all_commandlist="$(__tg_commands 2>/dev/null)"
@@ -268,7 +269,7 @@ _tg_delete ()
 _tg_depend ()
 {
 	local subcommands="add"
-	local subcommand="$(__git_find_subcommand "$subcommands")"
+	local subcommand="$(__git_find_subcommand "$subcommands" 2>/dev/null || __git_find_on_cmdline "$subcommands" 2>/dev/null)"
 	if [ -z "$subcommand" ]; then
 		__tgcomp "$subcommands"
 		return

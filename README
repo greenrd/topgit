@@ -472,9 +472,11 @@ tg export
 		t/foo/red.diff -p1
 		t/baz.diff -p1
 
-	With '--quilt', you can also pass '-b' parameter followed by
-	a comma-separated explicit list of branches to export. This
-	mode of operation is currently not supported with '--collapse'.
+	With '--quilt', you can also pass the '-b' parameter followed
+	by a comma-separated explicit list of branches to export, or
+	the '--all' parameter (which can be shortened to '-a') to
+	export them all. These options are currently only supported
+	with '--quilt'.
 
 	In '--quilt' mode the patches are named like the originating
 	topgit branch.  So usually they end up in subdirectories of the
@@ -490,8 +492,8 @@ tg export
 
 	TODO: Make stripping of non-essential headers configurable
 	TODO: Make stripping of [PATCH] and other prefixes configurable
-	TODO: --mbox option for other mode of operation
-	TODO: -a option to export all branches
+	TODO: --mbox option to export instead as an mbox file
+	TODO: support --all option in other modes of operation
 	TODO: For quilt exporting, export the linearized history created in a
 	      temporary branch---this would allow producing conflict-less
 	      series
