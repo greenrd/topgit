@@ -12,7 +12,7 @@ commands_out := $(patsubst %.sh,%,$(commands_in))
 hooks_out := $(patsubst %.sh,%,$(hooks_in))
 help_out := $(patsubst %.sh,%.txt,$(commands_in))
 
-all::	tg $(commands_out) $(hooks_out) $(help_out)
+all::	precheck $(commands_out) $(hooks_out) $(help_out)
 
 tg $(commands_out) $(hooks_out): % : %.sh Makefile
 	@echo "[SED] $@"
@@ -24,10 +24,13 @@ tg $(commands_out) $(hooks_out): % : %.sh Makefile
 	chmod +x $@+ && \
 	mv $@+ $@
 
-$(help_out): README
+$(help_out): README create-help.sh
 	@CMD=`echo $@ | sed -e 's/tg-//' -e 's/\.txt//'` && \
 	echo '[HELP]' $$CMD && \
 	./create-help.sh $$CMD
+
+precheck:: tg
+	./$+ precheck
 
 install:: all
 	install -d -m 755 "$(DESTDIR)$(bindir)"

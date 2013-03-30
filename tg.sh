@@ -5,6 +5,9 @@
 
 TG_VERSION=0.9
 
+# Update if you add any code that requires a newer version of git
+GIT_MINIMUM_VERSION=1.5.6
+
 ## Auxiliary functions
 
 info()
@@ -17,6 +20,25 @@ die()
 	info "fatal: $*" >&2
 	exit 1
 }
+
+compare_versions()
+{
+	separator=$1
+	echo $3 | tr ${separator} '\n' | (for l in $(echo $2|tr ${separator} ' '); do
+	    read r || return 0
+	    [ $l -ge $r ] || return 1
+	    [ $l -gt $r ] && return 0
+	done)
+}
+
+precheck() {
+	git_ver=$(git version)
+	compare_versions . ${git_ver#git version} ${GIT_MINIMUM_VERSION} \
+	    || die "git version >= " ${GIT_MINIMUM_VERSION} required
+}
+
+precheck
+[ "$1" = "precheck" ] && exit 0
 
 # cat_file TOPIC:PATH [FROM]
 # cat the file PATH from branch TOPIC when FROM is empty.
