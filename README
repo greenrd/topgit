@@ -267,7 +267,23 @@ tg delete
 	unmerge the removed branch's changes from the branches depending
 	on it.
 
+	See also `tg annihilate`.
+
 	TODO: '-a' to delete all empty branches, depfix, revert
+
+tg annihilate
+~~~~~~~~~~~~~
+	Make a commit on the current TopGit-controlled topic branch
+	that makes it equal to its base, including the presence or
+	absence of .topmsg and .topdeps.  Annihilated branches are not
+	displayed by `tg summary`, so they effectively get out of your
+	way.  However, the branch still exists, and `tg push` will
+	push it.  This way, you can communicate that the branch is no
+	longer wanted.
+
+	Normally, this command will remove only empty branch
+	(base == head, except for changes to the .top* files); use
+	'-f' to annihilate a non-empty branch.
 
 tg depend
 ~~~~~~~~~

@@ -12,6 +12,8 @@
 
 /hooks/pre-commit
 /tg
+/tg-annihilate
+/tg-annihilate.txt
 /tg-base
 /tg-base.txt
 /tg-create
