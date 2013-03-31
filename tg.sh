@@ -6,7 +6,7 @@
 TG_VERSION=0.9
 
 # Update if you add any code that requires a newer version of git
-GIT_MINIMUM_VERSION=1.5.6
+GIT_MINIMUM_VERSION=1.7.7.2
 
 ## Auxiliary functions
 

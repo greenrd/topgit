@@ -54,7 +54,7 @@ to="$(echo "$header" | grep '^To:' | sed 's/To:\s*//')"
 
 people=
 [ -n "$from" ] && people="$people --from '$from'"
-# FIXME: there could be multimple To
+# FIXME: there could be multiple To
 [ -n "$to" ] && people="$people --to '$to'"
 
 # NOTE: git-send-email handles cc itself
