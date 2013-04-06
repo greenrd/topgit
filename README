@@ -4,58 +4,62 @@ TopGit - A different patch queue manager
 DESCRIPTION
 -----------
 
-TopGit aims to make handling of large amount of interdependent topic
-branches easier. In fact, it is designed especially for the case
-when you maintain a queue of third-party patches on top of another
-(perhaps Git-controlled) project and want to easily organize, maintain
-and submit them - TopGit achieves that by keeping a separate topic
-branch for each patch and providing few tools to maintain the branches.
+TopGit aims to make handling of large amounts of interdependent topic
+branches easier. In fact, it is designed especially for the case where
+you maintain a queue of third-party patches on top of another (perhaps
+Git-controlled) project and want to easily organize, maintain and submit
+them - TopGit achieves that by keeping a separate topic branch for each
+patch and providing some tools to maintain the branches.
+
+
+INSTALLATION
+------------
+See the file INSTALL.
 
 
 RATIONALE
 ---------
 
-Why not use something like StGIT or Guilt or rebase -i for maintaining
+Why not use something like StGIT or Guilt or 'rebase -i' for maintaining
 your patch queue?  The advantage of these tools is their simplicity;
 they work with patch _series_ and defer to the reflog facility for
 version control of patches (reordering of patches is not
-version-controlled at all). But there are several disadvantages -
-for one, these tools (especially StGIT) do not actually fit well
-with plain Git at all: it is basically impossible to take advantage
-of the index effectively when using StGIT. But more importantly,
-these tools horribly fail in the face of distributed environment.
+version-controlled at all).  But there are several disadvantages - for
+one, these tools (especially StGIT) do not actually fit well with plain
+Git at all: it is basically impossible to take advantage of the index
+effectively when using StGIT.  But more importantly, these tools
+horribly fail in the face of a distributed environment.
 
 TopGit has been designed around three main tenets:
 
-	(i) TopGit is as thin layer on top of Git as possible.
-You still maintain your index and commit using Git, TopGit will
-only automate few indispensable tasks.
+	(i) TopGit is as thin a layer on top of Git as possible.  You
+still maintain your index and commit using Git; TopGit will only
+automate a few indispensable tasks.
 
-	(ii) TopGit is anxious about _keeping_ your history. It will
-never rewrite your history and all metadata is also tracked by Git,
-smoothly and non-obnoxiously. It is good to have a _single_ point
-when the history is cleaned up, and that is at the point of inclusion
-in the upstream project; locally, you can see how your patch has evolved
-and easily return to older versions.
+	(ii) TopGit is anxious about _keeping_ your history.  It will
+never rewrite your history, and all metadata is also tracked by Git,
+smoothly and non-obnoxiously.  It is good to have a _single_ point when
+the history is cleaned up, and that is at the point of inclusion in the
+upstream project; locally, you can see how your patch has evolved and
+easily return to older versions.
 
-	(iii) TopGit is specifically designed to work in distributed
-environment. You can have several instances of TopGit-aware repositories
-and smoothly keep them all up-to-date and transfer your changes between
-them.
+	(iii) TopGit is specifically designed to work in a distributed
+environment.  You can have several instances of TopGit-aware
+repositories and smoothly keep them all up-to-date and transfer your
+changes between them.
 
 As mentioned above, the main intended use-case for TopGit is tracking
 third-party patches, where each patch is effectively a single topic
 branch.  In order to flexibly accommodate even complex scenarios when
-you track many patches where many are independent but some depend
-on others, TopGit ignores the ancient Quilt heritage of patch series
-and instead allows the patches to freely form graphs (DAGs just like
-Git history itself, only "one level higher"). For now, you have
-to manually specify which patches does the current one depend
-on, but TopGit might help you with that in the future in a darcs-like
-fashion.
+you track many patches where many are independent but some depend on
+others, TopGit ignores the ancient Quilt heritage of patch series and
+instead allows the patches to freely form graphs (DAGs just like Git
+history itself, only "one level higher").  For now, you have to manually
+specify which patches the current one depends on, but TopGit might help
+you with that in the future in a darcs-like fashion.
 
-A glossary plug: The union (i.e. merge) of patch dependencies is
-called a _base_ of the patch (topic branch).
+A glossary plug: The union (i.e. merge) of patch dependencies is called
+a _base_ of the patch (topic branch).
 
 Of course, TopGit is perhaps not the right tool for you:
 
@@ -195,7 +199,7 @@ SYNOPSIS
 	## Add a TopGit remote to a repository and push to it
 	$ git remote add foo URL
 	$ tg remote foo
-	$ git push foo
+	$ tg push -r foo
 
 	## Update from a non-default TopGit remote
 	$ git fetch foo
@@ -206,87 +210,119 @@ SYNOPSIS
 USAGE
 -----
 
-The 'tg' tool of TopGit has several subcommands:
+The 'tg' tool has several subcommands:
 
 tg help
 ~~~~~~~
-	Our sophisticated integrated help facility. Doesn't do
-	a whole lot for now.
+	Our sophisticated integrated help facility.  Mostly duplicates
+	what is below, except for adding summary Usage lines.
+
+	# to list commands:
+	$ tg help
+	# to get help for a particular command:
+	$ tg help <command>
 
 tg create
 ~~~~~~~~~
-	Create a new TopGit-controlled topic branch of a given name
-	(required argument) and switch to it. If no dependencies
-	are specified (by extra arguments passed after the first one),
-	the current branch is assumed to be the only dependency.
+	Create a new TopGit-controlled topic branch of the given name
+	(required argument) and switch to it.  If no dependencies are
+	specified (by extra arguments passed after the first one), the
+	current branch is assumed to be the only dependency.
 
-	After `tg create`, you should insert the patch description
-	to the '.topmsg' file, which will already contain some
-	prefilled bits. You can set topgit.to, topgit.cc and topgit.bcc
-	configuration variables in order to have `tg create`
-	add these headers with given default values to '.topmsg'.
+	After `tg create`, you should insert the patch description into
+	the '.topmsg' file, which will already contain some prefilled
+	bits.  You can set the 'topgit.to', 'topgit.cc' and 'topgit.bcc'
+	git configuration variables (see `man git-config`) in order to
+	have `tg create` add these headers with the given default values
+	to '.topmsg'.
 
-	The main task of `tg create` is to set up the topic branch
-	base from the dependencies. This may fail due to merge conflicts.
-	In that case, after you commit the conflicts resolution,
-	you should call `tg create` again (without any arguments);
-	it will detect that you are on a topic branch base ref and
-	resume the topic branch creation operation.
+	The main task of `tg create` is to set up the topic branch base
+	from the dependencies.  This may fail due to merge conflicts.
+	In that case, after you commit the conflict resolution, you
+	should call `tg create` again (without any arguments); it will
+	detect that you are on a topic branch base ref and resume the
+	topic branch creation operation.
 
-	In an alternative use case, if '-r BRANCH' is given instead
-	of dependency list, the topic branch is created based on
-	the given remote branch.
+	In an alternative use case, if '-r BRANCH' is given instead of a
+	dependency list, the topic branch is created based on the given
+	remote branch.
 
 tg delete
 ~~~~~~~~~
-	Remove a TopGit-controlled topic branch of given name
-	(required argument). Normally, this command will remove
-	only empty branch (base == head); use '-f' to remove
-	non-empty branch.
+	Remove a TopGit-controlled topic branch of the given name
+	(required argument). Normally, this command will remove only an
+	empty branch (base == head) without dependendents; use '-f' to
+	remove a non-empty branch or a branch that is depended upon by
+	another branch.
 
-	The '-f' option is also useful to force removal of a branch's base, if
-	you used 'git branch -D B' to remove the branch B, and then certain
-	TopGit commands complain, because the base of branch B is still there.
+	The '-f' option is also useful to force removal of a branch's
+	base, if you used `git branch -D B` to remove branch B, and then
+	certain TopGit commands complain, because the base of branch B
+	is still there.
 
-	Currently, this command will _NOT_ remove the branch from
-	the dependency list in other branches. You need to take
-	care of this _manually_. This is even more complicated
-	in combination with '-f', in that case you need to manually
-	unmerge the removed branch's changes from the branches
-	depending on it.
+	IMPORTANT: Currently, this command will _NOT_ remove the branch
+	from the dependency list in other branches. You need to take
+	care of this _manually_.  This is even more complicated in
+	combination with '-f' - in that case, you need to manually
+	unmerge the removed branch's changes from the branches depending
+	on it.
+
+	See also `tg annihilate`.
 
 	TODO: '-a' to delete all empty branches, depfix, revert
 
+tg annihilate
+~~~~~~~~~~~~~
+	Make a commit on the current TopGit-controlled topic branch
+	that makes it equal to its base, including the presence or
+	absence of .topmsg and .topdeps.  Annihilated branches are not
+	displayed by `tg summary`, so they effectively get out of your
+	way.  However, the branch still exists, and `tg push` will
+	push it.  This way, you can communicate that the branch is no
+	longer wanted.
+
+	Normally, this command will remove only empty branch
+	(base == head, except for changes to the .top* files); use
+	'-f' to annihilate a non-empty branch.
+
 tg depend
 ~~~~~~~~~
-	Change dependencies of a TopGit-controlled topic branch.
-	This should have several subcommands, but only 'add' is
+	Change the dependencies of a TopGit-controlled topic branch.
+	This should have several subcommands, but only `add` is
 	supported right now.
 
-	The 'add' subcommand takes an argument of a topic branch
-	to be added, adds it to '.topdeps', performs a commit and
-	then updates your topic branch accordingly. If you want to
-	do other things related to the dependency addition, like
-	adjusting '.topmsg', prepare them in the index before
-	calling 'tg depend add'.
+	The `add` subcommand takes an argument naming a topic branch to
+	be added, adds it to '.topdeps', performs a commit and then
+	updates your topic branch accordingly.  If you want to do other
+	things related to the dependency addition, like adjusting
+	'.topmsg', prepare them in the index before calling `tg depend
+	add`.
 
 	TODO: Subcommand for removing dependencies, obviously
 
+tg files
+~~~~~~~~
+	List files changed by the current or specified topic branch.
+
+	Options:
+	  -i		list files based on index instead of branch
+	  -w		list files based on working tree instead of branch
+
 tg info
 ~~~~~~~
-	Show a summary information about the current or specified
-	topic branch.
+	Show summary information about the current or specified topic
+	branch.
 
 tg patch
 ~~~~~~~~
 	Generate a patch from the current or specified topic branch.
-	This means that the diff between the topic branch base and
-	head (latest commit) is shown, appended to the description
-	found in the .topmsg file.
+	This means that the diff between the topic branch base and head
+	(latest commit) is shown, appended to the description found in
+	the '.topmsg' file.
 
-	The patch is by default simply dumped to stdout. In the future,
-	tg patch will be able to automatically send the patches by mail
-	or save them to files. (TODO)
+	The patch is simply dumped to stdout.  In the future, `tg patch`
+	will be able to automatically send the patches by mail or save
+	them to files. (TODO)
 
 	Options:
 	  -i		base patch generation on index instead of branch
@@ -295,25 +331,30 @@ tg patch
 tg mail
 ~~~~~~~
 	Send a patch from the current or specified topic branch as
-	email.
+	email(s).
 
 	Takes the patch given on the command line and emails it out.
 	Destination addresses such as To, Cc and Bcc are taken from the
 	patch header.
 
-	Since it actually boils down to `git send-email` please refer to
-	its documentation for details on how to setup email for git.
-	You can pass arbitrary options to this command through the
-	'-s' parameter, but you must double-quote everything.
-	The '-r' parameter with msgid can be used to generate in-reply-to
+	Since it actually boils down to `git send-email`, please refer
+	to the documentation for that for details on how to setup email
+	for git.  You can pass arbitrary options to this command through
+	the '-s' parameter, but you must double-quote everything.  The
+	'-r' parameter with a msgid can be used to generate in-reply-to
 	and reference headers to an earlier mail.
 
-	Note: be careful when using this command.  It easily sends out several
-	mails.  You might want to run
+	WARNING: be careful when using this command.  It easily sends
+	out several mails.  You might want to run
 
 		git config sendemail.confirm always
 
-	to let `git send-email` ask for confirmation before sending any mail.
+	to let `git send-email` ask for confirmation before sending any
+	mail.
+
+	Options:
+	  -i		base patch generation on index instead of branch
+	  -w		base patch generation on working tree instead of branch
 
 	TODO: 'tg mail patchfile' to mail an already exported patch
 	TODO: mailing patch series
@@ -322,45 +363,50 @@ tg mail
 
 tg remote
 ~~~~~~~~~
-	Register given remote as TopGit-controlled. This will create
-	the namespace for the remote branch bases and teach 'git fetch'
-	and 'git push' to operate on them. (Do NOT use 'git push --all'
-	for your pushes - plain 'git push' will do the right thing.)
+	Register the given remote as TopGit-controlled. This will create
+	the namespace for the remote branch bases and teach `git fetch`
+	to operate on them. However, from TopGit 0.8 onwards you need to
+	use `tg push`, or `git push --mirror`, for pushing
+	TopGit-controlled branches.
 
-	It takes a optional remote name argument, and optional
-	'--populate' switch - use that for your origin-style remote,
-	it will seed the local topic branch system based on the
-	remote topic branches. '--populate' will also make 'tg remote'
-	automatically fetch the remote and 'tg update' to look at
-	branches of this remote for updates by default.
+	`tg remote` takes an optional remote name argument, and an
+	optional '--populate' switch.  Use '--populate' for your
+	origin-style remotes: it will seed the local topic branch system
+	based on the remote topic branches.  '--populate' will also make
+	`tg remote` automatically fetch the remote, and `tg update` look
+	at branches of this remote for updates by default.
 
 tg summary
 ~~~~~~~~~~
 	Show overview of all TopGit-tracked topic branches and their
 	up-to-date status ('>' marks the current topic branch,
-	'0' marks that it introduces no own changes,
-	'l'/'r' marks that it is local-only or has remote mate,
-	'L'/'R' marks that it is ahead/out-of-date wrt. its remote mate,
-	'D' marks that it is out-of-date wrt. its dependencies,
-	'!' marks that it has missing dependencies (even recursively),
-	'B' marks that it is out-of-date wrt. its base).
+	'0' indicates that it introduces no changes of its own,
+	'l'/'r' indicates respectively whether it is local-only or has a remote mate,
+	'L'/'R' indicates respectively if it is ahead or out-of-date with respect to its remote mate,
+	'D' indicates that it is out-of-date with respect to its dependencies,
+	'!' indicates that it has missing dependencies [even if they are recursive ones], and
+	'B' indicates that it is out-of-date with respect to its base).
 
-	This can take long time to accurately determine all the relevant
-	information about each branch; you can pass '-t' to get just
-	terse list of topic branch names quickly. Alternately, you can
-	pass '--graphviz' to get a dot-suitable output to draw a dependency
-	graph between the topic branches.
+	This can take a long time to accurately determine all the
+	relevant information about each branch; you can pass '-t' to get
+	just a terse list of topic branch names quickly.  Alternately,
+	you can pass '--graphviz' to get a dot-suitable output to draw a
+	dependency graph between the topic branches.
 
-	You can also use the --sort option to sort the branches using
+	You can also use the '--sort' option to sort the branches using
 	a topological sort.  This is especially useful if each
 	TopGit-tracked topic branch depends on a single parent branch,
-	since it will then print the branches in the dependency
-	order.  In more complex scenarios, a text graph view would be
-	much more useful, but that is not yet implemented.
+	since it will then print the branches in the dependency order.
+	In more complex scenarios, a text graph view would be much more
+	useful, but that has not yet been implemented.
 
-	The --deps option outputs dependency informations between
-	branches in a machine-readable format.  Feed this to "tsort"
-	to get the output from --sort.
+	The --deps option outputs dependency information between
+	branches in a machine-readable format.  Feed this to `tsort` to
+	get the output from --sort.
+
+	Options:
+	  -i		Use TopGit metadata from the index instead of the branch
+	  -w		Use TopGit metadata from the working tree instead of the branch
 
 	TODO: Speed up by an order of magnitude
 	TODO: Text graph view
@@ -413,60 +459,70 @@ tg checkout
 
 tg export
 ~~~~~~~~~
-	Export a tidied-up history of the current topic branch
-	and its dependencies, suitable for feeding upstream.
-	Each topic branch corresponds to a single commit or patch
-	in the cleaned up history (corresponding basically exactly
-	to `tg patch` output for the topic branch).
+	Export a tidied-up history of the current topic branch and its
+	dependencies, suitable for feeding upstream.  Each topic branch
+	corresponds to a single commit or patch in the cleaned up
+	history (corresponding basically exactly to `tg patch` output
+	for the topic branch).
 
-	The command has three possible outputs now - either a Git branch with
-	the collapsed history, a Git branch with a linearized history, or a
-	quilt series in new directory.
+	The command has three possible outputs now - either a Git branch
+	with the collapsed history, a Git branch with a linearized
+	history, or a quilt series in new directory.
 
-	In case of producing collapsed history in new branch,
-	you can use this collapsed structure either for providing
-	a pull source for upstream, or further linearization e.g.
-	for creation of a quilt series using git log:
+	In the case where you are producing collapsed history in a new
+	branch, you can use this collapsed structure either for
+	providing a pull source for upstream, or for further
+	linearization e.g. for creation of a quilt series using git log:
 
 		git log --pretty=email -p --topo-order origin..exported
 
-	To better understand the function of `tg export`,
-	consider this dependency structure of topic branches:
+	To better understand the function of `tg export`, consider this
+	dependency structure:
 
 	origin/master - t/foo/blue - t/foo/red - master
 	             `- t/bar/good <,----------'
 	             `- t/baz      ------------'
 
-	(Where each of the branches may have hefty history.) Then
+	(where each of the branches may have a hefty history). Then
 
 	master$ tg export for-linus
 
-	will create this commit structure on branch for-linus:
+	will create this commit structure on the branch 'for-linus':
 
 	origin/master - t/foo/blue -. merge - t/foo/red -.. merge - master
 	             `- t/bar/good <,-------------------'/
 	             `- t/baz      ---------------------'
 
-	In case of using the linearize mode:
+	In this mode, `tg export` works on the current topic branch, and
+	can be called either without an option (in that case,
+	'--collapse' is assumed), or with the '--collapse' option, and
+	with one mandatory argument: the name of the branch where the
+	exported result will be stored.
+
+	WARNING: The branch will be silently overwritten if it exists
+	already!  If you make a mistake, use `git reflog` to recover.
+
+	When using the linearize mode:
 
 	master$ tg export --linearize for-linus
 
-	you get a linear history respecting the dependencies of your patches in
-	a new branch for-linus.  The result should be more or less the same as
-	using quilt mode and reimporting it into a Git branch.  (More or less
-	because the topologic order can usually be extended in more than one
-	way into a complete ordering and the two methods may choose different
-	one's.)  The result might be more appropriate for merging upstream as
-	it contains fewer merges.
+	you get a linear history respecting the dependencies of your
+	patches in a new branch 'for-linus'.  The result should be more
+	or less the same as using quilt mode and then reimporting it
+	into a Git branch.  (More or less because the topological order
+	can usually be extended in more than one way into a total order,
+	and the two methods may choose different ones.)  The result
+	might be more appropriate for merging upstream, as it contains
+	fewer merges.
 
-	Note that you might get conflicts during linearization because the
-	patches are reordered to get a linear history.
+	Note that you might get conflicts during linearization because
+	the patches are reordered to get a linear history.
 
-	In case of the quilt mode,
+	When using the quilt mode,
 
 	master$ tg export --quilt for-linus
 
-	would create this directory for-linus:
+	would create the following directory 'for-linus':
 
 	for-linus/t/foo/blue.diff
 	for-linus/t/foo/red.diff
@@ -478,36 +534,28 @@ tg export
 		t/foo/red.diff -p1
 		t/baz.diff -p1
 
-	The command works on the current topic branch
-	and can be called either without a parameter
-	(in that case, '--collapse' is assumed)
-	and with one mandatory argument: the name of the branch
-	where the exported result shall be stored.
-	The branch will be silently overwritten if it exists already!
-	Use git reflog to recover in case of mistake.
+	With '--quilt', you can also pass the '-b' parameter followed
+	by a comma-separated explicit list of branches to export, or
+	the '--all' parameter (which can be shortened to '-a') to
+	export them all. These options are currently only supported
+	with '--quilt'.
 
-	Alternatively, call it with the '--quilt' parameter
-	and an argument specifying the directory
-	where the quilt series should be saved.
-
-	With '--quilt', you can also pass '-b' parameter followed by
-	a comma-separated explicit list of branches to export. This
-	mode of operation is currently not supported with collapse.
-
-	In '--quilt' mode the patches are named like the originating topgit
-	branch.  So usually they end up in subdirectories of the output
-	directory.  With option '--flatten' the names are mangled such that
-	they end up directly in the output dir (i.e. slashed are substituted by
-	underscores).  With '--numbered' (which implies '--flatten') the patch
-	names get a number as prefix to allow getting the order without
-	consulting the series file, which eases sending out the patches.
-
-	Usage: tg export ([(--collapse | --linearize)] BRANCH | --quilt DIR)
+	In '--quilt' mode the patches are named like the originating
+	topgit branch.  So usually they end up in subdirectories of the
+	output directory.  With the '--flatten' option the names are
+	mangled so that they end up directly in the output dir (slashes
+	are substituted by underscores).  With the '--strip[=N]' option
+	the first 'N' subdirectories (all if no 'N' is given) get
+	stripped off.  Names are always '--strip'ped before being
+	'--flatten'ed.  With the option '--numbered' (which implies
+	'--flatten') the patch names get a number as prefix to allow
+	getting the order without consulting the series file, which
+	eases sending out the patches.
 
 	TODO: Make stripping of non-essential headers configurable
 	TODO: Make stripping of [PATCH] and other prefixes configurable
-	TODO: --mbox option for other mode of operation
-	TODO: -a option to export all branches
+	TODO: --mbox option to export instead as an mbox file
+	TODO: support --all option in other modes of operation
 	TODO: For quilt exporting, export the linearized history created in a
 	      temporary branch---this would allow producing conflict-less
 	      series
@@ -515,168 +563,197 @@ tg export
 tg import
 ~~~~~~~~~
 	Import commits within the given revision range into TopGit,
-	creating one topic branch per commit, the dependencies forming
-	a linear sequence starting on your current branch (or a branch
-	specified by the '-d' parameter).
+	creating one topic branch per commit. The dependencies are set
+	up to form a linear sequence starting on your current branch -
+	or a branch specified by the '-d' parameter, if present.
 
-	The branch names are auto-guessed from the commit messages
-	and prefixed by t/ by default; use '-p PREFIX' to specify
-	an alternative prefix (even an empty one).
+	The branch names are auto-guessed from the commit messages and
+	prefixed by 't/' by default; use '-p <prefix>' to specify an
+	alternative prefix (even an empty one).
 
 	Alternatively, you can use the '-s NAME' parameter to specify
-	the name of target branch; the command will then take one more
-	argument describing a single commit to import.
+	the name of the target branch; the command will then take one
+	more argument describing a _single_ commit to import.
 
 tg update
 ~~~~~~~~~
-	Update the current or specified topic branch wrt. changes in the
-	branches it depends on and remote branches.
-	This is performed in two phases - first,
-	changes within the dependencies are merged to the base,
-	then the base is merged into the topic branch.
-	The output will guide you in case of conflicts.
+	Update the current, specified or all topic branches with respect
+	to changes in the branches they depend on and remote branches.
+	This is performed in two phases - first, changes within the
+	dependencies are merged to the base, then the base is merged
+	into the topic branch.  The output will guide you on what to do
+	next in case of conflicts.
 
-	After the update the current branch is the specified one.
+	When '-a' is specifed, updates all topic branches matched by
+	<pattern>s (see `git-for-all-refs(1)` for details), or all if
+	no <pattern> is given.
 
-	In case your dependencies are not up-to-date, tg update
-	will first recurse into them and update these.
+	After the update, if a single topic branch was specified, it is
+	left as the current one; if '-a' was specified, it returns to
+	the branch which was current at the beginning.
 
-	If a remote branch update brings dependencies on branches
-	not yet instantiated locally, you can either bring in all
-	the new branches from the remote using 'tg remote --populate'
-	or only pick out the missing ones using 'tg create -r'
-	('tg summary' will point out branches with incomplete
-	dependencies by showing an '!' near to them).
+	If your dependencies are not up-to-date, `tg update` will first
+	recurse into them and update them.
 
-	TODO: tg update -a for updating all topic branches
+	If a remote branch update brings in dependencies on branches
+	that are not yet instantiated locally, you can either bring in
+	all the new branches from the remote using `tg remote
+	--populate`, or only pick out the missing ones using `tg create
+	-r` (`tg summary` will point out branches with incomplete
+	dependencies by showing an '!' next to them).
+
+	TODO: tg update -a -c to autoremove (clean) up-to-date branches
 
 tg push
 ~~~~~~~
-	pushes a TopGit-controlled topic branch to a remote
-	repository.  By default the remote gets all dependencies
-	(both tgish and non-tgish) and bases pushed to.
+	pushes one, several or all TopGit-controlled topic branches -
+	the current branch, if you don't specify which - to a remote
+	repository.  By default, the remote gets all the dependencies
+	(both TopGit-controlled and non-TopGit-controlled) and bases
+	pushed to it too.
 
 tg base
 ~~~~~~~
-	Prints the base commit of the current topic branch.  Silently
-	exits with exit code 1 if you are not working on a TopGit
-	branch.
+	Prints the base commit of each of the named topic branches, or
+	the current branch if no branches are named.  Prints an error
+	message and exits with exit code 1 if the named branch is not
+	a TopGit branch.
 
 tg log
 ~~~~~~
-	Prints the git log of the named topgit branch.
+	Prints the git log of the named topgit branch - or the current
+	branch, if you don't specify a name.
 
-	Note: if you have shared the TopGit branch, this command
-	only lists the commits that were made in the current
-	repository, so you will not see work done by your
-	collaborators.
+	NOTE: if you have merged changes from a different repository, this
+	command might not list all interesting commits.
+
+tg prev
+~~~~~~~
+	Outputs the direct dependencies for the current or named branch.
+
+	Options:
+	  -i		show dependencies based on index instead of branch
+	  -w		show dependencies based on working tree instead of branch
+
+tg next
+~~~~~~~
+	Outputs all branches which directly depend on the current or
+	named branch.
+
+	Options:
+	  -i		show dependencies based on index instead of branch
+	  -w		show dependencies based on working tree instead of branch
 
 TODO: tg rename
-
 
 IMPLEMENTATION
 --------------
 
-TopGit stores all the topic branches in the regular refs/heads/
-namespace, (we recommend to mark them with the 't/' prefix).
-Except that, TopGit also maintains a set of auxiliary refs in
-refs/top-*. Currently, only refs/top-bases/ is used, containing
-the current _base_ of the given topic branch - this is basically
-a merge of all the branches the topic branch depends on; it is
-updated during `tg update` and then merged to the topic branch,
-and it is the base of a patch generated from the topic branch by
-`tg patch`.
+TopGit stores all the topic branches in the regular 'refs/heads/'
+namespace (so we recommend distinguishing them with the 't/' prefix).
+Apart from that, TopGit also maintains a set of auxiliary refs in
+'refs/top-*'.  Currently, only refs/top-bases/ is used, containing the
+current _base_ of the given topic branch - this is basically a merge of
+all the branches the topic branch depends on; it is updated during `tg
+update` and then merged to the topic branch, and it is the base of a
+patch generated from the topic branch by `tg patch`.
 
-All the metadata is tracked within the source tree and history
-of the topic branch itself, in .top* files; these files are kept
-isolated within the topic branches during TopGit-controlled merges
-and are of course omitted during `tg patch`. The state of these
-files in base commits is undefined; look at them only in the topic
-branches themselves.  Currently, two files are defined:
+All the metadata is tracked within the source tree and history of the
+topic branch itself, in .top* files; these files are kept isolated
+within the topic branches during TopGit-controlled merges and are of
+course omitted during `tg patch`.  The state of these files in base
+commits is undefined; look at them only in the topic branches
+themselves.  Currently, two files are defined:
 
-	.topmsg: Contains the description of the topic branch
-in a mail-like format, plus the author information,
-whatever Cc headers you choose or the post-three-dashes message.
-When mailing out your patch, basically only few extra headers
-mail headers are inserted and the patch itself is appended.
-Thus, as your patches evolve, you can record nuances like whether
-the particular patch should have To-list/Cc-maintainer or vice
-versa and similar nuances, if your project is into that.
-From is prefilled from your current GIT_AUTHOR_IDENT, other headers
-can be prefilled from various optional topgit.* config options.
+	'.topmsg': Contains the description of the topic branch in a
+mail-like format, plus the author information, whatever Cc headers you
+choose or the post-three-dashes message.  When mailing out your patch,
+basically only a few extra mail headers are inserted and then the patch
+itself is appended.  Thus, as your patches evolve, you can record
+nuances like whether the particular patch should have To-list /
+Cc-maintainer or vice-versa and similar nuances, if your project is into
+that.  'From' is prefilled from your current `GIT_AUTHOR_IDENT`; other
+headers can be prefilled from various optional 'topgit.*' git config
+options.
 
-	.topdeps: Contains the one-per-line list of branches
-your patch depends on, pre-seeded with `tg create`. (Continuously
-updated) merge of these branches will be the "base" of your topic
-branch. DO NOT EDIT THIS FILE MANUALLY!!! If you do so, you need
-to know exactly what are you doing, since this file must stay in
-sync with the Git history information, otherwise very bad things
-will happen.
+	'.topdeps': Contains the one-per-line list of branches this
+branch depends on, pre-seeded by `tg create`. A (continuously updated)
+merge of these branches will be the "base" of your topic branch.
+
+IMPORTANT: DO NOT EDIT '.topdeps' MANUALLY!!! If you do so, you need to
+know exactly what are you doing, since this file must stay in sync with
+the Git history information, otherwise very bad things will happen.
 
 TopGit also automagically installs a bunch of custom commit-related
-hooks that will verify if you are committing the .top* files in sane
-state. It will add the hooks to separate files within the hooks/
-subdirectory and merely insert calls of them to the appropriate hooks
-and make them executable (but make sure the original hooks code
-is not called if the hook was not executable beforehand).
+hooks that will verify whether you are committing the '.top*' files in a
+sane state. It will add the hooks to separate files within the 'hooks/'
+subdirectory, and merely insert calls to them to the appropriate hooks
+and make them executable (but will make sure the original hook's code is
+not called if the hook was not executable beforehand).
 
-Another automagically installed piece is .git/info/attributes specifier
-for an 'ours' merge strategy for the files .topmsg and .topdeps, and
-the (intuitive) 'ours' merge strategy definition in .git/config.
+Another automagically installed piece is a '.git/info/attributes'
+specifier for an 'ours' merge strategy for the files '.topmsg' and
+'.topdeps', and the (intuitive) 'ours' merge strategy definition in
+'.git/config'.
 
 
 REMOTE HANDLING
 ---------------
 
-There are three issues with accessing topic branches in remote repositories:
+There are two remaining issues with accessing topic branches in remote
+repositories:
 
-	(i) Fetching/pushing accurate picture of the remote topic branch setup
-	(ii) Referring to remote topic branches from your local repository
-	(iii) Developing some of the remote topic branches locally
+	(i) Referring to remote topic branches from your local repository
+	(ii) Developing some of the remote topic branches locally
 
-(ii) and (iii) are fairly interconnected problems, while (i) is largely
-independent. The issue is to accurately reflect the current state of the
-quickly changing topic branches set - this can be easily done
-with the current facilities like 'git remote prune' and 'git push --mirror' -
-and to properly upload also the bases of the topic branches.
-For this, we need to modify the fetch/push refspecs to also include
-the refs/top-bases/ ref namespace; we shall provide a special 'tg remote'
-command to set up an existing remote for TopGit usage.
-
-About (ii) and (iii), there are two somewhat contradicting design
-considerations:
+There are two somewhat contradictory design considerations here:
 
 	(a) Hacking on multiple independent TopGit remotes in a single
 	repository
 	(b) Having a self-contained topic system in local refs space
 
-To us, (a) does not appear to be very convincing, while (b) is quite desirable
-for 'git-log topic' etc. working, 'git push' automatically creating
-self-contained topic system in the remote repository, and increased conceptual
+To us, (a) does not appear to be very convincing, while (b) is quite
+desirable for 'git-log topic' etc. working, and increased conceptual
 simplicity.
 
-Thus, we choose to instantiate all the topic branches of given remote locally;
-this is performed by 'tg remote --populate'.
-'tg update' will also check if a branch can be updated from its corresponding
-remote branch. The logic is somewhat involved if we should DTRT.
-First, we update the base, handling the remote branch as if it was the first
-dependency; thus, conflict resolutions made in the remote branch will be
-carried over to our local base automagically. Then, the base is merged into
-remote branch and the result is merged to local branch - again, to carry over
-remote conflict resolutions. In the future, this order might be adjustable
-per-update in case local changes are diverging more than the remote ones.
+Thus, we choose to instantiate all the topic branches of given remote
+locally; this is performed by `tg remote --populate`. `tg update` will
+also check if a branch can be updated from its corresponding remote
+branch.  The logic needs to be somewhat involved if we are to "do the
+right thing".  First, we update the base, handling the remote branch as
+if it was the first dependency; thus, conflict resolutions made in the
+remote branch will be carried over to our local base automagically.
+Then, the base is merged into the remote branch and the result is merged
+to the local branch - again, to carry over remote conflict resolutions.
+In the future, this order might be adjustable on a per-update basis, in
+case local changes happen to be diverging more than the remote ones.
 
-All commands by default refer to the remote that 'tg remote --populate'
-was called on the last time ('topgit.remote' configuration variable). You can
-manually run any command with a different base remote by passing '-r REMOTE'
-_before_ the subcommand name.
+All commands by default refer to the remote that `tg remote --populate`
+was called on the last time (stored in the 'topgit.remote' git
+configuration variable). You can manually run any command with a
+different base remote by passing '-r REMOTE' _before_ the subcommand
+name.
 
 
-POINTERS
---------
+REFERENCES
+----------
 
-The following references are useful to understand the development of topgit and
-its subcommands.
+The following references are useful to understand the development of
+topgit and its subcommands.
 
-tg depend:
+* tg depend:
   http://lists-archives.org/git/688698-add-list-and-rm-sub-commands-to-tg-depend.html
+
+
+THIRD-PARTY SOFTWARE
+--------------------
+
+The following software understands TopGit branches:
+
+* http://magit.github.com/magit/[magit] - a git mode for emacs
+
+IMPORTANT: Magit requires its topgit mode to be enabled first, as
+described in its documentation, in the "Activating extensions"
+subsection.  If this is not done, it will not push TopGit branches
+correctly, so it's important to enable it even if you plan to mostly use
+TopGit from the command line.

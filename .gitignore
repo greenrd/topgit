@@ -12,6 +12,8 @@
 
 /hooks/pre-commit
 /tg
+/tg-annihilate
+/tg-annihilate.txt
 /tg-base
 /tg-base.txt
 /tg-checkout
@@ -24,16 +26,22 @@
 /tg-depend.txt
 /tg-export
 /tg-export.txt
+/tg-files
+/tg-files.txt
 /tg-import
 /tg-import.txt
 /tg-info
 /tg-info.txt
 /tg-mail
 /tg-mail.txt
+/tg-next
+/tg-next.txt
 /tg-log
 /tg-log.txt
 /tg-patch
 /tg-patch.txt
+/tg-prev
+/tg-prev.txt
 /tg-push
 /tg-push.txt
 /tg-remote
