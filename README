@@ -568,10 +568,9 @@ tg push
 
 tg base
 ~~~~~~~
-	Prints the base commit of each of the named topic branches, or
-	the current branch if no branches are named.  Prints an error
-	message and exits with exit code 1 if the named branch is not
-	a TopGit branch.
+	Prints the base commit of the current topic branch.  Silently
+	exits with exit code 1 if you are not working on a TopGit
+	branch.
 
 tg log
 ~~~~~~
