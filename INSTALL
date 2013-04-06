@@ -14,7 +14,7 @@ global install, you can do
 
 (or prefix=/usr/local, of course).  Just like any program suite that uses
 $prefix, the built results have some paths encoded, which are derived from
-$prefix, so "make all; make prefix=/usr install" would not work.
+$prefix, so "make; make prefix=/usr install" would not work.
 
 The Makefile does not currently install the bash completion support in
 contrib/tg-completion.bash. Instructions for installing that file are at the
@@ -34,12 +34,15 @@ TopGit repo on GitHub. Ones that have are listed below:
 Linux
 ~~~~~
 
+* Fedora/EPEL/QubesOS: yum install topgit
+* Exherbo: cave resolve dev-scm/topgit -x
+* Nix: nix-env -f nixpkgs-version -i topgit
 * OpenSuSE: http://software.opensuse.org/download.html?project=home:arvidjaar:TopGIT&package=topgit [unofficial]
 
 Mac OS X
 ~~~~~~~~
 
-none as yet
+* Nix: nix-env -f nixpkgs-version -i topgit
 
 FreeBSD
 ~~~~~~~
