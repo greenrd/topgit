@@ -7,19 +7,22 @@ terse=
 graphviz=
 tsort=
 deps=
-
+head_from=
 
 ## Parse options
 
 while [ -n "$1" ]; do
 	arg="$1"; shift
 	case "$arg" in
+	-i|-w)
+		[ -z "$head_from" ] || die "-i and -w are mutually exclusive"
+		head_from="$arg";;
 	-t)
 		terse=1;;
 	--graphviz)
 		graphviz=1;;
 	--sort=alphabetical)
-		;;
+		tsort=;;
 	--sort=topological)
 		tsort=1;;
 	--sort)
@@ -27,7 +30,7 @@ while [ -n "$1" ]; do
 	--deps)
 		deps=1;;
 	*)
-		echo "Usage: tg [...] summary [-t | --sort[=(alphabetical|topological)] | --deps | --graphviz]" >&2
+		echo "Usage: tg [...] summary [-t | --sort[=(alphabetical|topological)] | --deps | --graphviz] [-i | -w]" >&2
 		exit 1;;
 	esac
 done
@@ -67,8 +70,11 @@ process_branch()
 
 	current=' '
 	[ "$name" != "$curname" ] || current='>'
+	from=$head_from
+	[ "$name" = "$curname" ] ||
+		from=
 	nonempty=' '
-	! branch_empty "$name" || nonempty='0'
+	! branch_empty "$name" $from || nonempty='0'
 	remote=' '
 	[ -z "$base_remote" ] || remote='l'
 	! has_remote "$name" || remote='r'
@@ -87,7 +93,7 @@ process_branch()
 	branch_contains "$name" "refs/top-bases/$name" || base_update='B'
 
 	if [ "$(git rev-parse "$name")" != "$rev" ]; then
-		subject="$(git cat-file blob "$name:.topmsg" | sed -n 's/^Subject: //p')"
+		subject="$(cat_file "$name:.topmsg" $from | sed -n 's/^Subject: //p')"
 	else
 		# No commits yet
 		subject="(No commits)"
@@ -116,26 +122,31 @@ if [ -n "$tsort" ]; then
 fi
 
 if [ -n "$deps" ]; then
-	list_deps
+	list_deps $head_from
 	exit 0
 fi
 
-git for-each-ref refs/top-bases |
-	while read rev type ref; do
-		name="${ref#refs/top-bases/}"
-		if branch_annihilated "$name"; then
-			continue;
-		fi
-
+non_annihilated_branches |
+	while read name; do
 		if [ -n "$terse" ]; then
 			echo "$name"
 		elif [ -n "$graphviz" ]; then
-			git cat-file blob "$name:.topdeps" | while read dep; do
+			from=$head_from
+			[ "$name" = "$curname" ] ||
+				from=
+			cat_file "$name:.topdeps" $from | while read dep; do
 				dep_is_tgish=true
 				ref_exists "refs/top-bases/$dep"  ||
 					dep_is_tgish=false
 				if ! "$dep_is_tgish" || ! branch_annihilated $dep; then
-					echo "\"$name\" -> \"$dep\";"
+					if [ -n "$graphviz" ]; then
+						echo "\"$name\" -> \"$dep\";"
+						if [ "$name" = "$curname" ] || [ "$dep" = "$curname" ]; then
+							echo "\"$curname\" [style=filled,fillcolor=yellow];"
+						fi
+					else
+						echo "$name $dep" >&4
+					fi
 				fi
 			done
 		else
