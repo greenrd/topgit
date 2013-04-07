@@ -21,7 +21,7 @@ while [ -n "$1" ]; do
 	-a|--all)
 		push_all=true;;
 	-h|--help)
-		echo "Usage: tg push [--dry-run] [--no-deps] [--tgish-only] [-r <remote>] [--all | <branch>...]"
+		echo "Usage: tg push [--dry-run] [--no-deps] [--tgish-only] [-r <remote>] [-a | --all | <branch>...]"
 		exit 0;;
 	-r)
 		remote="$1"

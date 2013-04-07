@@ -278,8 +278,8 @@ tg annihilate
 	absence of .topmsg and .topdeps.  Annihilated branches are not
 	displayed by `tg summary`, so they effectively get out of your
 	way.  However, the branch still exists, and `tg push` will
-	push it.  This way, you can communicate that the branch is no
-	longer wanted.
+	push it (except if given the '-a' option).  This way, you can
+	communicate that the branch is no longer wanted.
 
 	Normally, this command will remove only empty branch
 	(base == head, except for changes to the .top* files); use
@@ -606,11 +606,19 @@ tg update
 
 tg push
 ~~~~~~~
-	pushes one, several or all TopGit-controlled topic branches -
-	the current branch, if you don't specify which - to a remote
-	repository.  By default, the remote gets all the dependencies
-	(both TopGit-controlled and non-TopGit-controlled) and bases
-	pushed to it too.
+	If '-a' or '--all' was specified, pushes all non-annihilated
+	TopGit-controlled topic branches, to a remote repository.
+	Otherwise, pushes the specified topic branches - or the
+	current branch, if you don't specify which.  By default, the
+	remote gets all the dependencies (both TopGit-controlled and
+	non-TopGit-controlled) and bases pushed to it too.  If
+	'--tgish-only' was specified, only TopGit-controlled
+	dependencies will be pushed, and if '--no-deps' was specified,
+	no dependencies at all will be pushed.
+
+	The remote may be specified with the '-r' option. If no remote
+	was specified, the configured default TopGit remote will be
+	used.
 
 tg base
 ~~~~~~~

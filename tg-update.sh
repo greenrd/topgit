@@ -44,6 +44,13 @@ fi
 
 ensure_clean_tree
 
+recursive_update() {
+	$tg update
+	_ret=$?
+	[ $_ret -eq 3 ] && exit 3
+	return $_ret
+}
+
 update_branch() {
 	local name="$1" base_rev depcheck missing_deps HEAD
 	## First, take care of our base
@@ -88,7 +95,7 @@ update_branch() {
 					(
 					export TG_RECURSIVE="[$dep] $TG_RECURSIVE"
 					export PS1="[$dep] $PS1"
-					while ! $tg update; do
+					while ! recursive_update; do
 						# The merge got stuck! Let the user fix it up.
 						info "You are in a subshell. If you abort the merge,"
 						info "use \`exit 1\` to abort the recursive update altogether."
@@ -158,7 +165,7 @@ update_branch() {
 				info "Please commit merge resolution and call:"
 				info "git checkout $name && git merge <commitid>"
 				info "It is also safe to abort this operation using: git reset --hard $name"
-				exit 3
+				exit 4
 			fi
 			# Go back but remember we want to merge with this, not base
 			merge_with="$(git rev-parse HEAD)"
@@ -183,7 +190,7 @@ update_branch() {
 			info "Please commit merge resolution and call exit."
 			info "You can abort this operation using \`git reset --hard\`."
 		fi
-		exit 3
+		exit 4
 	fi
 }
 

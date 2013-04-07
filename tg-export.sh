@@ -300,6 +300,8 @@ driver()
 	# FIXME should we abort on missing dependency?
 	[ -z "$_dep_missing" ] || return 0
 
+	branch_annihilated "$_dep" && return 0
+
 	case $_dep in refs/remotes/*) return;; esac
 	branch_needs_update >/dev/null
 	[ "$_ret" -eq 0 ] ||
@@ -311,10 +313,10 @@ driver()
 # Call driver on all the branches - this will happen
 # in topological order.
 if "$allbranches" ; then
+	_dep_is_tgish=1
 	non_annihilated_branches |
-		while read name; do
-			recurse_deps driver "$name"
-			(_ret=0; _dep="$name"; _name=""; _dep_is_tgish=1; _dep_missing=; driver)
+		while read _dep; do
+			driver
 		done
 elif [ -z "$branches" ]; then
 	recurse_deps driver "$name"
