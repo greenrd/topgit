@@ -311,12 +311,8 @@ driver()
 # Call driver on all the branches - this will happen
 # in topological order.
 if "$allbranches" ; then
-	git for-each-ref refs/top-bases |
-		while read rev type ref; do
-			name="${ref#refs/top-bases/}"
-			if branch_annihilated "$name"; then
-				continue;
-			fi;
+	non_annihilated_branches |
+		while read name; do
 			recurse_deps driver "$name"
 			(_ret=0; _dep="$name"; _name=""; _dep_is_tgish=1; _dep_missing=; driver)
 		done

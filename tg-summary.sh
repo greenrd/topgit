@@ -109,13 +109,8 @@ if [ -n "$deps" ]; then
 	exit 0
 fi
 
-git for-each-ref refs/top-bases |
-	while read rev type ref; do
-		name="${ref#refs/top-bases/}"
-		if branch_annihilated "$name"; then
-			continue;
-		fi
-
+non_annihilated_branches |
+	while read name; do
 		if [ -n "$terse" ]; then
 			echo "$name"
 		elif [ -n "$graphviz$sort" ]; then

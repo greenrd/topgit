@@ -29,10 +29,8 @@ head="$(git rev-parse --abbrev-ref=loose HEAD)"
 [ -n "$name" ] ||
 	name="$head"
 
-git for-each-ref --format='%(refname)' refs/top-bases |
-	while read ref; do
-		parent="${ref#refs/top-bases/}"
-
+non_annihilated_branches |
+	while read parent; do
 		from=$head_from
 		# select .topdeps source for HEAD branch
 		[ "x$parent" = "x$head" ] ||
