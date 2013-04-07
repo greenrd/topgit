@@ -22,7 +22,7 @@ while [ -n "$1" ]; do
 	-s)
 		single="$1"; shift;;
 	-*)
-		echo "Usage: tg [...] import [-d BASE_BRANCH] {[-p PREFIX] RANGE...|-s NAME COMMIT}" >&2
+		echo "Usage: tg [...] import [-d <base-branch>] ([-p <prefix>] <range>... | -s <name> <commit>)" >&2
 		exit 1;;
 	*)
 		ranges="$ranges $arg";;
@@ -30,12 +30,7 @@ while [ -n "$1" ]; do
 done
 
 
-## Make sure our tree is clean
-
-git update-index --ignore-submodules --refresh || exit
-[ -z "$(git diff-index --cached --name-status -r --ignore-submodules HEAD --)" ] ||
-	die "the index is not clean"
-
+ensure_clean_tree
 
 ## Perform import
 
