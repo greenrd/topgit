@@ -194,12 +194,12 @@ has_remote()
 
 branch_annihilated()
 {
-	_name="$1";
+	_branch_name="$1";
 
 	# use the merge base in case the base is ahead.
-	mb="$(git merge-base "refs/top-bases/$_name" "$_name" 2> /dev/null)";
+	mb="$(git merge-base "refs/top-bases/$_branch_name" "$_branch_name" 2> /dev/null)";
 
-	test -z "$mb" || test "$(git rev-parse "$mb^{tree}")" = "$(git rev-parse "$_name^{tree}")";
+	test -z "$mb" || test "$(git rev-parse "$mb^{tree}")" = "$(git rev-parse "$_branch_name^{tree}")";
 }
 
 non_annihilated_branches()
