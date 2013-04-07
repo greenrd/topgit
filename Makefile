@@ -48,7 +48,6 @@ install:: all
 	install -d -m 755 "$(DESTDIR)$(sharedir)"
 	install -m 644 $(help_out) "$(DESTDIR)$(sharedir)"
 	install -m 644 leaves.awk "$(DESTDIR)$(sharedir)"
-	install -m 644 next-level.awk "$(DESTDIR)$(sharedir)"
 
 clean::
 	rm -f tg $(commands_out) $(hooks_out) $(help_out)

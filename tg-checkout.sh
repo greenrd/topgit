@@ -60,21 +60,29 @@ else
 	branch=`git symbolic-ref -q HEAD` || die "Working on a detached head"
 	branch=`git rev-parse --abbrev-ref $branch`
 
-	tg summary --deps >$_depfile || die "tg summary failed"
-
 	if [ -n "$pop" ]; then
-		dir=pop
 		no_branch_found="$branch does not depend on any topic"
 	else
-		dir=push
 		no_branch_found="No topic depends on $branch"
 	fi
-	if [ -z "$all" ];then
-		script=@sharedir@/next-level.awk
+
+	if [ -z "$all" ]; then
+		if [ -n "$pop" ]; then
+			tg prev >$_altfile
+		else
+			tg next >$_altfile
+		fi
 	else
+		tg summary --deps >$_depfile || die "tg summary failed"
+
+		if [ -n "$pop" ]; then
+			dir=pop
+		else
+			dir=push
+		fi
 		script=@sharedir@/leaves.awk
+		awk -f @sharedir@/leaves.awk dir=$dir start=$branch <$_depfile | sort >$_altfile
 	fi
-	awk -f $script dir=$dir start=$branch <$_depfile | sort >$_altfile
 fi
 
 _alts=`wc -l < $_altfile`
