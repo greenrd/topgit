@@ -499,9 +499,6 @@ tg export
 	with one mandatory argument: the name of the branch where the
 	exported result will be stored.
 
-	WARNING: The branch will be silently overwritten if it exists
-	already!  If you make a mistake, use `git reflog` to recover.
-
 	When using the linearize mode:
 
 	master$ tg export --linearize for-linus

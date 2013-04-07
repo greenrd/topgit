@@ -76,7 +76,7 @@ else
 		if [ -n "$pop" ]; then
 			tg prev -w >$_altfile
 		else
-			tg next -w >$_altfile
+			tg next >$_altfile
 		fi
 	else
 		tg summary --deps >$_depfile || die "tg summary failed"
