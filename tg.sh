@@ -215,6 +215,15 @@ non_annihilated_branches()
 		done
 }
 
+# Make sure our tree is clean
+ensure_clean_tree()
+{
+	git update-index --ignore-submodules --refresh ||
+		die "the working directory has uncommitted changes (see above) - first commit or reset them"
+	[ -z "$(git diff-index --cached --name-status -r --ignore-submodules HEAD --)" ] ||
+		die "the index has uncommited changes"
+}
+
 # is_sha1 REF
 # Whether REF is a SHA1 (compared to a symbolic name).
 is_sha1()
