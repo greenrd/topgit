@@ -33,7 +33,7 @@ while [ $# -gt 0 ]; do
 				shift
 			fi;;
 		*)
-			echo "Usage: tg [...] checkout [ [ push | pop ] [ -a ] | goto PATTERN ]" >&2
+			echo "Usage: tg [...] checkout [ [ push | pop ] [ -a ] | goto <pattern> ]" >&2
 			exit 1;;
 	esac
 done

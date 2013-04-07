@@ -18,7 +18,7 @@ while [ -n "$1" ]; do
 	-r)
 		rname="$1"; shift;;
 	-*)
-		echo "Usage: tg [...] create NAME [DEPS...|-r RNAME]" >&2
+		echo "Usage: tg [...] create [<name> [<dep>...|-r <rname>] ]" >&2
 		exit 1;;
 	*)
 		if [ -z "$name" ]; then
@@ -129,11 +129,9 @@ author_addr="${author%> *}>"
 	! subject_prefix="$(git config topgit.subjectprefix)" || subject_prefix="$subject_prefix "
 	echo "Subject: [${subject_prefix}PATCH] $name"
 	echo
-	cat <<EOT
-<patch description>
-
-Signed-off-by: $author_addr
-EOT
+	echo '<patch description>'
+	echo
+	[ "$(git config --bool format.signoff)" = true ] && echo "Signed-off-by: $author_addr"
 } >"$root_dir/.topmsg"
 git add -f "$root_dir/.topmsg"
 
