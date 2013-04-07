@@ -539,7 +539,7 @@ tg update
 	next in case of conflicts.
 
 	When '-a' is specifed, updates all topic branches matched by
-	<pattern>s (see `git-for-all-refs(1)` for details), or all if
+	<pattern>s (see `git-for-each-ref(1)` for details), or all if
 	no <pattern> is given.
 
 	After the update, if a single topic branch was specified, it is
