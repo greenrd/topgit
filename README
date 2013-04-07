@@ -422,7 +422,7 @@ tg summary
 
 tg checkout
 ~~~~~~~~~~~
-	Switch to a topic branch.  You can use 'git checkout BRANCH'
+	Switch to a topic branch.  You can use 'git checkout <branch>'
 	to get the same effect, but this command helps you navigate
 	the dependency graph, or allows you to match the topic branch
 	name using a regular expression, so it can be more convenient.
@@ -435,8 +435,8 @@ tg checkout
 	    'tg checkout pop'     Check out a branch that this branch
 	    		       	  directly depends on.
 
-	    'tg checkout goto PATTERN'  Check out a topic branch that
-	    		          matches PATTERN.  PATTERN is used as
+	    'tg checkout goto <pattern>'  Check out a topic branch that
+	    		          matches <pattern>.  <pattern> is used as
 	    		          a sed pattern to filter all the
 	    		          topic branches.
 
@@ -452,7 +452,7 @@ tg checkout
 	branch to switch to, you will be presented with the matches
 	and ask to select one of them.
 
-	The 'PATTERN' of 'tg checkout goto' is optional.  If you don't
+	The <pattern> of 'tg checkout goto' is optional.  If you don't
 	supply it, all the available topic branches are listed and you
 	can select one of them.
 
