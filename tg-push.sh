@@ -42,14 +42,7 @@ fi
 
 if [ -z "$branches" ]; then
 	if $push_all; then
-		branches="$( git for-each-ref refs/top-bases |
-			while read rev type ref; do
-				name="${ref#refs/top-bases/}"
-				if branch_annihilated "$name"; then
-					continue
-				fi
-        printf "$name "
-			done )"
+		branches="$(non_annihilated_branches)"
 	else
 		branches="$(git symbolic-ref HEAD | sed 's#^refs/heads/##')"
 	fi

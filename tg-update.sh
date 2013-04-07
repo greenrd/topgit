@@ -187,13 +187,9 @@ update_branch() {
 
 [ -z "$all" ] && { update_branch $name; exit; }
 
-git for-each-ref $pattern |
-	while read rev type ref; do
-		name="${ref#refs/top-bases/}"
-		if branch_annihilated "$name"; then
-			continue;
-		fi
-		info "Procesing $name..."
+non_annihilated_branches $pattern |
+	while read name; do
+		info "Proccessing $name..."
 		update_branch "$name" || exit
 	done
 

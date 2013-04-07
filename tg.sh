@@ -202,6 +202,19 @@ branch_annihilated()
 	test -z "$mb" || test "$(git rev-parse "$mb^{tree}")" = "$(git rev-parse "$_name^{tree}")";
 }
 
+non_annihilated_branches()
+{
+	_pattern="$@"
+	git for-each-ref ${_pattern:-refs/top-bases} |
+		while read rev type ref; do
+			name="${ref#refs/top-bases/}"
+			if branch_annihilated "$name"; then
+				continue
+			fi
+			echo "$name"
+		done
+}
+
 # is_sha1 REF
 # Whether REF is a SHA1 (compared to a symbolic name).
 is_sha1()
