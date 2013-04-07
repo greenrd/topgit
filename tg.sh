@@ -298,8 +298,6 @@ recurse_deps()
 # description for details) and set $_ret to non-zero.
 branch_needs_update()
 {
-	branch_annihilated "$_dep" && return 0
-
 	if [ -n "$_dep_missing" ]; then
 		echo "! $_depchain"
 		return 0
@@ -307,6 +305,8 @@ branch_needs_update()
 
 	_dep_base_update=
 	if [ -n "$_dep_is_tgish" ]; then
+		branch_annihilated "$_dep" && return 0
+
 		if has_remote "$_dep"; then
 			branch_contains "$_dep" "refs/remotes/$base_remote/$_dep" || _dep_base_update=%
 		fi

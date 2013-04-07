@@ -574,7 +574,6 @@ tg push
 	was specified, the configured default TopGit remote will be
 	used.
 
-
 tg base
 ~~~~~~~
 	Prints the base commit of each of the named topic branches, or
