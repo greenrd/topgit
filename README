@@ -411,6 +411,52 @@ tg summary
 	TODO: Speed up by an order of magnitude
 	TODO: Text graph view
 
+tg checkout
+~~~~~~~~~~~
+	Switch to a topic branch.  You can use 'git checkout <branch>'
+	to get the same effect, but this command helps you navigate
+	the dependency graph, or allows you to match the topic branch
+	name using a regular expression, so it can be more convenient.
+
+	There following subcommands are available:
+
+	    'tg checkout push'    Check out a branch that directly
+	    		       	  depends on your current branch.
+
+	    'tg checkout pop'     Check out a branch that this branch
+	    		       	  directly depends on.
+
+	    'tg checkout goto <pattern>'  Check out a topic branch that
+	    		          matches <pattern>.  <pattern> is used as
+	    		          a sed pattern to filter all the
+	    		          topic branches.
+
+	    'tg checkout next'    An alias for 'push'.
+	    'tg checkout child'   An alias for 'push'.
+	    'tg checkout'      	  An alias for 'push'.
+
+	    'tg checkout prev'    An alias for 'pop'.
+	    'tg checkout parent'  An alias for 'pop'.
+	    'tg checkout ..'      An alias for 'pop'.
+
+	If any of the above commands can find more than one possible
+	branch to switch to, you will be presented with the matches
+	and ask to select one of them.
+
+	The <pattern> of 'tg checkout goto' is optional.  If you don't
+	supply it, all the available topic branches are listed and you
+	can select one of them.
+
+	Normally, the 'push' and 'pop' commands moves one step in
+	the dependency graph of the topic branches.  The '-a' option
+	causes them (and their aliases) to move as far as possible.
+	That is, 'tg checkout push -a' moves to a topic branch that
+	depends (directly or indirectly) on the current branch and
+	that no other branch depends on.  'tg checkout pop -a'
+	moves to a regular branch that the current topic branch
+	depends on (directly or indirectly).  If there is more than
+	one possibility, you will be prompted for your selection.
+
 tg export
 ~~~~~~~~~
 	Export a tidied-up history of the current topic branch and its
