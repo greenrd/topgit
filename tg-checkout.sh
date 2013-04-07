@@ -15,6 +15,12 @@ all=
 # Arguments of "goto".
 pattern=
 
+checkout() {
+	_head="$(git rev-parse --abbrev-ref=loose HEAD)"
+	ref_exists "refs/top-bases/$_head" && branch_annihilated "$_head" && _checkout_opts="-f"
+	git checkout ${_checkout_opts} "$1"
+}
+
 while [ $# -gt 0 ]; do
 	arg="$1"
 	shift
@@ -68,9 +74,9 @@ else
 
 	if [ -z "$all" ]; then
 		if [ -n "$pop" ]; then
-			tg prev >$_altfile
+			tg prev -w >$_altfile
 		else
-			tg next >$_altfile
+			tg next -w >$_altfile
 		fi
 	else
 		tg summary --deps >$_depfile || die "tg summary failed"
@@ -89,8 +95,8 @@ _alts=`wc -l < $_altfile`
 if [ $_alts = 0 ]; then
 	die "$no_branch_found"
 elif [ $_alts = 1 ]; then
-	git checkout `cat $_altfile`
-	exit
+	checkout `cat $_altfile`
+	exit $?
 fi
 
 echo Please select one of the following topic branches:
@@ -110,4 +116,4 @@ fi
 new_branch=`sed -n ${n}p $_altfile`
 [ -n "$new_branch" ] || die "Bad input"
 
-git checkout $new_branch
+checkout $new_branch
