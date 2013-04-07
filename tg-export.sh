@@ -9,6 +9,9 @@ output=
 driver=collapse
 flatten=false
 numbered=false
+strip=false
+stripval=0
+allbranches=false
 
 
 ## Parse options
@@ -16,6 +19,8 @@ numbered=false
 while [ -n "$1" ]; do
 	arg="$1"; shift
 	case "$arg" in
+	-a|--all)
+		allbranches=true;;
 	-b)
 		branches="$1"; shift;;
 	--flatten)
@@ -23,6 +28,17 @@ while [ -n "$1" ]; do
 	--numbered)
 		flatten=true;
 		numbered=true;;
+	--strip*)
+		val=${arg#*=}
+		if [ "$val" = "--strip" ]; then
+			strip=true
+			stripval=9999
+		elif [ -n "$val" -a "x$(echo $val | sed -e 's/[0-9]//g')" = "x" ]; then
+			strip=true
+			stripval=$val
+		else
+			die "invalid parameter $arg"
+		fi;;
 	--quilt)
 		driver=quilt;;
 	--collapse)
@@ -30,7 +46,7 @@ while [ -n "$1" ]; do
 	--linearize)
 		driver=linearize;;
 	-*)
-		echo "Usage: tg [...] export ([--collapse] NEWBRANCH | [-b BRANCH1,BRANCH2...] --quilt DIRECTORY | --linearize NEWBRANCH)" >&2
+		echo "Usage: tg [...] export ([--collapse] <newbranch> | [-a | --all | -b <branch1>...] --quilt <directory> | --linearize <newbranch>)" >&2
 		exit 1;;
 	*)
 		[ -z "$output" ] || die "output already specified ($output)"
@@ -49,7 +65,16 @@ done
 [ "$driver" = "quilt" ] || ! "$flatten" ||
 	die "--flatten works only with the quilt driver"
 
-if [ -z "$branches" ]; then
+[ "$driver" = "quilt" ] || ! "$strip" ||
+	die "--strip works only with the quilt driver"
+
+[ "$driver" = "quilt" ] || ! "$allbranches" ||
+	die "--all works only with the quilt driver";
+
+[ -z "$branches" ] || ! "$allbranches" ||
+	die "-b conflicts with the --all option";
+
+if [ -z "$branches" ] && ! "$allbranches"; then
 	# this check is only needed when no branches have been passed
 	name="$(git symbolic-ref HEAD | sed 's#^refs/heads/##')"
 	base_rev="$(git rev-parse --short --verify "refs/top-bases/$name" 2>/dev/null)" ||
@@ -57,20 +82,10 @@ if [ -z "$branches" ]; then
 fi
 
 
-playground="$(mktemp -d -t tg-export.XXXXXX)"
-trap 'rm -rf "$playground"' EXIT
+playground="$(get_temp tg-export -d)"
 
 
 ## Collapse driver
-
-# pretty_tree NAME
-# Output tree ID of a cleaned-up tree without tg's artifacts.
-pretty_tree()
-{
-	git ls-tree --full-tree "$1" \
-	| awk -F '	' '$2 !~ /^.top/' \
-	| git mktree
-}
 
 create_tg_commit()
 {
@@ -105,14 +120,15 @@ collapsed_commit()
 	>"$playground/^body"
 
 	# Determine parent
-	parent="$(cut -f 1 "$playground/$name^parents")"
+	parent="$(cut -f 1 "$playground/$name^parents" | \
+		while read p; do [ $(git cat-file -t $p 2> /dev/null) = tag ] && git cat-file tag $p | head -1 | cut -d' ' -f2 || echo $p; done)"
 	if [ "$(cat "$playground/$name^parents" | wc -l)" -gt 1 ]; then
 		# Produce a merge commit first
 		parent="$({
 			echo "TopGit-driven merge of branches:"
 			echo
 			cut -f 2 "$playground/$name^parents"
-		} | git commit-tree "$(pretty_tree "refs/top-bases/$name")" \
+		} | git commit-tree "$(pretty_tree "$name" -b)" \
 			$(for p in $parent; do echo -p $p; done))"
 	fi
 
@@ -161,16 +177,27 @@ quilt()
 		return
 	fi
 
-	if "$flatten"; then
-		bn="$(echo "$_dep.diff" | sed -e 's#_#__#g' -e 's#/#_#g')";
-		dn="";
-	else
-		bn="$(basename "$_dep.diff")";
-		dn="$(dirname "$_dep.diff")/";
-		if [ "x$dn" = "x./" ]; then
-			dn="";
-		fi;
-	fi;
+	_dep_tmp=$_dep
+
+	if "$strip"; then
+		i=$stripval
+		while [ "$i" -gt 0 ]; do
+			[ "$_dep_tmp" = "${_dep_tmp#*/}" ] && break
+			_dep_tmp=${_dep_tmp#*/}
+			i=$((i - 1))
+		done
+	fi
+
+	bn="$(basename "$_dep_tmp.diff")"
+	dn="$(dirname "$_dep_tmp.diff")/"
+	[ "x$dn" = "x./" ] && dn=""
+
+	if "$flatten" && [ "$dn" ]; then
+		bn="$(echo "$_dep_tmp.diff" | sed -e 's#_#__#g' -e 's#/#_#g')"
+		dn=""
+	fi
+
+	unset _dep_tmp
 
 	if [ -e "$playground/$_dep" ]; then
 		# We've already seen this dep
@@ -227,7 +254,7 @@ linearize()
 	else
 		retmerge=0;
 
-		git merge-recursive "$(pretty_tree "refs/top-bases/$_dep")" -- HEAD "$(pretty_tree "refs/heads/$_dep")" || retmerge="$?";
+		git merge-recursive "$(pretty_tree "$_dep" -b)" -- HEAD "$(pretty_tree "refs/heads/$_dep")" || retmerge="$?";
 
 		if test "x$retmerge" != "x0"; then
 			git rerere;
@@ -270,6 +297,9 @@ fi
 
 driver()
 {
+	# FIXME should we abort on missing dependency?
+	[ -z "$_dep_missing" ] || return 0
+
 	case $_dep in refs/remotes/*) return;; esac
 	branch_needs_update >/dev/null
 	[ "$_ret" -eq 0 ] ||
@@ -280,9 +310,15 @@ driver()
 
 # Call driver on all the branches - this will happen
 # in topological order.
-if [ -z "$branches" ]; then
+if "$allbranches" ; then
+	non_annihilated_branches |
+		while read name; do
+			recurse_deps driver "$name"
+			(_ret=0; _dep="$name"; _name=""; _dep_is_tgish=1; _dep_missing=; driver)
+		done
+elif [ -z "$branches" ]; then
 	recurse_deps driver "$name"
-	(_ret=0; _dep="$name"; _name=""; _dep_is_tgish=1; driver)
+	(_ret=0; _dep="$name"; _name=; _dep_is_tgish=1; _dep_missing=; driver)
 else
 	echo "$branches" | tr ',' '\n' | while read _dep; do
 		_dep_is_tgish=1

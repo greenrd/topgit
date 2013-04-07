@@ -5,6 +5,7 @@
 # GPLv2
 
 name=
+head_from=
 
 
 ## Parse options
@@ -12,10 +13,11 @@ name=
 while [ -n "$1" ]; do
 	arg="$1"; shift
 	case "$arg" in
-	--)
-		break;;
+	-i|-w)
+		[ -z "$head_from" ] || die "-i and -w are mutually exclusive"
+		head_from="$arg";;
 	-*)
-		echo "Usage: tg [...] log [<name>] [-- <git-log-option>...]" >&2
+		echo "Usage: tg next [-i | -w] [<name>]" >&2
 		exit 1;;
 	*)
 		[ -z "$name" ] || die "name already specified ($name)"
@@ -23,8 +25,14 @@ while [ -n "$1" ]; do
 	esac
 done
 
-[ -n "$name" ] || name="$(git symbolic-ref HEAD | sed 's#^refs/heads/##')"
+head="$(git rev-parse --abbrev-ref=loose HEAD)"
+[ -n "$name" ] ||
+	name="$head"
 base_rev="$(git rev-parse --short --verify "refs/top-bases/$name" 2>/dev/null)" ||
 	die "not a TopGit-controlled branch"
 
-git log --first-parent --no-merges "$@" "refs/top-bases/$name".."$name"
+# select .topdeps source for HEAD branch
+[ "x$name" = "x$head" ] ||
+	head_from=
+
+cat_file "$name:.topdeps" $head_from

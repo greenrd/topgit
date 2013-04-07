@@ -201,13 +201,14 @@ __tg_commands ()
 		return
 	fi
 	local i IFS=" "$'\n'
-	for i in $(tg help | sed -n 's/^Usage:.*(\(.*\)).*/\1/p' | tr '|' ' ')
+	for i in $(tg help | sed -n 's/^Usage:.*(\([^)]*\)).*/\1/p' | tr '|' ' ')
 	do
 		case $i in
 		*--*)             : helper pattern;;
 		*) echo $i;;
 		esac
 	done
+	echo help
 }
 __tg_all_commandlist=
 __tg_all_commandlist="$(__tg_commands 2>/dev/null)"
@@ -268,7 +269,7 @@ _tg_delete ()
 _tg_depend ()
 {
 	local subcommands="add"
-	local subcommand="$(__git_find_subcommand "$subcommands")"
+	local subcommand="$(__git_find_subcommand "$subcommands" 2>/dev/null || __git_find_on_cmdline "$subcommands" 2>/dev/null)"
 	if [ -z "$subcommand" ]; then
 		__tgcomp "$subcommands"
 		return
@@ -359,6 +360,14 @@ _tg_mail ()
 	local cur="${COMP_WORDS[COMP_CWORD]}"
 
 	case "$cur" in
+	-*)
+		__tgcomp "
+			-i
+			-w
+			-s
+			-r
+		"
+		;;
 	*)
 		__tgcomp "$(__tg_topics)"
 	esac
@@ -426,7 +435,11 @@ _tg_summary ()
 	*)
 		__tgcomp "
 			--graphviz
+			--sort
+			--deps
 			-t
+			-i
+			-w
 		"
 	esac
 }
@@ -436,6 +449,38 @@ _tg_update ()
 	local cur="${COMP_WORDS[COMP_CWORD]}"
 
 	case "$cur" in
+	*)
+		__tgcomp "$(__tg_topics)"
+	esac
+}
+
+_tg_next ()
+{
+	local cur="${COMP_WORDS[COMP_CWORD]}"
+
+	case "$cur" in
+	-*)
+		__tgcomp "
+			-i
+			-w
+		"
+		;;
+	*)
+		__tgcomp "$(__tg_heads)"
+	esac
+}
+
+_tg_prev ()
+{
+	local cur="${COMP_WORDS[COMP_CWORD]}"
+
+	case "$cur" in
+	-*)
+		__tgcomp "
+			-i
+			-w
+		"
+		;;
 	*)
 		__tgcomp "$(__tg_topics)"
 	esac
@@ -482,12 +527,15 @@ _tg ()
 	delete)      _tg_delete ;;
 	depend)      _tg_depend ;;
 	export)      _tg_export ;;
+	files)       _tg_patch ;;
 	help)        _tg_help ;;
 	import)      _tg_import ;;
 	info)        _tg_info ;;
 	log)         _tg_log ;;
 	mail)        _tg_mail ;;
+	next)        _tg_next ;;
 	patch)       _tg_patch ;;
+	prev)        _tg_prev ;;
 	push)        _tg_push ;;
 	remote)      _tg_remote ;;
 	summary)     _tg_summary ;;
