@@ -17,7 +17,7 @@ while [ -n "$1" ]; do
 		[ -z "$head_from" ] || die "-i and -w are mutually exclusive"
 		head_from="$arg";;
 	-*)
-		echo "Usage: tg next [-i | -w] [<name>]" >&2
+		echo "Usage: tg prev [-i | -w] [<name>]" >&2
 		exit 1;;
 	*)
 		[ -z "$name" ] || die "name already specified ($name)"
@@ -35,4 +35,7 @@ base_rev="$(git rev-parse --short --verify "refs/top-bases/$name" 2>/dev/null)" 
 [ "x$name" = "x$head" ] ||
 	head_from=
 
-cat_file "$name:.topdeps" $head_from
+cat_file "$name:.topdeps" $head_from | while read dep; do
+	ref_exists "refs/top-bases/$dep" && branch_annihilated "$dep" && continue
+	echo "$dep"
+done
