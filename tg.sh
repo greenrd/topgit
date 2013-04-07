@@ -3,7 +3,10 @@
 # (c) Petr Baudis <pasky@suse.cz>  2008
 # GPLv2
 
-TG_VERSION=0.8
+TG_VERSION=0.9
+
+# Update if you add any code that requires a newer version of git
+GIT_MINIMUM_VERSION=1.7.7.2
 
 ## Auxiliary functions
 
@@ -14,29 +17,100 @@ info()
 
 die()
 {
-	info "fatal: $*"
+	info "fatal: $*" >&2
 	exit 1
 }
 
-# cat_file "topic:file"
-# Like `git cat-file blob $1`, but topics '(i)' and '(w)' means index and worktree
+compare_versions()
+{
+	separator=$1
+	echo $3 | tr ${separator} '\n' | (for l in $(echo $2|tr ${separator} ' '); do
+	    read r || return 0
+	    [ $l -ge $r ] || return 1
+	    [ $l -gt $r ] && return 0
+	done)
+}
+
+precheck() {
+	git_ver=$(git version)
+	compare_versions . ${git_ver#git version} ${GIT_MINIMUM_VERSION} \
+	    || die "git version >= " ${GIT_MINIMUM_VERSION} required
+}
+
+precheck
+[ "$1" = "precheck" ] && exit 0
+
+# cat_file TOPIC:PATH [FROM]
+# cat the file PATH from branch TOPIC when FROM is empty.
+# FROM can be -i or -w, than the file will be from the index or worktree,
+# respectively. The caller should than ensure that HEAD is TOPIC, to make sense.
 cat_file()
 {
-	arg="$1"
-	case "$arg" in
-	'(w):'*)
-		arg=$(echo "$arg" | tail --bytes=+5)
-		cat "$arg"
-		return
+	path="$1"
+	case "${2-}" in
+	-w)
+		cat "$root_dir/${path#*:}"
 		;;
-	'(i):'*)
+	-i)
 		# ':file' means cat from index
-		arg=$(echo "$arg" | tail --bytes=+5)
-		git cat-file blob ":$arg"
+		git cat-file blob ":${path#*:}"
+		;;
+	'')
+		git cat-file blob "$path"
 		;;
 	*)
-		git cat-file blob "$arg"
+		die "Wrong argument to cat_file: '$2'"
+		;;
 	esac
+}
+
+# get tree for the committed topic
+get_tree_()
+{
+	echo "$1"
+}
+
+# get tree for the base
+get_tree_b()
+{
+	echo "refs/top-bases/$1"
+}
+
+# get tree for the index
+get_tree_i()
+{
+	git write-tree
+}
+
+# get tree for the worktree
+get_tree_w()
+{
+	i_tree=$(git write-tree)
+	(
+		# the file for --index-output needs to sit next to the
+		# current index file
+		: ${GIT_INDEX_FILE:="$git_dir/index"}
+		TMP_INDEX="$(mktemp "${GIT_INDEX_FILE}-tg.XXXXXX")"
+		git read-tree -m $i_tree --index-output="$TMP_INDEX" &&
+		GIT_INDEX_FILE="$TMP_INDEX" &&
+		export GIT_INDEX_FILE &&
+		git diff --name-only -z HEAD |
+			git update-index -z --add --remove --stdin &&
+		git write-tree &&
+		rm -f "$TMP_INDEX"
+	)
+}
+
+# pretty_tree NAME [-b | -i | -w]
+# Output tree ID of a cleaned-up tree without tg's artifacts.
+# NAME will be ignored for -i and -w, but needs to be present
+pretty_tree()
+{
+	name=$1
+	source=${2#?}
+	git ls-tree --full-tree "$(get_tree_$source "$name")" |
+		awk -F '	' '$2 !~ /^.top/' |
+		git mktree
 }
 
 # setup_hook NAME
@@ -123,9 +197,31 @@ branch_annihilated()
 	_name="$1";
 
 	# use the merge base in case the base is ahead.
-	mb="$(git merge-base "refs/top-bases/$_name" "$_name")";
+	mb="$(git merge-base "refs/top-bases/$_name" "$_name" 2> /dev/null)";
 
-	test "$(git rev-parse "$mb^{tree}")" = "$(git rev-parse "$_name^{tree}")";
+	test -z "$mb" || test "$(git rev-parse "$mb^{tree}")" = "$(git rev-parse "$_name^{tree}")";
+}
+
+non_annihilated_branches()
+{
+	_pattern="$@"
+	git for-each-ref ${_pattern:-refs/top-bases} |
+		while read rev type ref; do
+			name="${ref#refs/top-bases/}"
+			if branch_annihilated "$name"; then
+				continue
+			fi
+			echo "$name"
+		done
+}
+
+# Make sure our tree is clean
+ensure_clean_tree()
+{
+	git update-index --ignore-submodules --refresh ||
+		die "the working directory has uncommitted changes (see above) - first commit or reset them"
+	[ -z "$(git diff-index --cached --name-status -r --ignore-submodules HEAD --)" ] ||
+		die "the index has uncommited changes"
 }
 
 # is_sha1 REF
@@ -140,11 +236,13 @@ is_sha1()
 # CMD can refer to $_name for queried branch name,
 # $_dep for dependency name,
 # $_depchain for space-seperated branch backtrace,
+# $_dep_missing boolean to check whether $_dep is present
 # and the $_dep_is_tgish boolean.
 # It can modify $_ret to affect the return value
 # of the whole function.
 # If recurse_deps() hits missing dependencies, it will append
-# them to space-separated $missing_deps list and skip them.
+# them to space-separated $missing_deps list and skip them
+# affter calling CMD with _dep_missing set.
 # remote dependencies are processed if no_remotes is unset.
 recurse_deps()
 {
@@ -152,7 +250,7 @@ recurse_deps()
 	_name="$1"; # no shift
 	_depchain="$*"
 
-	_depsfile="$(mktemp -t tg-depsfile.XXXXXX)"
+	_depsfile="$(get_temp tg-depsfile)"
 	# If no_remotes is unset check also our base against remote base.
 	# Checking our head against remote head has to be done in the helper.
 	if test -z "$no_remotes" && has_remote "top-bases/$_name"; then
@@ -167,9 +265,12 @@ recurse_deps()
 
 	_ret=0
 	while read _dep; do
+		_dep_missing=
 		if ! ref_exists "$_dep" ; then
-			# All hope is lost
+			# All hope is lost. Inform driver and continue
 			missing_deps="$missing_deps $_dep"
+			_dep_missing=1
+			eval "$_cmd"
 			continue
 		fi
 
@@ -185,7 +286,6 @@ recurse_deps()
 		eval "$_cmd"
 	done <"$_depsfile"
 	missing_deps="${missing_deps# }"
-	rm "$_depsfile"
 	return $_ret
 }
 
@@ -198,6 +298,11 @@ recurse_deps()
 # description for details) and set $_ret to non-zero.
 branch_needs_update()
 {
+	if [ -n "$_dep_missing" ]; then
+		echo "! $_depchain"
+		return 0
+	fi
+
 	_dep_base_update=
 	if [ -n "$_dep_is_tgish" ]; then
 		if has_remote "$_dep"; then
@@ -223,8 +328,9 @@ branch_needs_update()
 # This function is recursive; it outputs reverse path from NAME
 # to the branch (e.g. B_DIRTY B1 B2 NAME), one path per line,
 # inner paths first. Innermost name can be ':' if the head is
-# not in sync with the base or '%' if the head is not in sync
-# with the remote (in this order of priority).
+# not in sync with the base, '%' if the head is not in sync
+# with the remote (in this order of priority) or '!' if depednecy
+# is missing.
 # It will also return non-zero status if NAME needs update.
 # If needs_update() hits missing dependencies, it will append
 # them to space-separated $missing_deps list and skip them.
@@ -233,15 +339,23 @@ needs_update()
 	recurse_deps branch_needs_update "$@"
 }
 
-# branch_empty NAME
+# branch_empty NAME [-i | -w]
 branch_empty()
 {
-	[ -z "$(git diff-tree "refs/top-bases/$1" "$1" -- | fgrep -v "	.top")" ]
+	[ "$(pretty_tree "$1" -b)" = "$(pretty_tree "$1" ${2-})" ]
 }
 
-# list_deps
+# list_deps [-i | -w]
+# -i/-w apply only to HEAD
 list_deps()
 {
+	local head
+	local head_from
+	local from
+	head_from=${1-}
+	head="$(git symbolic-ref -q HEAD)" ||
+		head="..detached.."
+
 	git for-each-ref refs/top-bases |
 		while read rev type ref; do
 			name="${ref#refs/top-bases/}"
@@ -249,7 +363,10 @@ list_deps()
 				continue;
 			fi
 
-			git cat-file blob "$name:.topdeps" | while read dep; do
+			from=$head_from
+			[ "refs/heads/$name" = "$head" ] ||
+				from=
+			cat_file "$name:.topdeps" $from | while read dep; do
 				dep_is_tgish=true
 				ref_exists "refs/top-bases/$dep"  ||
 					dep_is_tgish=false
@@ -259,7 +376,6 @@ list_deps()
 			done
 		done
 }
-
 
 # switch_to_base NAME [SEED]
 switch_to_base()
@@ -298,7 +414,7 @@ do_help()
 		done
 
 		echo "TopGit v$TG_VERSION - A different patch queue manager"
-		echo "Usage: tg [-r REMOTE] ($cmds|help) ..."
+		echo "Usage: tg ( help [<command>] | [-r <remote>] ($cmds) ...)"
 	elif [ -r "@cmddir@"/tg-$1 ] ; then
 		setup_pager
 		@cmddir@/tg-$1 -h 2>&1 || :
@@ -337,19 +453,28 @@ setup_pager()
 	# now spawn pager
 	export LESS="${LESS:-FRSX}"	# as in pager.c:pager_preexec()
 
-	_pager_fifo_dir="$(mktemp -t -d tg-pager-fifo.XXXXXX)"
-	_pager_fifo="$_pager_fifo_dir/0"
-	mkfifo -m 600 "$_pager_fifo"
+	# setup_pager should be called only once per command
+	pager_fifo="${tg_tmp_dir:-${HOME}}/.tg-pager"
+	mkfifo -m 600 "$pager_fifo"
 
-	"$TG_PAGER" < "$_pager_fifo" &
-	exec > "$_pager_fifo"		# dup2(pager_fifo.in, 1)
+	"$TG_PAGER" < "$pager_fifo" &
+	exec > "$pager_fifo"		# dup2(pager_fifo.in, 1)
 
 	# this is needed so e.g. `git diff` will still colorize it's output if
 	# requested in ~/.gitconfig with color.diff=auto
 	export GIT_PAGER_IN_USE=1
 
 	# atexit(close(1); wait pager)
-	trap "exec >&-; rm \"$_pager_fifo\"; rmdir \"$_pager_fifo_dir\"; wait" EXIT
+	# deliberately overwrites the global EXIT trap
+	trap "exec >&-; rm -rf \"${tg_tmp_dir:-${HOME}/.tg-pager}\"; wait" EXIT
+}
+
+# get_temp NAME [-d]
+# creates a new temporary file (or directory with -d) in the global
+# temporary directory $tg_tmp_dir with pattern prefix NAME
+get_temp()
+{
+	mktemp ${2-} "$tg_tmp_dir/$1.XXXXXX"
 }
 
 ## Startup
@@ -359,16 +484,30 @@ setup_pager()
 
 ## Initial setup
 
-set -e
-git_dir="$(git rev-parse --git-dir)"
-root_dir="$(git rev-parse --show-cdup)"; root_dir="${root_dir:-.}"
+cmd="$1"
+[ -z "$tg__include" ] || cmd="include" # ensure setup happens
+case "$cmd" in
+help|--help|-h)
+        :;;
+*)
+        if [ -n "$cmd" ]; then
+            set -e
+            # suppress the merge log editor feature since git 1.7.10
+            export GIT_MERGE_AUTOEDIT=no
+            git_dir="$(git rev-parse --git-dir)"
+            root_dir="$(git rev-parse --show-cdup)"; root_dir="${root_dir:-.}"
 # Make sure root_dir doesn't end with a trailing slash.
-root_dir="${root_dir%/}"
-base_remote="$(git config topgit.remote 2>/dev/null)" || :
-tg="tg"
+            root_dir="${root_dir%/}"
+            base_remote="$(git config topgit.remote 2>/dev/null)" || :
+            tg="tg"
 # make sure merging the .top* files will always behave sanely
-setup_ours
-setup_hook "pre-commit"
+            setup_ours
+            setup_hook "pre-commit"
+            # create global temporary directories, inside GIT_DIR
+            tg_tmp_dir="$(mktemp -d "$git_dir/tg-tmp.XXXXXX")"
+            trap "rm -rf \"$tg_tmp_dir\"" EXIT
+        fi
+esac
 
 ## Dispatch
 
@@ -388,7 +527,6 @@ if [ "$1" = "-r" ]; then
 	tg="$tg -r $base_remote"
 fi
 
-cmd="$1"
 [ -n "$cmd" ] || { do_help; exit 1; }
 shift
 

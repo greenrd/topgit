@@ -12,7 +12,12 @@ commands_out := $(patsubst %.sh,%,$(commands_in))
 hooks_out := $(patsubst %.sh,%,$(hooks_in))
 help_out := $(patsubst %.sh,%.txt,$(commands_in))
 
-all::	tg $(commands_out) $(hooks_out) $(help_out)
+version = $(shell test -d .git && git describe --match "topgit-[0-9]*" --abbrev=4 HEAD 2>/dev/null | sed -e 's/^topgit-//' )
+ifneq ($(strip $(version)),)
+	version_arg = -e s/TG_VERSION=.*/TG_VERSION=$(version)/
+endif
+
+all::	precheck $(commands_out) $(hooks_out) $(help_out)
 
 tg $(commands_out) $(hooks_out): % : %.sh Makefile
 	@echo "[SED] $@"
@@ -20,14 +25,18 @@ tg $(commands_out) $(hooks_out): % : %.sh Makefile
 		-e 's#@hooksdir@#$(hooksdir)#g' \
 		-e 's#@bindir@#$(bindir)#g' \
 		-e 's#@sharedir@#$(sharedir)#g' \
+		$(version_arg) \
 		$@.sh >$@+ && \
 	chmod +x $@+ && \
 	mv $@+ $@
 
-$(help_out): README
+$(help_out): README create-help.sh
 	@CMD=`echo $@ | sed -e 's/tg-//' -e 's/\.txt//'` && \
 	echo '[HELP]' $$CMD && \
 	./create-help.sh $$CMD
+
+precheck:: tg
+	./$+ precheck
 
 install:: all
 	install -d -m 755 "$(DESTDIR)$(bindir)"
