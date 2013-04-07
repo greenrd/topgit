@@ -257,7 +257,7 @@ recurse_deps()
 		echo "refs/remotes/$base_remote/top-bases/$_name" >>"$_depsfile"
 	fi
 
-	# if the branch was annihilated, there exists no .topdeps file
+	# if the branch was annihilated, it is considered to have no dependencies
 	if ! branch_annihilated "$_name"; then
 		#TODO: handle nonexisting .topdeps?
 		git cat-file blob "$_name:.topdeps" >>"$_depsfile";
@@ -298,6 +298,8 @@ recurse_deps()
 # description for details) and set $_ret to non-zero.
 branch_needs_update()
 {
+	branch_annihilated "$_dep" && return 0
+
 	if [ -n "$_dep_missing" ]; then
 		echo "! $_depchain"
 		return 0
