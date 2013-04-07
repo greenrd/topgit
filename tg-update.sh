@@ -42,6 +42,8 @@ else
 	[ -n "$current" ] || die "cannot return to detached tree; switch to another branch"
 fi
 
+ensure_clean_tree
+
 update_branch() {
 	local name="$1" base_rev depcheck missing_deps HEAD
 	## First, take care of our base

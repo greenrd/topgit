@@ -215,6 +215,14 @@ non_annihilated_branches()
 		done
 }
 
+## Make sure our tree is clean
+ensure_clean_tree()
+{
+	git update-index --ignore-submodules --refresh || exit
+	[ -z "$(git diff-index --cached --name-status -r --ignore-submodules HEAD --)" ] ||
+		die "the index is not clean"
+}
+
 # is_sha1 REF
 # Whether REF is a SHA1 (compared to a symbolic name).
 is_sha1()
