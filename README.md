@@ -1,7 +1,7 @@
 TopGit - A different patch queue manager
 
 
-DESCRIPTION
+Description
 ===========
 
 TopGit aims to make handling of large amounts of interdependent topic
@@ -12,12 +12,12 @@ them - TopGit achieves that by keeping a separate topic branch for each
 patch and providing some tools to maintain the branches.
 
 
-INSTALLATION
+Installation
 ============
 See the file [`INSTALL`](INSTALL).
 
 
-RATIONALE
+Rationale
 =========
 
 Why not use something like [StGIT] or [Quilt] or `rebase -i` for maintaining
@@ -73,7 +73,7 @@ Of course, TopGit is perhaps not the right tool for you:
    over time, especially with all the merges rippling through. ;-)
 
 
-SYNOPSIS
+Synopsis
 ========
 
 ## Create and evolve a topic branch
@@ -215,7 +215,7 @@ SYNOPSIS
 	$ tg -r foo update
 
 
-USAGE
+Usage
 =====
 
 The 'tg' tool has several subcommands:
@@ -270,7 +270,7 @@ base, if you used `git branch -D B` to remove branch B, and then
 certain TopGit commands complain, because the base of branch B
 is still there.
 
-IMPORTANT: Currently, this command will _NOT_ remove the branch
+**IMPORTANT**: Currently, this command will **NOT** remove the branch
 from the dependency list in other branches. You need to take
 care of this _manually_.  This is even more complicated in
 combination with '-f' - in that case, you need to manually
@@ -279,7 +279,7 @@ on it.
 
 See also `tg annihilate`.
 
-TODO: '-a' to delete all empty branches, depfix, revert
+**TODO**: '-a' to delete all empty branches, depfix, revert
 
 tg annihilate
 -------------
@@ -310,7 +310,7 @@ things related to the dependency addition, like adjusting
 '.topmsg', prepare them in the index before calling `tg depend
 add`.
 
-TODO: Subcommand for removing dependencies, obviously
+**TODO**: Subcommand for removing dependencies, obviously
 
 tg files
 --------
@@ -336,7 +336,7 @@ the '.topmsg' file.
 
 The patch is simply dumped to stdout.  In the future, `tg patch`
 will be able to automatically send the patches by mail or save
-them to files. (TODO)
+them to files. (**TODO**)
 
 Options:
 - `-i`: base patch generation on index instead of branch
@@ -358,7 +358,7 @@ the '-s' parameter, but you must double-quote everything.  The
 '-r' parameter with a msgid can be used to generate in-reply-to
 and reference headers to an earlier mail.
 
-WARNING: be careful when using this command.  It easily sends
+**WARNING**: be careful when using this command.  It easily sends
 out several mails.  You might want to run:
 
 	git config sendemail.confirm always
@@ -370,7 +370,7 @@ Options:
 - `-i`: base patch generation on index instead of branch
 - `-w`: base patch generation on working tree instead of branch
 
-TODO:
+**TODO**:
 - `tg mail patchfile` to mail an already exported patch
 - mailing patch series
 - specifying additional options and addresses on command line
@@ -427,7 +427,7 @@ Options:
 - `-i`: Use TopGit metadata from the index instead of the branch
 - `-w`: Use TopGit metadata from the working tree instead of the branch
 
-TODO:
+**TODO**:
 - Speed up by an order of magnitude
 - Text graph view
 
@@ -564,7 +564,7 @@ stripped off.  Names are always '--strip'ped before being
 getting the order without consulting the series file, which
 eases sending out the patches.
 
-TODO:
+**TODO**:
 - Make stripping of non-essential headers configurable
 - Make stripping of [PATCH] and other prefixes configurable
 - `--mbox` option to export instead as an mbox file
@@ -616,7 +616,7 @@ all the new branches from the remote using `tg remote
 -r` (`tg summary` will point out branches with incomplete
 dependencies by showing an '!' next to them).
 
-TODO: tg update -a -c to autoremove (clean) up-to-date branches
+**TODO**: tg update -a -c to autoremove (clean) up-to-date branches
 
 tg push
 -------
@@ -649,7 +649,7 @@ tg log
 Prints the git log of the named topgit branch - or the current
 branch, if you don't specify a name.
 
-NOTE: if you have merged changes from a different repository, this
+**NOTE**: if you have merged changes from a different repository, this
 command might not list all interesting commits.
 
 tg prev
@@ -671,9 +671,9 @@ Options:
 - `-i`: show dependencies based on index instead of branch
 - `-w`: show dependencies based on working tree instead of branch
 
-TODO: tg rename
+**TODO**: tg rename
 
-IMPLEMENTATION
+Implementation
 ==============
 
 TopGit stores all the topic branches in the regular 'refs/heads/'
@@ -707,7 +707,7 @@ themselves.  Currently, two files are defined:
   branch depends on, pre-seeded by `tg create`. A (continuously updated)
   merge of these branches will be the "base" of your topic branch.
   
-  IMPORTANT: DO NOT EDIT '.topdeps' MANUALLY!!! If you do so, you need to
+  **IMPORTANT**: DO NOT EDIT '.topdeps' MANUALLY!!! If you do so, you need to
   know exactly what are you doing, since this file must stay in sync with
   the Git history information, otherwise very bad things will happen.
 
@@ -724,7 +724,7 @@ specifier for an 'ours' merge strategy for the files '.topmsg' and
 '.git/config'.
 
 
-REMOTE HANDLING
+Remote handling
 ===============
 
 There are two remaining issues with accessing topic branches in remote
@@ -761,7 +761,7 @@ different base remote by passing '-r REMOTE' _before_ the subcommand
 name.
 
 
-REFERENCES
+References
 ==========
 
 The following references are useful to understand the development of
@@ -771,14 +771,14 @@ topgit and its subcommands.
   http://lists-archives.org/git/688698-add-list-and-rm-sub-commands-to-tg-depend.html
 
 
-THIRD-PARTY SOFTWARE
+Third-party software
 ====================
 
 The following software understands TopGit branches:
 
 * http://magit.github.com/magit/ - a git mode for emacs
 
-IMPORTANT: Magit requires its topgit mode to be enabled first, as
+**IMPORTANT**: Magit requires its topgit mode to be enabled first, as
 described in its documentation, in the "Activating extensions"
 subsection.  If this is not done, it will not push TopGit branches
 correctly, so it's important to enable it even if you plan to mostly use
