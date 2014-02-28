@@ -6,19 +6,19 @@ Direct from source
 Although TopGit is essentially a bunch of shell scripts (and their
 accompanying documentation), it does require some preprocessing.
 
-Normally you can just do "make" followed by "make install", and that will
-install the tg program in your own ~/bin/ directory.  If you want to do a
+Normally you can just do `make` followed by `make install`, and that will
+install the tg program in your own `~/bin/` directory.  If you want to do a
 global install, you can do
 
 	# make prefix=/usr install ;# as root
 
-(or prefix=/usr/local, of course).  Just like any program suite that uses
+(or `prefix=/usr/local`, of course).  Just like any program suite that uses
 $prefix, the built results have some paths encoded, which are derived from
-$prefix, so "make; make prefix=/usr install" would not work.
+$prefix, so `make; make prefix=/usr install` would not work.
 
 The Makefile does not currently install the bash completion support in
-contrib/tg-completion.bash. Instructions for installing that file are at the
-top of that file.
+[`contrib/tg-completion.bash`](contrib/tg-completion.bash).
+Instructions for installing that file are at the top of that file.
 
 
 Other
