@@ -218,7 +218,7 @@ Synopsis
 Usage
 =====
 
-The 'tg' tool has several subcommands:
+The `tg` tool has several subcommands:
 
 tg help
 -------
@@ -239,11 +239,11 @@ specified (by extra arguments passed after the first one), the
 current branch is assumed to be the only dependency.
 
 After `tg create`, you should insert the patch description into
-the '.topmsg' file, which will already contain some prefilled
-bits.  You can set the 'topgit.to', 'topgit.cc' and 'topgit.bcc'
+the `.topmsg` file, which will already contain some prefilled
+bits.  You can set the `topgit.to`, `topgit.cc` and `topgit.bcc`
 git configuration variables (see `man git-config`) in order to
 have `tg create` add these headers with the given default values
-to '.topmsg'.
+to `.topmsg`.
 
 The main task of `tg create` is to set up the topic branch base
 from the dependencies.  This may fail due to merge conflicts.
@@ -252,7 +252,7 @@ should call `tg create` again (without any arguments); it will
 detect that you are on a topic branch base ref and resume the
 topic branch creation operation.
 
-In an alternative use case, if '-r BRANCH' is given instead of a
+In an alternative use case, if `-r BRANCH` is given instead of a
 dependency list, the topic branch is created based on the given
 remote branch.
 
@@ -261,11 +261,11 @@ tg delete
 
 Remove a TopGit-controlled topic branch of the given name
 (required argument). Normally, this command will remove only an
-empty branch (base == head) without dependendents; use '-f' to
+empty branch (base == head) without dependendents; use `-f` to
 remove a non-empty branch or a branch that is depended upon by
 another branch.
 
-The '-f' option is also useful to force removal of a branch's
+The `-f' option is also useful to force removal of a branch`s
 base, if you used `git branch -D B` to remove branch B, and then
 certain TopGit commands complain, because the base of branch B
 is still there.
@@ -273,13 +273,13 @@ is still there.
 **IMPORTANT**: Currently, this command will **NOT** remove the branch
 from the dependency list in other branches. You need to take
 care of this _manually_.  This is even more complicated in
-combination with '-f' - in that case, you need to manually
+combination with `-f` - in that case, you need to manually
 unmerge the removed branch's changes from the branches depending
 on it.
 
 See also `tg annihilate`.
 
-**TODO**: '-a' to delete all empty branches, depfix, revert
+**TODO**: `-a` to delete all empty branches, depfix, revert
 
 tg annihilate
 -------------
@@ -289,12 +289,12 @@ that makes it equal to its base, including the presence or
 absence of .topmsg and .topdeps.  Annihilated branches are not
 displayed by `tg summary`, so they effectively get out of your
 way.  However, the branch still exists, and `tg push` will
-push it (except if given the '-a' option).  This way, you can
+push it (except if given the `-a` option).  This way, you can
 communicate that the branch is no longer wanted.
 
 Normally, this command will remove only empty branch
 (base == head, except for changes to the .top* files); use
-'-f' to annihilate a non-empty branch.
+`-f` to annihilate a non-empty branch.
 
 tg depend
 ---------
@@ -304,10 +304,10 @@ This should have several subcommands, but only `add` is
 supported right now.
 
 The `add` subcommand takes an argument naming a topic branch to
-be added, adds it to '.topdeps', performs a commit and then
+be added, adds it to `.topdeps`, performs a commit and then
 updates your topic branch accordingly.  If you want to do other
 things related to the dependency addition, like adjusting
-'.topmsg', prepare them in the index before calling `tg depend
+`.topmsg`, prepare them in the index before calling `tg depend
 add`.
 
 **TODO**: Subcommand for removing dependencies, obviously
@@ -332,7 +332,7 @@ tg patch
 Generate a patch from the current or specified topic branch.
 This means that the diff between the topic branch base and head
 (latest commit) is shown, appended to the description found in
-the '.topmsg' file.
+the `.topmsg` file.
 
 The patch is simply dumped to stdout.  In the future, `tg patch`
 will be able to automatically send the patches by mail or save
@@ -354,8 +354,8 @@ patch header.
 Since it actually boils down to `git send-email`, please refer
 to the documentation for that for details on how to setup email
 for git.  You can pass arbitrary options to this command through
-the '-s' parameter, but you must double-quote everything.  The
-'-r' parameter with a msgid can be used to generate in-reply-to
+the `-s` parameter, but you must double-quote everything.  The
+`-r` parameter with a msgid can be used to generate in-reply-to
 and reference headers to an earlier mail.
 
 **WARNING**: be careful when using this command.  It easily sends
@@ -385,9 +385,9 @@ use `tg push`, or `git push --mirror`, for pushing
 TopGit-controlled branches.
 
 `tg remote` takes an optional remote name argument, and an
-optional '--populate' switch.  Use '--populate' for your
+optional `--populate` switch.  Use `--populate` for your
 origin-style remotes: it will seed the local topic branch system
-based on the remote topic branches.  '--populate' will also make
+based on the remote topic branches.  `--populate` will also make
 `tg remote` automatically fetch the remote, and `tg update` look
 at branches of this remote for updates by default.
 
@@ -396,23 +396,23 @@ tg summary
 
 Show overview of all TopGit-tracked topic branches and their
 up-to-date status:
-- '>' marks the current topic branch;
-- '0' indicates that it introduces no changes of its own;
-- 'l'/'r' indicates respectively whether it is local-only or has a remote mate;
-- 'L'/'R' indicates respectively if it is ahead or out-of-date with respect to
+- `>` marks the current topic branch;
+- `0` indicates that it introduces no changes of its own;
+- `l`/`r` indicates respectively whether it is local-only or has a remote mate;
+- `L`/`R` indicates respectively if it is ahead or out-of-date with respect to
   its remote mate;
-- 'D' indicates that it is out-of-date with respect to its dependencies;
-- '!' indicates that it has missing dependencies (even if they are recursive
+- `D` indicates that it is out-of-date with respect to its dependencies;
+- `!` indicates that it has missing dependencies (even if they are recursive
   ones);
-- 'B' indicates that it is out-of-date with respect to its base.
+- `B` indicates that it is out-of-date with respect to its base.
 
 This can take a long time to accurately determine all the
-relevant information about each branch; you can pass '-t' to get
+relevant information about each branch; you can pass `-t` to get
 just a terse list of topic branch names quickly.  Alternately,
-you can pass '--graphviz' to get a dot-suitable output to draw a
+you can pass `--graphviz` to get a dot-suitable output to draw a
 dependency graph between the topic branches.
 
-You can also use the '--sort' option to sort the branches using
+You can also use the `--sort` option to sort the branches using
 a topological sort.  This is especially useful if each
 TopGit-tracked topic branch depends on a single parent branch,
 since it will then print the branches in the dependency order.
@@ -435,38 +435,38 @@ Options:
 tg checkout
 -----------
 
-Switch to a topic branch.  You can use 'git checkout <branch>'
+Switch to a topic branch.  You can use `git checkout <branch>`
 to get the same effect, but this command helps you navigate
 the dependency graph, or allows you to match the topic branch
 name using a regular expression, so it can be more convenient.
 
 There following subcommands are available:
-- 'tg checkout push' checks out a branch that directly depends on your
+- `tg checkout push` checks out a branch that directly depends on your
   current branch.
-- 'tg checkout pop' checks out a branch that this branch directly depends on.
-- 'tg checkout goto <pattern>' check out a topic branch that matches <pattern>.
-  <pattern> is used as a sed pattern to filter all the topic branches.
+- `tg checkout pop` checks out a branch that this branch directly depends on.
+- `tg checkout goto <pattern>` check out a topic branch that matches `<pattern>`.
+  `<pattern>` is used as a sed pattern to filter all the topic branches.
 
-- 'tg checkout next', 'tg checkout child' and 'tg checkout'
-  are aliases for 'push'.
+- `tg checkout next`, `tg checkout child` and `tg checkout`
+  are aliases for `push`.
 
-- 'tg checkout prev', 'tg checkout parent' and 'tg checkout ..'
-  are aliases for 'pop'.
+- `tg checkout prev`, `tg checkout parent` and `tg checkout ..`
+  are aliases for `pop`.
 
 If any of the above commands can find more than one possible
 branch to switch to, you will be presented with the matches
 and ask to select one of them.
 
-The <pattern> of 'tg checkout goto' is optional.  If you don't
+The `<pattern>` of `tg checkout goto` is optional.  If you don't
 supply it, all the available topic branches are listed and you
 can select one of them.
 
-Normally, the 'push' and 'pop' commands moves one step in
-the dependency graph of the topic branches.  The '-a' option
+Normally, the `push` and `pop` commands moves one step in
+the dependency graph of the topic branches.  The `-a` option
 causes them (and their aliases) to move as far as possible.
-That is, 'tg checkout push -a' moves to a topic branch that
+That is, `tg checkout push -a` moves to a topic branch that
 depends (directly or indirectly) on the current branch and
-that no other branch depends on.  'tg checkout pop -a'
+that no other branch depends on.  `tg checkout pop -a`
 moves to a regular branch that the current topic branch
 depends on (directly or indirectly).  If there is more than
 one possibility, you will be prompted for your selection.
@@ -494,32 +494,32 @@ linearization e.g. for creation of a quilt series using git log:
 To better understand the function of `tg export`, consider this
 dependency structure:
 
-origin/master - t/foo/blue - t/foo/red - master
-             `- t/bar/good <,----------'
-             `- t/baz      ------------'
+	origin/master - t/foo/blue - t/foo/red - master
+	             `- t/bar/good <,----------'
+	             `- t/baz      ------------'
 
 (where each of the branches may have a hefty history). Then
 
-master$ tg export for-linus
+	master$ tg export for-linus
 
-will create this commit structure on the branch 'for-linus':
+will create this commit structure on the branch `for-linus`:
 
-origin/master - t/foo/blue -. merge - t/foo/red -.. merge - master
-             `- t/bar/good <,-------------------'/
-             `- t/baz      ---------------------'
+	origin/master - t/foo/blue -. merge - t/foo/red -.. merge - master
+	             `- t/bar/good <,-------------------'/
+	             `- t/baz      ---------------------'
 
 In this mode, `tg export` works on the current topic branch, and
 can be called either without an option (in that case,
-'--collapse' is assumed), or with the '--collapse' option, and
+`--collapse` is assumed), or with the `--collapse` option, and
 with one mandatory argument: the name of the branch where the
 exported result will be stored.
 
 When using the linearize mode:
 
-master$ tg export --linearize for-linus
+	master$ tg export --linearize for-linus
 
 you get a linear history respecting the dependencies of your
-patches in a new branch 'for-linus'.  The result should be more
+patches in a new branch `for-linus`.  The result should be more
 or less the same as using quilt mode and then reimporting it
 into a Git branch.  (More or less because the topological order
 can usually be extended in more than one way into a total order,
@@ -532,35 +532,35 @@ the patches are reordered to get a linear history.
 
 When using the quilt mode,
 
-master$ tg export --quilt for-linus
+	master$ tg export --quilt for-linus
 
-would create the following directory 'for-linus':
+would create the following directory `for-linus`:
 
-for-linus/t/foo/blue.diff
-for-linus/t/foo/red.diff
-for-linus/t/bar/good.diff
-for-linus/t/baz.diff
-for-linus/series:
-	t/foo/blue.diff -p1
-	t/bar/good.diff -p1
-	t/foo/red.diff -p1
-	t/baz.diff -p1
+	for-linus/t/foo/blue.diff
+	for-linus/t/foo/red.diff
+	for-linus/t/bar/good.diff
+	for-linus/t/baz.diff
+	for-linus/series:
+		t/foo/blue.diff -p1
+		t/bar/good.diff -p1
+		t/foo/red.diff -p1
+		t/baz.diff -p1
 
-With '--quilt', you can also pass the '-b' parameter followed
+With `--quilt`, you can also pass the `-b` parameter followed
 by a comma-separated explicit list of branches to export, or
-the '--all' parameter (which can be shortened to '-a') to
+the `--all` parameter (which can be shortened to `-a`) to
 export them all. These options are currently only supported
-with '--quilt'.
+with `--quilt`.
 
-In '--quilt' mode the patches are named like the originating
+In `--quilt` mode the patches are named like the originating
 topgit branch.  So usually they end up in subdirectories of the
-output directory.  With the '--flatten' option the names are
+output directory.  With the `--flatten` option the names are
 mangled so that they end up directly in the output dir (slashes
-are substituted by underscores).  With the '--strip[=N]' option
-the first 'N' subdirectories (all if no 'N' is given) get
-stripped off.  Names are always '--strip'ped before being
-'--flatten'ed.  With the option '--numbered' (which implies
-'--flatten') the patch names get a number as prefix to allow
+are substituted by underscores).  With the `--strip[=N]` option
+the first N subdirectories (all if no N is given) get
+stripped off.  Names are always `--strip`ped before being
+`--flatten`ed.  With the option `--numbered` (which implies
+`--flatten`) the patch names get a number as prefix to allow
 getting the order without consulting the series file, which
 eases sending out the patches.
 
@@ -578,13 +578,13 @@ tg import
 Import commits within the given revision range into TopGit,
 creating one topic branch per commit. The dependencies are set
 up to form a linear sequence starting on your current branch -
-or a branch specified by the '-d' parameter, if present.
+or a branch specified by the `-d` parameter, if present.
 
 The branch names are auto-guessed from the commit messages and
-prefixed by 't/' by default; use '-p <prefix>' to specify an
+prefixed by `t/` by default; use `-p <prefix>` to specify an
 alternative prefix (even an empty one).
 
-Alternatively, you can use the '-s NAME' parameter to specify
+Alternatively, you can use the `-s NAME` parameter to specify
 the name of the target branch; the command will then take one
 more argument describing a _single_ commit to import.
 
@@ -598,12 +598,12 @@ dependencies are merged to the base, then the base is merged
 into the topic branch.  The output will guide you on what to do
 next in case of conflicts.
 
-When '-a' is specifed, updates all topic branches matched by
-<pattern>s (see `git-for-each-ref(1)` for details), or all if
-no <pattern> is given.
+When `-a` is specifed, updates all topic branches matched by
+`<pattern>`s (see `git-for-each-ref(1)` for details), or all if
+no `<pattern>` is given.
 
 After the update, if a single topic branch was specified, it is
-left as the current one; if '-a' was specified, it returns to
+left as the current one; if `-a` was specified, it returns to
 the branch which was current at the beginning.
 
 If your dependencies are not up-to-date, `tg update` will first
@@ -614,24 +614,24 @@ that are not yet instantiated locally, you can either bring in
 all the new branches from the remote using `tg remote
 --populate`, or only pick out the missing ones using `tg create
 -r` (`tg summary` will point out branches with incomplete
-dependencies by showing an '!' next to them).
+dependencies by showing an `!` next to them).
 
 **TODO**: tg update -a -c to autoremove (clean) up-to-date branches
 
 tg push
 -------
 
-If '-a' or '--all' was specified, pushes all non-annihilated
+If `-a` or `--all` was specified, pushes all non-annihilated
 TopGit-controlled topic branches, to a remote repository.
 Otherwise, pushes the specified topic branches - or the
 current branch, if you don't specify which.  By default, the
 remote gets all the dependencies (both TopGit-controlled and
 non-TopGit-controlled) and bases pushed to it too.  If
-'--tgish-only' was specified, only TopGit-controlled
-dependencies will be pushed, and if '--no-deps' was specified,
+`--tgish-only` was specified, only TopGit-controlled
+dependencies will be pushed, and if `--no-deps` was specified,
 no dependencies at all will be pushed.
 
-The remote may be specified with the '-r' option. If no remote
+The remote may be specified with the `-r` option. If no remote
 was specified, the configured default TopGit remote will be
 used.
 
@@ -676,10 +676,10 @@ Options:
 Implementation
 ==============
 
-TopGit stores all the topic branches in the regular 'refs/heads/'
-namespace (so we recommend distinguishing them with the 't/' prefix).
+TopGit stores all the topic branches in the regular `refs/heads/`
+namespace (so we recommend distinguishing them with the `t/` prefix).
 Apart from that, TopGit also maintains a set of auxiliary refs in
-'refs/top-*'.  Currently, only refs/top-bases/ is used, containing the
+`refs/top-*`.  Currently, only `refs/top-bases/` is used, containing the
 current _base_ of the given topic branch - this is basically a merge of
 all the branches the topic branch depends on; it is updated during `tg
 update` and then merged to the topic branch, and it is the base of a
@@ -692,36 +692,36 @@ course omitted during `tg patch`.  The state of these files in base
 commits is undefined; look at them only in the topic branches
 themselves.  Currently, two files are defined:
 
-- '.topmsg': Contains the description of the topic branch in a
+- `.topmsg`: Contains the description of the topic branch in a
   mail-like format, plus the author information, whatever Cc headers you
   choose or the post-three-dashes message.  When mailing out your patch,
   basically only a few extra mail headers are inserted and then the patch
   itself is appended.  Thus, as your patches evolve, you can record
   nuances like whether the particular patch should have To-list /
   Cc-maintainer or vice-versa and similar nuances, if your project is into
-  that.  'From' is prefilled from your current `GIT_AUTHOR_IDENT`; other
-  headers can be prefilled from various optional 'topgit.*' git config
+  that.  `From` is prefilled from your current `GIT_AUTHOR_IDENT`; other
+  headers can be prefilled from various optional `topgit.*` git config
   options.
 
-- '.topdeps': Contains the one-per-line list of branches this
+- `.topdeps`: Contains the one-per-line list of branches this
   branch depends on, pre-seeded by `tg create`. A (continuously updated)
   merge of these branches will be the "base" of your topic branch.
   
-  **IMPORTANT**: DO NOT EDIT '.topdeps' MANUALLY!!! If you do so, you need to
+  **IMPORTANT**: DO NOT EDIT `.topdeps` MANUALLY!!! If you do so, you need to
   know exactly what are you doing, since this file must stay in sync with
   the Git history information, otherwise very bad things will happen.
 
 TopGit also automagically installs a bunch of custom commit-related
-hooks that will verify whether you are committing the '.top*' files in a
-sane state. It will add the hooks to separate files within the 'hooks/'
+hooks that will verify whether you are committing the `.top*` files in a
+sane state. It will add the hooks to separate files within the `hooks/`
 subdirectory, and merely insert calls to them to the appropriate hooks
 and make them executable (but will make sure the original hook's code is
 not called if the hook was not executable beforehand).
 
-Another automagically installed piece is a '.git/info/attributes'
-specifier for an 'ours' merge strategy for the files '.topmsg' and
-'.topdeps', and the (intuitive) 'ours' merge strategy definition in
-'.git/config'.
+Another automagically installed piece is a `.git/info/attributes`
+specifier for an `ours` merge strategy for the files `.topmsg` and
+`.topdeps`, and the (intuitive) `ours` merge strategy definition in
+`.git/config`.
 
 
 Remote handling
@@ -739,7 +739,7 @@ There are two somewhat contradictory design considerations here:
 2. Having a self-contained topic system in local refs space
 
 To us, 1. does not appear to be very convincing, while 2. is quite
-desirable for 'git-log topic' etc. working, and increased conceptual
+desirable for `git-log topic` etc. working, and increased conceptual
 simplicity.
 
 Thus, we choose to instantiate all the topic branches of given remote
@@ -755,9 +755,9 @@ In the future, this order might be adjustable on a per-update basis, in
 case local changes happen to be diverging more than the remote ones.
 
 All commands by default refer to the remote that `tg remote --populate`
-was called on the last time (stored in the 'topgit.remote' git
+was called on the last time (stored in the `topgit.remote` git
 configuration variable). You can manually run any command with a
-different base remote by passing '-r REMOTE' _before_ the subcommand
+different base remote by passing `-r REMOTE` _before_ the subcommand
 name.
 
 
