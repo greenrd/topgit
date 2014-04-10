@@ -20,7 +20,7 @@ while [ -n "$1" ]; do
 	esac
 done
 
-[ -n "$name" ] || name="$(git symbolic-ref HEAD | sed 's#^refs/\(heads\|top-bases\)/##')"
+[ -n "$name" ] || name="$(strip_ref "$(git symbolic-ref HEAD 2>/dev/null)")"
 base_rev="$(git rev-parse --short --verify "refs/top-bases/$name" 2>/dev/null)" ||
 	die "not a TopGit-controlled branch"
 
@@ -68,7 +68,7 @@ if [ -s "$depcheck" ]; then
 			dep_parent="${chain%% *}"
 			echo -n "($(measure_branch "$dep" "${dep2:-$name}"))"
 			echo
-		done | sed 's/^/\t/'
+		done | sed 's/^/	/'
 else
 	echo "Up-to-date."
 fi

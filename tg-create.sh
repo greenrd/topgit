@@ -116,7 +116,7 @@ done
 git update-ref "refs/top-bases/$name" "HEAD" ""
 git checkout -b "$name"
 
-echo "$deps" | sed 's/ /\n/g' >"$root_dir/.topdeps"
+echo "$deps" | sed 'y/ /\n/' >"$root_dir/.topdeps"
 git add -f "$root_dir/.topdeps"
 
 author="$(git var GIT_AUTHOR_IDENT)"

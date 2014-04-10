@@ -101,6 +101,22 @@ get_tree_w()
 	)
 }
 
+# strip_ref "$(git symbolic-ref HEAD)"
+# Output will have a leading refs/heads/ or refs/top-bases/ stripped if present
+strip_ref()
+{
+	case "$1" in
+		refs/heads/*)
+			echo "${1#refs/heads/}"
+			;;
+		refs/top-bases/*)
+			echo "${1#refs/top-bases/}"
+			;;
+		*)
+			echo "$1"
+	esac
+}
+
 # pretty_tree NAME [-b | -i | -w]
 # Output tree ID of a cleaned-up tree without tg's artifacts.
 # NAME will be ignored for -i and -w, but needs to be present
