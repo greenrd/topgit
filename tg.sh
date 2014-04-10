@@ -540,6 +540,7 @@ if [ "$1" = "-r" ]; then
 	fi
 	base_remote="$1"; shift
 	tg="$tg -r $base_remote"
+	cmd="$1"
 fi
 
 [ -n "$cmd" ] || { do_help; exit 1; }
