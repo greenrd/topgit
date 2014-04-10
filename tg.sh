@@ -367,9 +367,6 @@ branch_empty()
 # -i/-w apply only to HEAD
 list_deps()
 {
-	local head
-	local head_from
-	local from
 	head_from=${1-}
 	head="$(git symbolic-ref -q HEAD)" ||
 		head="..detached.."

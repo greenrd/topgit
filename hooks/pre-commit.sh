@@ -32,28 +32,27 @@ fi
 
 check_topfile()
 {
-	local tree file ls_line type size
-	tree=$1
-	file=$2
+	_tree=$1
+	_file=$2
 
-	ls_line="$(git ls-tree --long "$tree" "$file")" ||
-		die "Can't ls tree for $file"
+	_ls_line="$(git ls-tree --long "$_tree" "$_file")" ||
+		die "Can't ls tree for $_file"
 
-	[ -n "$ls_line" ] ||
-		die "$file is missing"
+	[ -n "$_ls_line" ] ||
+		die "$_file is missing"
 
 	# check for type and size
-	set -- $ls_line
-	type=$2
-	size=$4
+	set -- $_ls_line
+	_type=$2
+	_size=$4
 
 	# check file is of type blob (file)
-	[ "x$type" = "xblob" ] ||
-		die "$file is not a file"
+	[ "x$_type" = "xblob" ] ||
+		die "$_file is not a file"
 
 	# check for positive size
-	[ "$size" -gt 0 ] ||
-		die "$file has empty size"
+	[ "$_size" -gt 0 ] ||
+		die "$_file has empty size"
 }
 
 tree=$(git write-tree) ||
