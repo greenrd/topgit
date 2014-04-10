@@ -1,25 +1,31 @@
-prefix ?= $(HOME)
-bindir := $(prefix)/bin
-cmddir := $(prefix)/libexec/topgit
-sharedir := $(prefix)/share/topgit
-hooksdir := $(cmddir)/hooks
+all::
 
+prefix ?= $(HOME)
+bindir = $(prefix)/bin
+cmddir = $(prefix)/libexec/topgit
+sharedir = $(prefix)/share/topgit
+hooksdir = $(cmddir)/hooks
 
 commands_in := $(wildcard tg-*.sh)
 hooks_in = hooks/pre-commit.sh
 
-commands_out := $(patsubst %.sh,%,$(commands_in))
-hooks_out := $(patsubst %.sh,%,$(hooks_in))
-help_out := $(patsubst %.sh,%.txt,$(commands_in))
+commands_out = $(patsubst %.sh,%,$(commands_in))
+hooks_out = $(patsubst %.sh,%,$(hooks_in))
+help_out = $(patsubst %.sh,%.txt,$(commands_in))
 
-version = $(shell test -d .git && git describe --match "topgit-[0-9]*" --abbrev=4 HEAD 2>/dev/null | sed -e 's/^topgit-//' )
+version := $(shell test -d .git && git describe --match "topgit-[0-9]*" --abbrev=4 --dirty 2>/dev/null | sed -e 's/^topgit-//' )
+
+-include config.mak
+
 ifneq ($(strip $(version)),)
 	version_arg = -e s/TG_VERSION=.*/TG_VERSION=$(version)/
 endif
 
+.PHONY: FORCE
+
 all::	precheck $(commands_out) $(hooks_out) $(help_out)
 
-tg $(commands_out) $(hooks_out): % : %.sh Makefile
+tg $(commands_out) $(hooks_out): % : %.sh Makefile TG-PREFIX
 	@echo "[SED] $@"
 	@sed -e 's#@cmddir@#$(cmddir)#g;' \
 		-e 's#@hooksdir@#$(hooksdir)#g' \
@@ -51,3 +57,15 @@ install:: all
 
 clean::
 	rm -f tg $(commands_out) $(hooks_out) $(help_out)
+	rm -f TG-PREFIX
+
+define TRACK_PREFIX
+$(bindir):$(cmddir):$(hooksdir):$(sharedir):$(version)
+endef
+export TRACK_PREFIX
+
+TG-PREFIX: FORCE
+	@if test x"$$TRACK_PREFIX" != x"`cat TG-PREFIX 2>/dev/null`"; then \
+		echo "* new prefix flags"; \
+		echo "$$TRACK_PREFIX" >TG-PREFIX; \
+	fi

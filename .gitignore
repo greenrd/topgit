@@ -10,6 +10,8 @@
 # .deb build stamp
 /build-stamp
 
+/TG-PREFIX
+/config.mak
 /hooks/pre-commit
 /tg
 /tg-annihilate
