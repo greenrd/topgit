@@ -32,8 +32,8 @@ compare_versions()
 }
 
 precheck() {
-	git_ver=$(git version)
-	compare_versions . ${git_ver#git version} ${GIT_MINIMUM_VERSION} \
+	git_ver="$(git version | sed -e 's/^[^0-9][^0-9]*//')"
+	compare_versions . ${git_ver%%[!0-9.]*} ${GIT_MINIMUM_VERSION} \
 	    || die "git version >= " ${GIT_MINIMUM_VERSION} required
 }
 
