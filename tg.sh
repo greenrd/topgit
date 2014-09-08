@@ -459,7 +459,7 @@ setup_pager()
 	pager_fifo="${tg_tmp_dir:-${HOME}}/.tg-pager"
 	mkfifo -m 600 "$pager_fifo"
 
-	"$TG_PAGER" < "$pager_fifo" &
+	eval "$TG_PAGER" < "$pager_fifo" &
 	exec > "$pager_fifo"		# dup2(pager_fifo.in, 1)
 
 	# this is needed so e.g. `git diff` will still colorize it's output if
