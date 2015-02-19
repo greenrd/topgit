@@ -16,8 +16,10 @@ while [ -n "$1" ]; do
 	case "$arg" in
 	-a)
 		all=1;;
+	--this-with)
+		TG_MERGE="$1"; shift;;
 	-*)
-		echo "Usage: tg [...] update ([<name>] | -a [<pattern>...])" >&2
+		echo "Usage: tg [...] update [--this-with <merge-cmd>] ([<name>] | -a [<pattern>...])" >&2
 		exit 1;;
 	*)
 		if [ -z "$all" ]; then
