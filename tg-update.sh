@@ -18,6 +18,8 @@ while [ -n "$1" ]; do
 		all=1;;
 	--this-with)
 		TG_MERGE="$1"; shift;;
+	    # TODO: make it a configurable (and stored) option for each branch
+	    # (or perhaps pair of branches).
 	-*)
 		echo "Usage: tg [...] update [--this-with <merge-cmd>] ([<name>] | -a [<pattern>...])" >&2
 		exit 1;;
