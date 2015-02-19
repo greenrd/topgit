@@ -599,6 +599,27 @@ tg update
 	-r` (`tg summary` will point out branches with incomplete
 	dependencies by showing an '!' next to them).
 
+	You can use a different command instead of the default 'git merge'
+	when updating branches.
+
+	* If set, the environment variable TG_MERGE is the global
+	  default for all recursive invocations of `tg update`.
+
+	* But it can be overriden for the current branch with
+	  '--this-with CMD' option. (It is effective for the branches
+	  processed by the toplevel `tg update` process.)
+
+	This will help, if you want 'git merge -s ours' only into the
+	current branch. For example, with a custom message to attract
+	attention:
+
+	--this-with='git merge -s ours -m "merge -s ours"'
+
+	In contrast, if what you want to do with every processed
+	branch is to rebase, then you use:
+
+	TG_MERGE='git rebase --preserve-merges' tg update ...
+
 	TODO: tg update -a -c to autoremove (clean) up-to-date branches
 
 tg push
