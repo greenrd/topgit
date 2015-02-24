@@ -17,8 +17,12 @@ while [ -n "$1" ]; do
 	case "$arg" in
 	-r)
 		rname="$1"; shift;;
+	--this-with)
+		TG_MERGE="$1"; shift;;
+	    # TODO: make it a configurable (and stored) option for each branch
+	    # (or perhaps pair of branches).
 	-*)
-		echo "Usage: tg [...] create [<name> [<dep>...|-r <rname>] ]" >&2
+		echo "Usage: tg [...] create [--this-with <merge-cmd>] [<name> [<dep>...|-r <rname>] ]" >&2
 		exit 1;;
 	*)
 		if [ -z "$name" ]; then
@@ -96,9 +100,10 @@ while [ -n "$merge" ]; do
 	# Unshift the first item from the to-merge list
 	branch="${merge%% *}"
 	merge="${merge#* }"
-	info "Merging $name base with $branch..."
+	info "Merging $name base with $branch"
+	info "(with the cmd given by TG_MERGE if set: ${TG_MERGE:-git merge})..."
 
-	if ! git merge "$branch"; then
+	if ! ${TG_MERGE:-git merge} "$branch"; then
 		info "Please commit merge resolution and call: $tg create"
 		info "It is also safe to abort this operation using:"
 		info "git reset --hard some_branch"
