@@ -247,6 +247,14 @@ tg create
 	dependency list, the topic branch is created based on the given
 	remote branch.
 
+	You can use a different command instead of the default 'git merge'
+	when updating or creating branches (see `tg update` for a full
+	description). For example, if you want to 'git merge -s ours' the
+	dependencies into the new branch, invoke the command with
+	(the custom message is to attract attention):
+
+	--this-with='git merge -s ours -m "merge -s ours"'
+
 tg delete
 ~~~~~~~~~
 	Remove a TopGit-controlled topic branch of the given name
@@ -600,14 +608,15 @@ tg update
 	dependencies by showing an '!' next to them).
 
 	You can use a different command instead of the default 'git merge'
-	when updating branches.
+	when updating or creating branches (TODO: or adding a new dependency).
 
 	* If set, the environment variable TG_MERGE is the global
-	  default for all recursive invocations of `tg update`.
+	  default for all recursive invocations of `tg update` 
+	  (as well as `tg create`).
 
 	* But it can be overriden for the current branch with
 	  '--this-with CMD' option. (It is effective for the branches
-	  processed by the toplevel `tg update` process.)
+	  processed by the toplevel `tg update` or `tg create` process.)
 
 	This will help, if you want 'git merge -s ours' only into the
 	current branch. For example, with a custom message to attract
