@@ -144,6 +144,7 @@ setup_hook()
 setup_ours()
 {
 	if [ ! -s "$git_dir/info/attributes" ] || ! grep -q topmsg "$git_dir/info/attributes"; then
+                [ -d "$git_dir/info" ] || mkdir "$git_dir/info"
 		{
 			echo ".topmsg	merge=ours"
 			echo ".topdeps	merge=ours"
