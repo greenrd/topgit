@@ -32,8 +32,8 @@ compare_versions()
 }
 
 precheck() {
-	git_ver=$(git version)
-	compare_versions . ${git_ver#git version} ${GIT_MINIMUM_VERSION} \
+	git_ver=$(git --version | cut -d' ' -f3)
+	compare_versions . ${git_ver} ${GIT_MINIMUM_VERSION} \
 	    || die "git version >= " ${GIT_MINIMUM_VERSION} required
 }
 
