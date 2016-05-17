@@ -448,7 +448,7 @@ setup_pager()
 
 	# TG_PAGER = GIT_PAGER | PAGER | less
 	# NOTE: GIT_PAGER='' is significant
-	TG_PAGER=${GIT_PAGER-${PAGER-less}}
+	TG_PAGER="${GIT_PAGER-${PAGER-less}}"
 
 	[ -z "$TG_PAGER"  -o  "$TG_PAGER" = "cat" ]  && return 0
 
@@ -460,7 +460,7 @@ setup_pager()
 	pager_fifo="${tg_tmp_dir:-${HOME}}/.tg-pager"
 	mkfifo -m 600 "$pager_fifo"
 
-	"$TG_PAGER" < "$pager_fifo" &
+	$TG_PAGER < "$pager_fifo" &
 	exec > "$pager_fifo"		# dup2(pager_fifo.in, 1)
 
 	# this is needed so e.g. `git diff` will still colorize it's output if
