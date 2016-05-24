@@ -16,8 +16,12 @@ while [ -n "$1" ]; do
 	case "$arg" in
 	-a)
 		all=1;;
+	--this-with)
+		TG_MERGE="$1"; shift;;
+	    # TODO: make it a configurable (and stored) option for each branch
+	    # (or perhaps pair of branches).
 	-*)
-		echo "Usage: tg [...] update ([<name>] | -a [<pattern>...])" >&2
+		echo "Usage: tg [...] update [--this-with <merge-cmd>] ([<name>] | -a [<pattern>...])" >&2
 		exit 1;;
 	*)
 		if [ -z "$all" ]; then
@@ -180,8 +184,9 @@ update_branch() {
 		info "The $name head is up-to-date wrt. the base."
 		return 0
 	fi
-	info "Updating $name against new base..."
-	if ! git merge "$merge_with"; then
+	info "Updating $name against new base"
+	info "(with the cmd given by TG_MERGE if set: ${TG_MERGE:-git merge})..."
+	if ! ${TG_MERGE:-git merge} "$merge_with"; then
 		if [ -z "$TG_RECURSIVE" ]; then
 			info "Please commit merge resolution. No need to do anything else"
 			info "You can abort this operation using \`git reset --hard\` now"
