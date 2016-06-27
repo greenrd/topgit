@@ -5,6 +5,8 @@
 
 name=
 branches=
+forcebranch=
+checkout_opt=-b
 output=
 driver=collapse
 flatten=false
@@ -23,6 +25,8 @@ while [ -n "$1" ]; do
 		allbranches=true;;
 	-b)
 		branches="$1"; shift;;
+	--force)
+		forcebranch=true;;
 	--flatten)
 		flatten=true;;
 	--numbered)
@@ -46,7 +50,7 @@ while [ -n "$1" ]; do
 	--linearize)
 		driver=linearize;;
 	-*)
-		echo "Usage: tg [...] export ([--collapse] <newbranch> | [-a | --all | -b <branch1>...] --quilt <directory> | --linearize <newbranch>)" >&2
+		echo "Usage: tg [...] export ([--collapse] <newbranch> [--force] | [-a | --all | -b <branch1>...] --quilt <directory> | --linearize <newbranch> [--force])" >&2
 		exit 1;;
 	*)
 		[ -z "$output" ] || die "output already specified ($output)"
@@ -282,8 +286,13 @@ linearize()
 if [ "$driver" = "collapse" ] || [ "$driver" = "linearize" ]; then
 	[ -n "$output" ] ||
 		die "no target branch specified"
-	! ref_exists "$output"  ||
-		die "target branch '$output' already exists; first run: git branch -D $output"
+	if ! ref_exists $output; then
+		:
+	elif ! "$forcebranch"; then
+		die "target branch '$output' already exists; first run: git branch -D $output, or run tg export with --force"
+	else
+		checkout_opt=-B
+	fi
 
 elif [ "$driver" = "quilt" ]; then
 	[ -n "$output" ] ||
@@ -341,7 +350,7 @@ elif [ "$driver" = "quilt" ]; then
 	echo "Exported topic branch $name (total $depcount topics) to directory $output"
 
 elif [ "$driver" = "linearize" ]; then
-	git checkout -q -b $output
+	git checkout -q $checkout_opt $output
 
 	echo $name
 	if test $(git rev-parse "$(pretty_tree $name)^{tree}") != $(git rev-parse "HEAD^{tree}"); then
