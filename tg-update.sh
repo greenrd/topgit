@@ -31,7 +31,7 @@ while [ -n "$1" ]; do
 done
 [ -z "$pattern" ] && pattern=refs/top-bases
 
-current="$(git symbolic-ref HEAD 2>/dev/null | sed 's#^refs/\(heads\|top-bases\)/##')"
+current="$(strip_ref "$(git symbolic-ref HEAD 2>/dev/null)")"
 if [ -z "$all" ]; then
 	if [ -z "$name" ]; then
 		name="$current"
@@ -52,12 +52,12 @@ recursive_update() {
 }
 
 update_branch() {
-	local name="$1" base_rev depcheck missing_deps HEAD
+	_update_name="$1"
 	## First, take care of our base
 
-	depcheck="$(get_temp tg-depcheck)"
+	_depcheck="$(get_temp tg-depcheck)"
 	missing_deps=
-	needs_update "$name" >"$depcheck" || :
+	needs_update "$_update_name" >"$_depcheck" || :
 	if [ -n "$missing_deps" ]; then
 	   	if [ -z "$all" ]; then
 		       	die "some dependencies are missing: $missing_deps"
@@ -66,16 +66,16 @@ update_branch() {
 		       	return
 		fi
 	fi
-	if [ -s "$depcheck" ]; then
+	if [ -s "$_depcheck" ]; then
 		# We need to switch to the base branch
 		# ...but only if we aren't there yet (from failed previous merge)
-		HEAD="$(git symbolic-ref HEAD)"
-		if [ "$HEAD" = "${HEAD#refs/top-bases/}" ]; then
-			switch_to_base "$name"
+		_HEAD="$(git symbolic-ref HEAD)"
+		if [ "$_HEAD" = "${_HEAD#refs/top-bases/}" ]; then
+			switch_to_base "$_update_name"
 		fi
 
-		cat "$depcheck" |
-			sed 's/ [^ ]* *$//' | # last is $name
+		cat "$_depcheck" |
+			sed 's/ [^ ]* *$//' | # last is $_update_name
 			sed 's/.* \([^ ]*\)$/+\1/' | # only immediate dependencies
 			sed 's/^\([^+]\)/-\1/' | # now each line is +branch or -branch (+ == recurse)
 			uniq -s 1 | # fold branch lines; + always comes before - and thus wins within uniq
@@ -116,7 +116,7 @@ update_branch() {
 						fi
 					done
 					)
-					switch_to_base "$name"
+					switch_to_base "$_update_name"
 				fi
 
 				# This will be either a proper topic branch
@@ -126,7 +126,7 @@ update_branch() {
 				info "Updating base with $dep changes..."
 				if ! git merge "$dep"; then
 					if [ -z "$TG_RECURSIVE" ]; then
-						resume="\`git checkout $name && $tg update\` again"
+						resume="\`git checkout $_update_name && $tg update\` again"
 					else # subshell
 						resume='exit'
 					fi
@@ -134,7 +134,7 @@ update_branch() {
 					info "It is also safe to abort this operation using \`git reset --hard\`,"
 					info "but please remember that you are on the base branch now;"
 					info "you will want to switch to some normal branch afterwards."
-					rm "$depcheck"
+					rm "$_depcheck"
 					exit 2
 				fi
 			done
@@ -145,42 +145,42 @@ update_branch() {
 	# Home, sweet home...
 	# (We want to always switch back, in case we were on the base from failed
 	# previous merge.)
-	git checkout -q "$name"
+	git checkout -q "$_update_name"
 
-	merge_with="refs/top-bases/$name"
+	merge_with="refs/top-bases/$_update_name"
 
 
 	## Second, update our head with the remote branch
 
-	if has_remote "$name"; then
-		rname="refs/remotes/$base_remote/$name"
-		if branch_contains "$name" "$rname"; then
-			info "The $name head is up-to-date wrt. its remote branch."
+	if has_remote "$_update_name"; then
+		_rname="refs/remotes/$base_remote/$_update_name"
+		if branch_contains "$_update_name" "$_rname"; then
+			info "The $_update_name head is up-to-date wrt. its remote branch."
 		else
-			info "Reconciling remote branch updates with $name base..."
+			info "Reconciling remote branch updates with $_update_name base..."
 			# *DETACH* our HEAD now!
-			git checkout -q "refs/top-bases/$name"
-			if ! git merge "$rname"; then
+			git checkout -q "refs/top-bases/$_update_name"
+			if ! git merge "$_rname"; then
 				info "Oops, you will need to help me out here a bit."
 				info "Please commit merge resolution and call:"
-				info "git checkout $name && git merge <commitid>"
-				info "It is also safe to abort this operation using: git reset --hard $name"
+				info "git checkout $_update_name && git merge <commitid>"
+				info "It is also safe to abort this operation using: git reset --hard $_update_name"
 				exit 4
 			fi
 			# Go back but remember we want to merge with this, not base
 			merge_with="$(git rev-parse HEAD)"
-			git checkout -q "$name"
+			git checkout -q "$_update_name"
 		fi
 	fi
 
 
 	## Third, update our head with the base
 
-	if branch_contains "$name" "$merge_with"; then
-		info "The $name head is up-to-date wrt. the base."
+	if branch_contains "$_update_name" "$merge_with"; then
+		info "The $_update_name head is up-to-date wrt. the base."
 		return 0
 	fi
-	info "Updating $name against new base..."
+	info "Updating $_update_name against new base..."
 	if ! git merge "$merge_with"; then
 		if [ -z "$TG_RECURSIVE" ]; then
 			info "Please commit merge resolution. No need to do anything else"
