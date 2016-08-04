@@ -52,16 +52,23 @@ git cat-file blob "$name:.topdeps" |
 	sed '1{ s/^/Depends: /; n; }; s/^/         /;'
 
 depcheck="$(get_temp tg-depcheck)"
+depcheck1="$(get_temp tg-depcheck)"
 missing_deps=
+missing_recursive_deps=
 needs_update "$name" >"$depcheck" || :
 if [ -n "$missing_deps" ]; then
 	echo "MISSING: $missing_deps"
 fi
-if [ -s "$depcheck" ]; then
+[ -z "$missing_deps" ] && grep -q '^!' "$depcheck" && missing_recursive_deps=1
+cat "$depcheck" |
+	sed '/^!/d' | # we cannot do anything about missing depends
+	sed 's/ [^ ]* *$//' | # last is $name
+	sed 's/^: //' | # don't distinguish base updates
+	uniq |
+	cat > "$depcheck1"
+if [ -s "$depcheck1" ]; then
 	echo "Needs update from:"
-	cat "$depcheck" |
-		sed 's/ [^ ]* *$//' | # last is $name
-		sed 's/^: //' | # don't distinguish base updates
+	cat "$depcheck1" |
 		while read dep chain; do
 			echo -n "$dep "
 			[ -n "$chain" ] && echo -n "(<= $(echo "$chain" | sed 's/ / <= /')) "
@@ -70,7 +77,9 @@ if [ -s "$depcheck" ]; then
 			echo
 		done | sed 's/^/\t/'
 else
-	echo "Up-to-date."
+	echo -n "Up-to-date"
+	[ -z "$missing_recursive_deps" ] || echo -n " (but some recursive dependencies are missing)"
+	echo "."
 fi
 
 # vim:noet
