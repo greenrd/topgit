@@ -31,7 +31,7 @@ while [ -n "$1" ]; do
 done
 [ -z "$pattern" ] && pattern=refs/top-bases
 
-current="$(git symbolic-ref HEAD 2>/dev/null | sed 's#^refs/\(heads\|top-bases\)/##')"
+current="$(git symbolic-ref HEAD 2>/dev/null | sed -r 's#^refs/(heads|top-bases)/##')"
 if [ -z "$all" ]; then
 	if [ -z "$name" ]; then
 		name="$current"
@@ -76,8 +76,8 @@ update_branch() {
 
 		cat "$depcheck" |
 			sed 's/ [^ ]* *$//' | # last is $name
-			sed 's/.* \([^ ]*\)$/+\1/' | # only immediate dependencies
-			sed 's/^\([^+]\)/-\1/' | # now each line is +branch or -branch (+ == recurse)
+			sed -r 's/.* ([^ ]*)$/+\1/' | # only immediate dependencies
+			sed -r 's/^([^+])/-\1/' | # now each line is +branch or -branch (+ == recurse)
 			uniq -s 1 | # fold branch lines; + always comes before - and thus wins within uniq
 			while read depline; do
 				action="$(echo "$depline" | cut -c 1)"

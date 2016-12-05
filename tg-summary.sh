@@ -31,7 +31,7 @@ while [ -n "$1" ]; do
 	esac
 done
 
-curname="$(git symbolic-ref HEAD | sed 's#^refs/\(heads\|top-bases\)/##')"
+curname="$(git symbolic-ref HEAD | sed -r 's#^refs/(heads|top-bases)/##')"
 
 [ "$terse$graphviz$sort$deps" = "" ] ||
 	[ "$terse$graphviz$sort$deps" = "1" ] ||
