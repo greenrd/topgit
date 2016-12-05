@@ -51,3 +51,6 @@ install:: all
 
 clean::
 	rm -f tg $(commands_out) $(hooks_out) $(help_out)
+
+check::
+	@./vendor/bats/libexec/bats --pretty tests
