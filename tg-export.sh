@@ -94,7 +94,7 @@ create_tg_commit()
 	parent="$3"
 
 	# Get commit message and authorship information
-	git cat-file blob "$name:.topmsg" | git mailinfo "$playground/^msg" /dev/null > "$playground/^info"
+	git cat-file blob "$name:.topmsg" | git mailinfo -b "$playground/^msg" /dev/null > "$playground/^info"
 
 	GIT_AUTHOR_NAME="$(sed -n '/^Author/ s/Author: //p' "$playground/^info")"
 	GIT_AUTHOR_EMAIL="$(sed -n '/^Email/ s/Email: //p' "$playground/^info")"
