@@ -94,7 +94,7 @@ create_tg_commit()
 	parent="$3"
 
 	# Get commit message and authorship information
-	git cat-file blob "$name:.topmsg" | git mailinfo "$playground/^msg" /dev/null > "$playground/^info"
+	git cat-file blob "$name:.topmsg" | git mailinfo -b "$playground/^msg" /dev/null > "$playground/^info"
 
 	GIT_AUTHOR_NAME="$(sed -n '/^Author/ s/Author: //p' "$playground/^info")"
 	GIT_AUTHOR_EMAIL="$(sed -n '/^Email/ s/Email: //p' "$playground/^info")"
@@ -121,7 +121,7 @@ collapsed_commit()
 
 	# Determine parent
 	parent="$(cut -f 1 "$playground/$name^parents" | \
-		while read p; do [ $(git cat-file -t $p 2> /dev/null) = tag ] && git cat-file tag $p | head -1 | cut -d' ' -f2 || echo $p; done)"
+		while read p || [[ -n "$p" ]]; do [ $(git cat-file -t $p 2> /dev/null) = tag ] && git cat-file tag $p | head -1 | cut -d' ' -f2 || echo $p; done)"
 	if [ "$(cat "$playground/$name^parents" | wc -l)" -gt 1 ]; then
 		# Produce a merge commit first
 		parent="$({
@@ -315,14 +315,14 @@ driver()
 if "$allbranches" ; then
 	_dep_is_tgish=1
 	non_annihilated_branches |
-		while read _dep; do
+		while read _dep || [[ -n "$_dep" ]]; do
 			driver
 		done
 elif [ -z "$branches" ]; then
 	recurse_deps driver "$name"
 	(_ret=0; _dep="$name"; _name=; _dep_is_tgish=1; _dep_missing=; driver)
 else
-	echo "$branches" | tr ',' '\n' | while read _dep; do
+	echo "$branches" | tr ',' '\n' | while read _dep || [[ -n "$_dep" ]]; do
 		_dep_is_tgish=1
 		$driver
 	done

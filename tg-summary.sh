@@ -110,14 +110,14 @@ if [ -n "$deps" ]; then
 fi
 
 non_annihilated_branches |
-	while read name; do
+	while read name || [[ -n "$name" ]]; do
 		if [ -n "$terse" ]; then
 			echo "$name"
 		elif [ -n "$graphviz$sort" ]; then
 			from=$head_from
 			[ "$name" = "$curname" ] ||
 				from=
-			cat_file "$name:.topdeps" $from | while read dep; do
+			cat_file "$name:.topdeps" $from | while read dep || [[ -n "$dep" ]]; do
 				dep_is_tgish=true
 				ref_exists "refs/top-bases/$dep"  ||
 					dep_is_tgish=false

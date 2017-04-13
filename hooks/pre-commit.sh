@@ -77,7 +77,7 @@ BEGIN      { in_hunk = 0; }
 /^\+/      { if (in_hunk == 1) printf("%s\n", substr($0, 2)); }
 /^[^@ +-]/ { in_hunk = 0; }
 ' |
-	while read newly_added; do
+	while read newly_added || [[ -n "$newly_added" ]]; do
 		ref_exists "$newly_added" ||
 			die "Invalid branch as dependent: $newly_added"
 
@@ -98,7 +98,7 @@ BEGIN      { in_hunk = 0; }
 depdir="$(get_temp tg-depdir -d)" ||
 	die "Can't check for multiple occurrences of deps"
 cat_file "$head_:.topdeps" -i |
-	while read dep; do
+	while read dep || [[ -n "$dep" ]]; do
 		[ ! -d "$depdir/$dep" ] ||
 			die "Multiple occurrences of the same dep: $dep"
 		mkdir -p "$depdir/$dep" ||

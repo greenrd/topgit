@@ -207,7 +207,7 @@ non_annihilated_branches()
 {
 	_pattern="$@"
 	git for-each-ref ${_pattern:-refs/top-bases} |
-		while read rev type ref; do
+		while read rev type ref || [[ -n "$rev" ]]; do
 			name="${ref#refs/top-bases/}"
 			if branch_annihilated "$name"; then
 				continue
@@ -265,7 +265,7 @@ recurse_deps()
 	fi;
 
 	_ret=0
-	while read _dep; do
+	while read _dep || [[ -n "$_dep" ]]; do
 		_dep_missing=
 		if ! ref_exists "$_dep" ; then
 			# All hope is lost. Inform driver and continue
@@ -360,7 +360,7 @@ list_deps()
 		head="..detached.."
 
 	git for-each-ref refs/top-bases |
-		while read rev type ref; do
+		while read rev type ref || [[ -n "$rev" ]]; do
 			name="${ref#refs/top-bases/}"
 			if branch_annihilated "$name"; then
 				continue;
@@ -369,7 +369,7 @@ list_deps()
 			from=$head_from
 			[ "refs/heads/$name" = "$head" ] ||
 				from=
-			cat_file "$name:.topdeps" $from | while read dep; do
+			cat_file "$name:.topdeps" $from | while read dep || [[ -n "$dep" ]]; do
 				dep_is_tgish=true
 				ref_exists "refs/top-bases/$dep"  ||
 					dep_is_tgish=false
@@ -528,6 +528,7 @@ if [ "$1" = "-r" ]; then
 	fi
 	base_remote="$1"; shift
 	tg="$tg -r $base_remote"
+	cmd="$1"
 fi
 
 [ -n "$cmd" ] || { do_help; exit 1; }

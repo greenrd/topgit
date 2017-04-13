@@ -62,7 +62,7 @@ if [ -s "$depcheck" ]; then
 	cat "$depcheck" |
 		sed 's/ [^ ]* *$//' | # last is $name
 		sed 's/^: //' | # don't distinguish base updates
-		while read dep chain; do
+		while read dep chain || [[ -n "$dep" ]]; do
 			echo -n "$dep "
 			[ -n "$chain" ] && echo -n "(<= $(echo "$chain" | sed 's/ / <= /')) "
 			dep_parent="${chain%% *}"
