@@ -61,7 +61,7 @@ git fetch --prune "$name" \
 	"+refs/heads/*:refs/remotes/$name/*"
 
 git for-each-ref "refs/remotes/$name/top-bases" |
-	while read rev type ref; do
+	while read rev type ref || [[ -n "$rev" ]]; do
 		branch="${ref#refs/remotes/$name/top-bases/}"
 		if git rev-parse "$branch" >/dev/null 2>&1; then
 			git rev-parse "refs/top-bases/$branch" >/dev/null 2>&1 ||

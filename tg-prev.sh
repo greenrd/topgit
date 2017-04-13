@@ -35,7 +35,7 @@ base_rev="$(git rev-parse --short --verify "refs/top-bases/$name" 2>/dev/null)" 
 [ "x$name" = "x$head" ] ||
 	head_from=
 
-cat_file "$name:.topdeps" $head_from | while read dep; do
+cat_file "$name:.topdeps" $head_from | while read dep || [[ -n "$dep" ]]; do
 	ref_exists "refs/top-bases/$dep" && branch_annihilated "$dep" && continue
 	echo "$dep"
 done

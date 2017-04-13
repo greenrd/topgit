@@ -79,7 +79,7 @@ update_branch() {
 			sed 's/.* \([^ ]*\)$/+\1/' | # only immediate dependencies
 			sed 's/^\([^+]\)/-\1/' | # now each line is +branch or -branch (+ == recurse)
 			uniq -s 1 | # fold branch lines; + always comes before - and thus wins within uniq
-			while read depline; do
+			while read depline || [[ -n "$depline" ]]; do
 				action="$(echo "$depline" | cut -c 1)"
 				dep="$(echo "$depline" | cut -c 2-)"
 
@@ -197,7 +197,7 @@ update_branch() {
 [ -z "$all" ] && { update_branch $name; exit; }
 
 non_annihilated_branches $pattern |
-	while read name; do
+	while read name || [[ -n "$name" ]]; do
 		info "Proccessing $name..."
 		update_branch "$name" || exit
 	done

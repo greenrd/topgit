@@ -40,7 +40,7 @@ git commit --no-verify -m"TopGit branch $name annihilated."
 
 # Propagate the dependencies through to dependents (if any), if they don't already have them
 dependencies="$(tg prev -w)"
-tg next | while read dependent; do
+tg next | while read dependent || [[ -n "$dependent" ]]; do
 	git checkout -f $dependent
 	for dependency in $dependencies; do
 		tg depend add "$dependency" 2>/dev/null

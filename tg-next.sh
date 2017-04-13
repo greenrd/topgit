@@ -30,7 +30,7 @@ head="$(git rev-parse --abbrev-ref=loose HEAD)"
 	name="$head"
 
 non_annihilated_branches |
-	while read parent; do
+	while read parent || [[ -n "$parent" ]]; do
 		from=$head_from
 		# select .topdeps source for HEAD branch
 		[ "x$parent" = "x$head" ] ||
